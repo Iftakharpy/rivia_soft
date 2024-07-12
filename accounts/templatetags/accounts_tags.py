@@ -1,6 +1,5 @@
 from django import template
 
-
 register = template.Library()
 
 
@@ -48,4 +47,15 @@ def natural_round(number):
         
         return number
     except Exception:
+        return "Error"
+
+@register.simple_tag(name="round_str")
+def round_str(number, **kwargs):
+    try:
+        digits = 0
+        if "digits" in kwargs:
+            digits = int(kwargs["digits"])
+        return f"{round(float(number))}{ '.'+'0'*digits if digits>0 else ''}"
+    except Exception as e:
+        print(e)
         return "Error"

@@ -1,4 +1,5 @@
 import json
+import datetime as dt
 
 from weasyprint import HTML, CSS
 from weasyprint.text.fonts import FontConfiguration
@@ -15,7 +16,7 @@ from django.db.models import QuerySet
 from django.contrib import messages
 
 # Models
-from companies.models import SelfassesmentAccountSubmission
+from companies.models import SelfassesmentAccountSubmission, SelfassesmentAccountSubmissionTaxYear
 from .models import SelfemploymentIncomeSources, SelfemploymentExpenseSources, SelfemploymentDeductionSources, Months, SelfemploymentExpensesPerTaxYear, SelfemploymentIncomesPerTaxYear, SelfemploymentDeductionsPerTaxYear, TaxableIncomeSources, TaxableIncomeSourceForSubmission
 from .models import SelfemploymentUkTaxConfigForTaxYear, SelfemploymentClass4TaxConfigForTaxYear, SelfemploymentClass2TaxConfigForTaxYear
 
@@ -431,17 +432,31 @@ def get_all_taxable_income_sources(request):
 ##############################################################################
 ## Views to calculate and retun tax
 ##############################################################################
+# to do here
+def calculate_selfemployment_expense_personal_usage(expense):
+    return (expense.amount * expense.personal_usage_percentage)/100
 
-
-def calculate_selfemployment_expense(expense_amount, personal_usage_percentage):
-    personal_usage = (expense_amount*personal_usage_percentage)/100
-    expense = expense_amount - personal_usage
+def calculate_selfemployment_expense(expense):
+    personal_usage = calculate_selfemployment_expense_personal_usage(expense)
+    expense = expense.amount - personal_usage
     return expense if expense>=0 else 0
+
+def get_total_selfemployment_expense_amount(selfemployment_expenses):
+    total = 0
+    for expense in selfemployment_expenses:
+        total+=expense.amount
+    return total
+
+def get_total_selfemployment_expense_personal_usage(selfemployment_expenses):
+    total = 0
+    for expense in selfemployment_expenses:
+        total += calculate_selfemployment_expense_personal_usage(expense)
+    return total
 
 def get_total_selfemployment_expense(selfemployment_expenses):
     total = 0
     for expense in selfemployment_expenses:
-        total += calculate_selfemployment_expense(expense.amount, expense.personal_usage_percentage)
+        total += calculate_selfemployment_expense(expense)
     return total
 
 
@@ -694,7 +709,7 @@ def generate_tax_report_pdf(account_submission):
 
     submission_id = account_submission.pk
 
-    tax_year = account_submission.tax_year
+    tax_year: SelfassesmentAccountSubmissionTaxYear = account_submission.tax_year
     selfemployment_incomes = get_object_or_None(SelfemploymentIncomesPerTaxYear, delete_duplicate=False, return_all=True, client=submission_id)
     selfemployment_incomes = filter_selfemployment_incomes(selfemployment_incomes)
     selfemployment_total_comission = get_total_selfemployment_comission(selfemployment_incomes)
@@ -711,6 +726,7 @@ def generate_tax_report_pdf(account_submission):
 
     # selfemployment
     selfemployment_total_income = get_total_selfemployment_income(selfemployment_incomes)
+    selfemployment_total_personal_usage = get_total_selfemployment_expense_personal_usage(selfemployment_expenses)
     selfemployment_total_expense = get_total_selfemployment_expense(selfemployment_expenses)
     selfemployment_total_deduction_and_allowance = get_total_selfemployment_deduction_and_allowance(deductions_and_allowances)
 
@@ -845,12 +861,14 @@ def generate_tax_report_pdf(account_submission):
         }
     
     context = {
+        "cover_page_date": tax_year.tax_year_end_date.strftime("%d %B %Y"),# tax_year.tax_year_end_date.strftime("%A, %B %d, %Y"),
+
         # submission info
         'submission': account_submission,
         'tax_year': tax_year.tax_year,
-        'tax_year_next': tax_year.tax_year[5:],
-        'tax_year_prev': tax_year.tax_year[:4],
-        'tax_year_prev_prev': int(tax_year.tax_year[:4])-1,
+        'tax_year_next': tax_year.next_year,
+        'tax_year_prev': tax_year.previous_year,
+        'tax_year_prev_prev': int(tax_year.previous_year)-1,
 
         # client info
         'client_name': account_submission.client_id.client_name,
@@ -867,6 +885,8 @@ def generate_tax_report_pdf(account_submission):
         'selfemployment_net_profit': selfemployment_net_profit,
         'selfemployment_is_loss': selfemployment_net_profit<0,
         'total_expenses': total_expenses,
+        "selfemployment_total_personal_usage": selfemployment_total_personal_usage,
+        'total_selfemployment_expense_amount': get_total_selfemployment_expense_amount(selfemployment_expenses),
 
         'total_taxable_income': get_total_taxable_income(taxable_incomes),
 

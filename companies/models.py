@@ -215,6 +215,18 @@ class SelfassesmentAccountSubmissionTaxYear(models.Model):
         if years.count()>=1:
             return years.first()
         return None
+    
+    @property
+    def previous_year(self) -> str:
+        return self.tax_year.split("-")[0].strip()
+        
+    @property
+    def next_year(self) -> str:
+        return self.tax_year.split("-")[1].strip()
+    
+    @property
+    def tax_year_end_date(self) -> date:
+        return date(year=int(self.next_year), month=4, day=5)
 
 class SelfassesmentAccountSubmission(models.Model):
 

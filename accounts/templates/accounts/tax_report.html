@@ -1,4 +1,5 @@
 {% load static %}
+{% load humanize %}
 {% load accounts_tags %}
 
 <!DOCTYPE html>
@@ -16,10 +17,18 @@
     {% endcomment %}
 </head>
 <body>
+    {% comment %} Cover Page {% endcomment %}
+     <article id="cover" class="h-full w-full d-flex items-center" page-break-before page-break-after>
+            <h2 class="text-center lh-2" style="margin-top:50%">
+                {{client_name}} <br>
+                Accounts <br>
+                {{cover_page_date}}
+            </h2>
+     </article>
     {% comment %} Agreement Page {% endcomment %}
-    <article id="agreement" page-break-before page-break-after>
+    {% comment %} <article id="agreement" page-break-before page-break-after>
         <section>
-            <h1 class="text-center underline to-upper">Accountant's Report</h1>
+            <h1 class="text-center line-underline to-upper">Accountant's Report</h1>
             <p>
                 We have prepared without carrying out an audit the attached
                 Profit and Loss accounts for the year ended <strong>05 April {{tax_year_next}}</strong>.
@@ -35,17 +44,20 @@
         <section>
             <div class="d-f items-center justify-between">
                 <h2 class="d-ib">RIVIA SOLUTION LTD</h2>
-                <span>Date: …………………………….</span>
+                <span>Date: __________________.</span>
             </div>
-            <strong class="underline"><i>Accountants</i></strong>
+            <strong class="line-underline"><i>Accountants</i></strong>
             <address>
                 419 Roman road<br/>
                 London<br/>
                 E3 5QS<br/>
-                {% comment %} Unit-111, 2<sup>nd</sup> Floor<br>
+
+                <!--
+                Unit-111, 2<sup>nd</sup> Floor<br>
                 Greatorex Business Centre<br>
                 8-10 Greatorex Street<br>
-                London E1 5NF<br> {% endcomment %}
+                London E1 5NF<br>
+                -->
             </address>
         </section>
 
@@ -54,7 +66,7 @@
         <div class="spacer"></div>
 
         <section>
-            <h1 class="text-center to-upper underline">Client's Approval</h1>
+            <h1 class="text-center to-upper line-underline">Client's Approval</h1>
             <p>
                 I have approved the attached Profit & Loss Accounts for the
                 period from <strong>06 April {{tax_year_prev}} to 05 April {{tax_year_next}}</strong>. These have been
@@ -62,67 +74,70 @@
             </p>
             <div class="spacer"></div>
 
-            <hr style="width: 2in;">
+            <hr class="overline">
             <div class="d-f items-center justify-between">
                 <h2 class="fs-11">{{client_name}}</h2>
-                <span class="fs-11">Date: …………………………….</span>
+                <span class="fs-11">Date: __________________.</span>
             </div>
         </section>
-    </article>
+    </article> {% endcomment %}
 
     {% comment %} Profit and Loss Page {% endcomment %}
     <article id="profit-and-loss" page-break-before page-break-after>
         <section>
-            <aside data-client-details class="fs-12">
-                <strong class="to-upper">{{client_name}}</strong>
-                <address class="text-center to-upper">
+            <aside data-client-details class="fs-14">
+                <strong class="">{{client_name}}</strong>
+                {% comment %} <address class="text-center to-upper">
                     <pre class="pre-to-normal mw-45ch">{{client_address}}</pre>
                     {% if client_post_code %}
                         <br/>
                         <span>{{client_post_code}}</span>
                     {% endif %}
-                </address>
+                </address> {% endcomment %}
             </aside>
-            <h1 class="to-upper text-center fs-11">Profit and loss for the year ended 5 April {{tax_year_next}}</h1>
+            <h1 class="text-center fs-12">Profit &amp; loss Account <br> for the year ended 5 April {{tax_year_next}}</h1>
             
             <br>
-            <h2 class="fs-11 font-normal d-f justify-between">Selfemployment Income (Including Tips) <span>£{{selfemployment_total_income|natural_round}}.00</span></h2>
+            <h2 class="fs-10 font-bold text-right"><b>05/04/{{tax_year_next}}</b></h2>
+            <h2 class="fs-10 font-bold text-right">£<span style="margin-right: 4ch; margin-left: 25ch;">£</span></h2>
+            {% comment %} <h2 class="fs-11 font-normal d-f justify-between">Selfemployment Income (Including Tips) <span>£{% round_str selfemployment_total_income as p %}{{p|intcomma}}</span></h2> {% endcomment %}
+            <h2 class="fs-10 font-bold d-f justify-between">Turnover <span>£{% round_str selfemployment_total_income as p %}{{p|intcomma}}</span></h2>
             <br>
 
             <section >
                 
-                <table data-expense-list class="fs-11">
+                <table data-expense-list class="fs-10">
                     <thead>
                         <tr>
-                            <th class="bb-1">Less: Expenses</th>
+                            <th class="line-underline"><b>Less: Expenses</b></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            {% comment %}
                             <th class="bb-1 text-right">Including personal usage(£)</th>
                             <th class="bb-1 text-right">Personal usage({{personal_usage_heading_value}}%)</th>
                             <th class="bb-1 text-right">Excluding personal usage(£)</th>
+                            {% endcomment %}
                         </tr>
                     </thead>
                     <tbody>
                         {% for expense in selfemployment_expenses %}
-                            <tr>
+                            <tr class="ml-6">
                                 <td>{{expense.expense_source.name}}</td>
-                                <td class="text-right">{{expense.amount|floatformat:"2g"}}</td>
-                                {% with expense.amount|as_percentage_of:expense.personal_usage_percentage as personal_usage %}
+                                <td class="text-right">{% round_str expense.amount as p %}{{p|intcomma}}</td>
+                                <td></td>
+                                <td></td>
+                                {% comment %} {% with expense.amount|as_percentage_of:expense.personal_usage_percentage as personal_usage %}
                                     <td class="text-right">{{personal_usage|floatformat:"2g"}}</td>
                                     <td class="text-right">{{expense.amount|subtract:personal_usage|floatformat:"2g"}}</td>
-                                {% endwith %}
+                                {% endwith %} {% endcomment %}
                             </tr>
                         {% endfor %}
                     </tbody>
-                    <tfoot>
-                        <tr>
-                            <th class="text-right font-bolder" colspan="3">Total Allowable Expenses</th>
-                            <th class="text-right font-bolder">{{selfemployment_total_expense|natural_round}}.00</th>
-                        </tr>
-                    </tfoot>
                 </table>
 
-                <br>
 
-
+                {% comment %}
                 {% if car_value %}
                     <table data-car-value class="fs-11">
                         <thead>
@@ -191,18 +206,44 @@
                         </tbody>
                     </table>
                 {% endif %}
-                <h2 class="fs-11 font-bold d-f justify-between">Total Expenses <span>£{{selfemployment_total_expense_with_car_value|natural_round}}.00</span></h2>
+                {% endcomment %}
+
+                {% comment %} <h2 class="fs-11 font-bold d-f justify-between">Total Expenses <span>£{{selfemployment_total_expense_with_car_value|natural_round}}.00</span></h2> {% endcomment %}
                 {% if loss_brought_forward_from_previous_year > 0 %}
-                <h2 class="fs-11 font-bold d-f justify-between">Profit for the year <span>£{{profit_for_the_year|natural_round}}.00</span></h2>
-                    <h2 class="fs-11 font-bold d-f justify-between">Loss B/f for {{tax_year_prev_prev}}-{{tax_year_prev}} <span>£-{{loss_brought_forward_from_previous_year|natural_round}}.00</span></h2>
+                    <h2 class="fs-10 font-bold d-f justify-between">Profit for the year <span>£{% round_str profit_for_the_year as p %}{{p|intcomma}}</span></h2>
+                    <h2 class="fs-10 font-bold d-f justify-between">Loss B/f for {{tax_year_prev_prev}}-{{tax_year_prev}} <span>£-{% round_str loss_brought_forward_from_previous_year as p %}{{p|intcomma}}</span></h2>
                 {% endif %}
-                <h2 class="fs-11 font-bold d-f justify-between doubble-underline">Net {% if selfemployment_is_loss %}Loss{% else %}Profit{% endif %} for the year <span>£{{selfemployment_net_profit|natural_round}}.00</span></h2>
+                
+                <h2 class="fs-10 font-bold d-f justify-between">Total Expenses <span class="text-right font-bolder color-red">({% round_str total_selfemployment_expense_amount as p %}{{p|intcomma}})</span></h2>
+                <h2 class="fs-10 font-bold d-f justify-between">Personal use <span>£{% round_str selfemployment_total_personal_usage as p %}{{p|intcomma}}</span></h2>
+                <h2 class="fs-10 font-bold d-f justify-between mt-2"><span>{% if selfemployment_is_loss %}Loss{% else %}Profit{% endif %} for the year</span> <span class="profit-loss">&nbsp;&nbsp;£{% round_str selfemployment_net_profit as p %}{{p|intcomma}}</span></h2>
             </section>
+        </section>
+
+        <section data-client-approval class="mt-16">
+            {% comment %} <h3 class="line-underline fs-12">Client's approval</h3> {% endcomment %}
+            <p class="mb-32">I hereby approve the above accounts and confirm that I have supplied all the information and
+                explanations required for the preparation of these accounts.
+            </p>
+            <hr class="overline">
+            <div class="d-f items-center justify-between mb-12">
+                <h4 class="fs-10">{{client_name}}</h4>
+                <span class="fs-10">Date: __________________.</span>
+            </div>
+        </section>
+
+        <section data-accountants-report class="mt-8">
+            <h3 class="line-underline fs-10">Accountants Report</h3>
+            <p>On the basis of supporting documents and the information and explanations given to us we have
+                prepared the above Profit and Loss account.
+            </p>
+            <h3 class="fs-10 line-underline mt-64">Capstone Accountants</h3>
         </section>
     </article>
 
 
     {% comment %} Tax Calculation Page {% endcomment %}
+    {% comment %}
     <article id="tax-calculation" page-break-before page-break-after>
         <aside data-client-details class="fs-12">
             <strong class="to-upper">{{client_name}}</strong>
@@ -270,7 +311,7 @@
                         
                     </tbody>
                     <tfoot>
-                        <tr class="font-bolder underline">
+                        <tr class="font-bolder line-underline">
                             <td colspan="4">Taxable Income for {{tax_year_prev}}/{{tax_year_next}}</td>
                             <td colspan="1" text-right>{{tax_calc.income.taxable_income|natural_round}}.00</td>
                         </tr>
@@ -389,7 +430,7 @@
                             <!-- empty row -->
                             <td class="h-30" colspan="4"></td>
                         </tr>
-                        <tr class="font-bolder doubble-underline">
+                        <tr class="font-bolder line-doubble-underline">
                             <td colspan="3">TAX AND CLASS 2 &amp; 4 NIC DUE</td>
                             <td colspan="1" class="text-right">{{tax_calc.total_tax_due|floatformat:"2g"}}</td>
                         </tr>
@@ -415,5 +456,6 @@
             </section>
         {% endif %}
     </article>
+    {% endcomment %}
 </body>
 </html>
