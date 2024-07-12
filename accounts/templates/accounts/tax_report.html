@@ -101,7 +101,7 @@
             <h2 class="fs-10 font-bold text-right"><b>05/04/{{tax_year_next}}</b></h2>
             <h2 class="fs-10 font-bold text-right">£<span style="margin-right: 4ch; margin-left: 25ch;">£</span></h2>
             {% comment %} <h2 class="fs-11 font-normal d-f justify-between">Selfemployment Income (Including Tips) <span>£{% round_str selfemployment_total_income as p %}{{p|intcomma}}</span></h2> {% endcomment %}
-            <h2 class="fs-10 font-bold d-f justify-between">Turnover <span>£{% round_str selfemployment_total_income as p %}{{p|intcomma}}</span></h2>
+            <h2 class="fs-10 font-bold d-f justify-between">Turnover <span>{% round_str selfemployment_total_income as p %}{{p|intcomma}}</span></h2>
             <br>
 
             <section >
@@ -215,8 +215,8 @@
                 {% endif %}
                 
                 <h2 class="fs-10 font-bold d-f justify-between">Total Expenses <span class="text-right font-bolder color-red">({% round_str total_selfemployment_expense_amount as p %}{{p|intcomma}})</span></h2>
-                <h2 class="fs-10 font-bold d-f justify-between">Personal use <span>£{% round_str selfemployment_total_personal_usage as p %}{{p|intcomma}}</span></h2>
-                <h2 class="fs-10 font-bold d-f justify-between mt-2"><span>{% if selfemployment_is_loss %}Loss{% else %}Profit{% endif %} for the year</span> <span class="profit-loss">&nbsp;&nbsp;£{% round_str selfemployment_net_profit as p %}{{p|intcomma}}</span></h2>
+                <h2 class="fs-10 font-bold d-f justify-between">Personal use <span>{% round_str selfemployment_total_personal_usage as p %}{{p|intcomma}}</span></h2>
+                <h2 class="fs-10 font-bold d-f justify-between mt-2"><span>{% if selfemployment_is_loss %}Loss{% else %}Profit{% endif %} for the year</span> <span class="profit-loss">&nbsp;&nbsp;{% round_str selfemployment_net_profit as p %}{{p|intcomma}}</span></h2>
             </section>
         </section>
 
