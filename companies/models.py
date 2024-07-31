@@ -60,6 +60,14 @@ class Selfassesment(models.Model):
         null=False,
         editable=False,
         db_index=True) # auto incrementing primary field
+    client_id = models.AutoField(
+        verbose_name='Unique ID for client',
+        primary_key=True,
+        unique=True,
+        blank=True,
+        null=False,
+        editable=False,
+        db_index=True) # auto incrementing primary field
     
     @property
     def id(self):
@@ -839,7 +847,7 @@ class LimitedSubmissionDeadlineTracker(models.Model):
             raise ValueError("HMRC_deadline should be an instance of datetime.date")
         
         # set self.our_deadline 30 days before the self.HMRC_deadline
-        self.our_deadline = self.HMRC_deadline + timedelta(45)
+        self.our_deadline = self.HMRC_deadline + timedelta(days=7)
         self.save()
 
 # Limited VAT Tracker
