@@ -1,6 +1,8 @@
 import uuid
 from datetime import timedelta, date
 from itertools import chain
+import string
+import random
 
 from django.db import models
 from django.utils import timezone
@@ -8,7 +10,7 @@ from django.utils.translation import gettext_lazy as _
 from django.core.validators import MinValueValidator, MaxValueValidator
 
 from users.models import CustomUser
-from .validators import BANK_ACCOUNT_NUMBER_VALIDATOR, SORT_CODE_VALIDATOR, UTR_VALIDATOR, NINO_VALIDATOR, AUTH_CODE_VALIDATOR, TAX_YEAR_VALIDATOR
+from .validators import BANK_ACCOUNT_NUMBER_VALIDATOR, SORT_CODE_VALIDATOR, UTR_VALIDATOR, NINO_VALIDATOR, AUTH_CODE_VALIDATOR, TAX_YEAR_VALIDATOR, ALPHANUMERIC_FILE_NUMBER_VALIDATORS
 from .utils import ChainedQuerysetsWithCount
 
 
@@ -60,18 +62,23 @@ class Selfassesment(models.Model):
         null=False,
         editable=False,
         db_index=True) # auto incrementing primary field
-    client_id = models.AutoField(
-        verbose_name='Unique ID for client',
-        primary_key=True,
-        unique=True,
-        blank=True,
-        null=False,
-        editable=False,
-        db_index=True) # auto incrementing primary field
     
     @property
     def id(self):
         return self.client_id
+    
+    @classmethod
+    def __get_random_alphanumeric_id(cls, length=16):
+        alnum_id = ""
+        for _ in range(length):
+            alnum_id += random.choice(string.ascii_uppercase + string.digits)
+        return alnum_id
+    @classmethod
+    def _get_unique_random_client_file_number(cls, length=16):
+        file_num = Selfassesment.__get_random_alphanumeric_id(length)
+        while Selfassesment.objects.filter(client_file_number=file_num):
+            file_num = Selfassesment.__get_random_alphanumeric_id(length)
+        return file_num
     
     client_rating = models.IntegerField(verbose_name=f'Client Rating({CLIENT_RATING_SYMBOL})', blank=True, null=True, default=0, validators=[MinValueValidator(0), MaxValueValidator(5)])
 
@@ -97,7 +104,7 @@ class Selfassesment(models.Model):
     is_active = models.BooleanField(verbose_name='Active Status', blank=False, null=False, default=True)
     remarks = models.TextField(_("Remarks"), blank=True, null=True)
     
-    client_file_number = models.DecimalField(verbose_name='File Number', max_digits=19, decimal_places=3, unique=True, blank=False, null=True, editable=True)
+    client_file_number = models.CharField(verbose_name='File Number(ALN)', max_length=16, unique=True, blank=True, null=True, editable=True, validators=ALPHANUMERIC_FILE_NUMBER_VALIDATORS)
     client_name = models.CharField(verbose_name='Full Name / Business Name', max_length=100, blank=False, null=False, db_index=True)
     start_date = models.DateField(verbose_name='Selfassesment Start Date', blank=True, null=True, default=None)
     
@@ -177,23 +184,11 @@ class Selfassesment(models.Model):
     
     def set_defaults(self):
         if not self.client_file_number:
-            self.client_file_number = Selfassesment.get_next_file_number()
+            self.client_file_number = Selfassesment._get_unique_random_client_file_number()
         
         if not self.bank_account_holder_name:
             self.bank_account_holder_name = self.client_name
         self.save()
-
-    @classmethod
-    def get_max_file_number(cls):
-      try:
-        max_num = cls.objects.all().order_by("-client_file_number")[0].client_file_number
-        return max_num
-      except IndexError:
-        return 0
-    
-    @classmethod
-    def get_next_file_number(cls):
-      return cls.get_max_file_number()+1
     
     def approve_update_request(self):
         self.is_updated = True
@@ -529,6 +524,19 @@ class Limited(models.Model):
     @property
     def id(self):
         return self.client_id
+
+    @classmethod
+    def __get_random_alphanumeric_id(cls, length=16):
+        alnum_id = ""
+        for _ in range(length):
+            alnum_id += random.choice(string.ascii_uppercase + string.digits)
+        return alnum_id
+    @classmethod
+    def _get_unique_random_client_file_number(cls, length=16):
+        file_num = Selfassesment.__get_random_alphanumeric_id(length)
+        while Selfassesment.objects.filter(client_file_number=file_num):
+            file_num = Selfassesment.__get_random_alphanumeric_id(length)
+        return file_num
     
     client_rating = models.IntegerField(verbose_name=f'Client Rating({CLIENT_RATING_SYMBOL})', blank=True, null=True, default=0, validators=[MinValueValidator(0), MaxValueValidator(5)])
 
@@ -547,7 +555,7 @@ class Limited(models.Model):
     is_payroll = models.BooleanField(verbose_name="Is Payroll", blank=False, default=False, null=False)
     remarks = models.TextField(_("Remarks"), blank=True, null=True)
     
-    client_file_number = models.DecimalField(verbose_name='File Number', max_digits=19, decimal_places=3, unique=True, blank=False, null=True, editable=True)
+    client_file_number = models.CharField(verbose_name='File Number(ALN)', max_length=16, unique=True, blank=True, null=True, editable=True, validators=ALPHANUMERIC_FILE_NUMBER_VALIDATORS)
     client_name = models.CharField(verbose_name='Business Name', max_length=100, blank=False, null=False, db_index=True)
     company_reg_number = models.CharField(verbose_name='Company Registration Number', max_length=100, blank=False, null=True, unique=True, db_index=True)
     company_auth_code = models.CharField(verbose_name='Company Authentication Code', max_length=100, blank=True, null=True, db_index=True, validators=[AUTH_CODE_VALIDATOR])
@@ -639,25 +647,11 @@ class Limited(models.Model):
     
     def set_defaults(self):
         if not self.client_file_number:
-            self.client_file_number = Limited.get_max_file_number()
+            self.client_file_number = Limited._get_unique_random_client_file_number()
 
         if not self.bank_account_holder_name:
             self.bank_account_holder_name = self.client_name
         self.save()
-
-    @classmethod
-    def get_max_file_number(cls):
-      try:
-        max_num = cls.objects.all().order_by("-client_file_number")[0].client_file_number
-        max_num = int(max_num)
-        return max_num
-      except IndexError:
-        return 0
-    
-    @classmethod
-    def get_next_file_number(cls):
-      return cls.get_max_file_number()+1
-
 
 class LimitedTracker(models.Model):
 

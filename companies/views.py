@@ -213,7 +213,7 @@ def create_selfassesment(request):
     'view_url': URL_NAMES_PREFIXED_WITH_APP_NAME.Selfassesment_home_name,
     'create_url': URL_NAMES_PREFIXED_WITH_APP_NAME.Selfassesment_create_name,
     'form_title': 'Selfassesment Account Year Assign Form',
-    'form': SelfassesmentCreationForm(initial={'client_file_number': Selfassesment.get_next_file_number()})
+    'form': SelfassesmentCreationForm(initial={'client_file_number': Selfassesment._get_unique_random_client_file_number()})
   }
 
   if request.method == 'POST':
@@ -281,7 +281,7 @@ def create_selfassesment(request):
           reference = AutoCreatedSelfassesmentTracker.CreatedForField.HMRC_AGENT)
         reference.save()
 
-      context['form'] = SelfassesmentCreationForm(initial={'client_file_number': Selfassesment.get_next_file_number()})
+      context['form'] = SelfassesmentCreationForm(initial={'client_file_number': Selfassesment._get_unique_random_client_file_number()})
   return render(request, template_name='companies/create.html', context=context)
 
 @login_required
@@ -1625,7 +1625,7 @@ def create_limited(request):
     'view_url': URL_NAMES_PREFIXED_WITH_APP_NAME.Limited_home_name,
     'create_url': URL_NAMES_PREFIXED_WITH_APP_NAME.Limited_create_name,
     'form_title': 'Register Limited Company Form',
-    'form': LimitedCreationForm(initial={'client_file_number': Limited.get_next_file_number()})
+    'form': LimitedCreationForm(initial={'client_file_number': Limited._get_unique_random_client_file_number()})
   }
 
   if request.method == 'POST':
@@ -1663,7 +1663,7 @@ def create_limited(request):
       return redirect('companies:limited_onboarding_tasks', client_id=limited.client_id)
 
       # Previous behaviour after adding new company
-      # context['form'] = LimitedCreationForm(initial={'client_file_number': Limited.get_next_file_number()})
+      # context['form'] = LimitedCreationForm(initial={'client_file_number': Limited._get_unique_random_client_file_number()})
   return render(request, template_name='companies/create.html', context=context)
 
 @login_required

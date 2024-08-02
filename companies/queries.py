@@ -9,7 +9,8 @@ from itertools import chain
 # =============================================================================================================
 # Selfassesment
 def db_search_Selfassesment(search_text: str, limit=-1):
-    Query = Q(selfassesment_type__type_name__icontains = search_text) |\
+    Query = Q(client_file_number__icontains            = search_text) |\
+            Q(selfassesment_type__type_name__icontains = search_text) |\
             Q(date_of_registration__icontains          = search_text) |\
             Q(remarks__icontains                       = search_text) |\
             Q(client_name__icontains                   = search_text) |\
@@ -37,8 +38,7 @@ def db_search_Selfassesment(search_text: str, limit=-1):
 
     try:
         num = int(search_text)
-        Query |= Q(client_id          = num) |\
-                 Q(client_file_number = num)
+        Query |= Q(client_id          = num)
     except Exception:
         pass
     
@@ -206,7 +206,8 @@ def db_all_SelfassesmentTracker(user_email='', is_superuser=False, limit=-1):
 # =============================================================================================================
 # Limited
 def db_search_Limited(search_text: str, limit=-1):
-    Query = Q(date_of_registration__icontains          = search_text) |\
+    Query = Q(client_file_number__icontains            = search_text) |\
+            Q(date_of_registration__icontains          = search_text) |\
             Q(remarks__icontains                       = search_text) |\
             Q(client_name__icontains                   = search_text) |\
             Q(company_reg_number__icontains            = search_text) |\
@@ -236,8 +237,7 @@ def db_search_Limited(search_text: str, limit=-1):
 
     try:
         num = float(search_text)
-        Query |= Q(client_id          = num) |\
-                 Q(client_file_number = num)
+        Query |= Q(client_id          = num)
     except Exception:
         pass
     

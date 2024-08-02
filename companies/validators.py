@@ -1,5 +1,5 @@
 from django.core.validators import RegexValidator
-import re 
+import re
 
 
 # UTR number
@@ -11,9 +11,10 @@ UTR_VALIDATOR = RegexValidator(
     message='Enter 10 digit UTR Number',
     code='Invalid UTR')
 
-# NINO 
+# NINO
 # https://www.gov.uk/hmrc-internal-manuals/national-insurance-manual/nim39110
-NINO_REGEX = r'^(?!BG|GB|KN|NK|NT|TN|ZZ)[ABCEGHJKLMNOPRSTWXYZ][ABCEGHJKLMNPRSTWXYZ][0-9]{6}[ABCD]$' # explicit
+# explicit
+NINO_REGEX = r'^(?!BG|GB|KN|NK|NT|TN|ZZ)[ABCEGHJKLMNOPRSTWXYZ][ABCEGHJKLMNPRSTWXYZ][0-9]{6}[ABCD]$'
 COMPILED_NINO_REGEX = re.compile(NINO_REGEX, flags=re.IGNORECASE)
 NINO_VALIDATOR = RegexValidator(
     regex=COMPILED_NINO_REGEX,
@@ -55,3 +56,14 @@ TAX_YEAR_VALIDATOR = RegexValidator(
     regex=COMPILED_TAX_YEAR_REGEX,
     message="Maintain the format(dddd-dddd) for tax years. Ex: 2020-2021"
 )
+
+# alphanumeric_file_number
+ALPHANUMERIC_FILE_NUMBER_REGEX = r"([A-Z0-9]{4,16})"
+ALPHANUMERIC_FILE_NUMBER_VALIDATOR = RegexValidator(
+    regex=ALPHANUMERIC_FILE_NUMBER_REGEX,
+    message="The length has to be between 4 and 16 characters and allowed characters are A-Z and 0-9.")
+ALPHANUMERIC_FILE_NUMBER_VALIDATORS = [ALPHANUMERIC_FILE_NUMBER_VALIDATOR, 
+                                       RegexValidator(regex=r"[A-Z]", message="Must contain a character from A-Z."), 
+                                       RegexValidator(regex=r"[0-9]", message="Must contain a digit from 0-9."),
+                                       RegexValidator(regex=r"[^A-Z0-9]", message="Have you used something other than A-Z or 0-9?", inverse_match=True),
+                                       ]

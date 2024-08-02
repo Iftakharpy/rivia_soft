@@ -124,6 +124,9 @@ class SelfassesmentCreationForm(forms.ModelForm):
                 ),
         )
 
+        def clean_client_file_number(self):
+            return self.cleaned_data["client_file_number"].upper()
+
 
 class SelfassesmentChangeForm(forms.ModelForm):
     start_date = forms.DateField(
@@ -213,6 +216,9 @@ class SelfassesmentChangeForm(forms.ModelForm):
                 fields = ('bank_name', 'bank_account_number', 'bank_sort_code', 'bank_account_holder_name',)
                 ),
         )
+        
+    def clean_client_file_number(self):
+        return self.cleaned_data["client_file_number"].upper()
 
 class SelfassesmentDeleteForm(forms.ModelForm):
     agree = forms.BooleanField(label='I want to proceed.', required=True)
@@ -948,6 +954,8 @@ class LimitedCreationForm(forms.ModelForm):
                 fields = ('bank_name', 'bank_account_number', 'bank_sort_code', 'bank_account_holder_name', 'vat',)
                 ),
         )
+    def clean_client_file_number(self):
+        return self.cleaned_data["client_file_number"].upper()
 
 
 class LimitedChangeForm(forms.ModelForm):
@@ -1028,6 +1036,8 @@ class LimitedChangeForm(forms.ModelForm):
                 fields = ('bank_name', 'bank_account_number', 'bank_sort_code', 'bank_account_holder_name', 'vat',)
                 ),
         )
+    def clean_client_file_number(self):
+        return self.cleaned_data["client_file_number"].upper()
 
 class LimitedDeleteForm(forms.ModelForm):
     agree = forms.BooleanField(label='I want to proceed.', required=True)
