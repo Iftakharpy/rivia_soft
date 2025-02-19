@@ -75,9 +75,9 @@ class Selfassesment(models.Model):
         return alnum_id
     @classmethod
     def _get_unique_random_client_file_number(cls, length=16):
-        file_num = Selfassesment.__get_random_alphanumeric_id(length)
-        while Selfassesment.objects.filter(client_file_number=file_num):
-            file_num = Selfassesment.__get_random_alphanumeric_id(length)
+        file_num = cls.__get_random_alphanumeric_id(length)
+        while cls.objects.filter(client_file_number=file_num):
+            file_num = cls.__get_random_alphanumeric_id(length)
         return file_num
     
     client_rating = models.IntegerField(verbose_name=f'Client Rating({CLIENT_RATING_SYMBOL})', blank=True, null=True, default=0, validators=[MinValueValidator(0), MaxValueValidator(5)])
@@ -184,7 +184,7 @@ class Selfassesment(models.Model):
     
     def set_defaults(self):
         if not self.client_file_number:
-            self.client_file_number = Selfassesment._get_unique_random_client_file_number()
+            self.client_file_number = self._get_unique_random_client_file_number()
         
         if not self.bank_account_holder_name:
             self.bank_account_holder_name = self.client_name
@@ -533,9 +533,9 @@ class Limited(models.Model):
         return alnum_id
     @classmethod
     def _get_unique_random_client_file_number(cls, length=16):
-        file_num = Selfassesment.__get_random_alphanumeric_id(length)
-        while Selfassesment.objects.filter(client_file_number=file_num):
-            file_num = Selfassesment.__get_random_alphanumeric_id(length)
+        file_num = cls.__get_random_alphanumeric_id(length)
+        while cls.objects.filter(client_file_number=file_num):
+            file_num = cls.__get_random_alphanumeric_id(length)
         return file_num
     
     client_rating = models.IntegerField(verbose_name=f'Client Rating({CLIENT_RATING_SYMBOL})', blank=True, null=True, default=0, validators=[MinValueValidator(0), MaxValueValidator(5)])
@@ -647,7 +647,7 @@ class Limited(models.Model):
     
     def set_defaults(self):
         if not self.client_file_number:
-            self.client_file_number = Limited._get_unique_random_client_file_number()
+            self.client_file_number = self._get_unique_random_client_file_number()
 
         if not self.bank_account_holder_name:
             self.bank_account_holder_name = self.client_name
