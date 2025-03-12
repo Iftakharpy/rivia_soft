@@ -67,7 +67,7 @@ def handle_500_error(request):
   formatted_traceback = "".join(traceback.format_exception(type_, value, tb))
   
   file_path = Path(__file__)
-  file_path = Path(r"../500_errors.log")
+  file_path = file_path / r"../500_errors.log"
   with open(file_path, 'a+') as f:
     f.write(f"{type_}: {value}\n")
     f.write(f"==================\n")
