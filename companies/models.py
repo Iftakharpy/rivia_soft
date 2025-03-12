@@ -156,7 +156,8 @@ class Selfassesment(models.Model):
         null=True)
 
     def __str__(self) -> str:
-        return f'{CLIENT_RATING_SYMBOL*self.client_rating} 👥{self.client_name} 📁{self.client_file_number} 📞{self.personal_phone_number} 📭{self.personal_post_code}'
+        rating = self.client_rating if self.client_rating is not None else 0
+        return f'{CLIENT_RATING_SYMBOL*rating} 👥{self.client_name} 📁{self.client_file_number} 📞{self.personal_phone_number} 📭{self.personal_post_code}'
     
     def __repr__(self) -> str:
         return str(self)
@@ -607,7 +608,8 @@ class Limited(models.Model):
         null=True)
 
     def __str__(self) -> str:
-        return f'{CLIENT_RATING_SYMBOL*self.client_rating} 🏢{self.client_name} 📂{self.client_file_number} ☎{self.director_phone_number} 📭{self.director_post_code} ⓇⓃ{self.company_reg_number}'
+        rating = self.client_rating if self.client_rating is not None else 0
+        return f'{CLIENT_RATING_SYMBOL*rating} 🏢{self.client_name} 📂{self.client_file_number} ☎{self.director_phone_number} 📭{self.director_post_code} ⓇⓃ{self.company_reg_number}'
     
     def __repr__(self) -> str:
         return str(self)
