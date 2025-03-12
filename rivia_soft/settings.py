@@ -41,6 +41,7 @@ with open(CONFIG_FILE_PATH, 'r') as CONFIG_FILE:
 # ?: (security.W018) You should not have DEBUG set to True in deployment.
 DEBUG = CONFIG['DEBUG']
 WANT_TO_MIGRATE = False
+ERROR_LOG_FILE_PATH = Path(__file__) / "../500_errors.log"
 ###############################################################################
 
 
@@ -62,7 +63,6 @@ else:
     SECRET_KEY = CONFIG['SECRET_KEY']
     ALLOWED_HOSTS = CONFIG['ALLOWED_HOSTS']
     DATABASES = CONFIG['DATABASES']
-
 
 # Application definition
 

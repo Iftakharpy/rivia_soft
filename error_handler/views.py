@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from django.http.response import Http404, HttpResponseBadRequest
 from django.shortcuts import render
+from django.conf import settings
 
 from companies.url_variables import *
 
@@ -71,12 +72,8 @@ def handle_500_error(request):
   # Get current timestamp in UTC format
   timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")  # ISO 8601 format
 
-  # Define log file path
-  file_path = Path(__file__)
-  file_path = file_path / r"../500_errors.log"
-
   # Write the error details to the log file
-  with open(file_path, 'a+') as f:
+  with open(settings.ERROR_LOG_FILE_PATH, 'a+') as f:
     f.write(f"[{timestamp} UTC] {type_.__name__}: {value}\n")
     f.write(f"{'='*35}\n")
     f.write(formatted_traceback)
