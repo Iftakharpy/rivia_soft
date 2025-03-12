@@ -1,5 +1,6 @@
 import sys
 import traceback
+from datetime import datetime, timezone
 from pathlib import Path
 from django.http.response import Http404, HttpResponseBadRequest
 from django.shortcuts import render
@@ -63,15 +64,23 @@ def handle_500_error(request):
     'hint': "This is an edge case contact the developer."
   }
   
+  # Get exception details
   type_, value, tb = sys.exc_info()
   formatted_traceback = "".join(traceback.format_exception(type_, value, tb))
-  
+
+  # Get current timestamp in UTC format
+  timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")  # ISO 8601 format
+
+  # Define log file path
   file_path = Path(__file__)
   file_path = file_path / r"../500_errors.log"
+
+  # Write the error details to the log file
   with open(file_path, 'a+') as f:
-    f.write(f"{type_}: {value}\n")
-    f.write(f"==================\n")
+    f.write(f"[{timestamp} UTC] {type_.__name__}: {value}\n")
+    f.write(f"{'='*35}\n")
     f.write(formatted_traceback)
+    f.write(f"{'='*35}\n")
     f.write(f"\n\n\n")
   
   return render(
