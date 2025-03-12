@@ -1,5 +1,5 @@
 import sys
-import os
+import traceback
 from pathlib import Path
 from django.http.response import Http404, HttpResponseBadRequest
 from django.shortcuts import render
@@ -63,13 +63,16 @@ def handle_500_error(request):
     'hint': "This is an edge case contact the developer."
   }
   
-  type_, value, traceback = sys.exc_info()
+  type_, value, tb = sys.exc_info()
+  formatted_traceback = "".join(traceback.format_exception(type_, value, tb))
+  
   file_path = Path(__file__)
-  file_path = Path(r"C:\Users\iftak\Desktop\projects\riviagw\errors.log")
+  file_path = Path(r"../500_errors.log")
   with open(file_path, 'a+') as f:
     f.write(f"{type_}: {value}\n")
-    f.write(f"==================")
-    f.write(f"{traceback}\n\n\n\n")
+    f.write(f"==================\n")
+    f.write(formatted_traceback)
+    f.write(f"\n\n\n")
   
   return render(
     request = request,
