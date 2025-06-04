@@ -1251,6 +1251,18 @@ class MergedTrackerCreateionForm(forms.ModelForm):
 
 # Limited Submission Deadline Tracker
 class LimitedSubmissionDeadlineTrackerCreationForm(forms.ModelForm):
+    assigned_to = SearchableModelField(
+        queryset=CustomUser.objects.all(),
+        search_url = search_users_url_path,
+        all_url = all_users_url_path,
+        repr_format = Forms.CustomUser_repr_format,
+        model = CustomUser,
+        choices = CustomUser.objects.all().only('user_id', 'first_name'),
+        fk_field = 'user_id',
+        disabled = False,
+        required = False,
+        empty_label = None # remove default option '------' from select menu
+        )
     client_id = SearchableModelField(
         queryset=Limited.objects.all(),
         label = 'Business Name',
@@ -1311,6 +1323,8 @@ class LimitedSubmissionDeadlineTrackerCreationForm(forms.ModelForm):
 
             # "updated_by",
             # "last_updated_on",
+
+            "assigned_to",
             )
     def clean_submission_date(self):
         is_submitted = self.cleaned_data.get('is_submitted')
@@ -1340,6 +1354,18 @@ class LimitedSubmissionDeadlineTrackerCreationForm(forms.ModelForm):
 
 # Limited Submission Deadline Tracker
 class LimitedSubmissionDeadlineTrackerChangeForm(forms.ModelForm):
+    assigned_to = SearchableModelField(
+        queryset=CustomUser.objects.all(),
+        search_url = search_users_url_path,
+        all_url = all_users_url_path,
+        repr_format = Forms.CustomUser_repr_format,
+        model = CustomUser,
+        choices = CustomUser.objects.all().only('user_id', 'first_name'),
+        fk_field = 'user_id',
+        disabled = False,
+        required = False,
+        empty_label = None # remove default option '------' from select menu
+        )
     client_id = SearchableModelField(
         queryset=Limited.objects.all(),
         label = 'Business Name',
@@ -1396,6 +1422,8 @@ class LimitedSubmissionDeadlineTrackerChangeForm(forms.ModelForm):
 
             # "updated_by",
             # "last_updated_on",
+
+            "assigned_to",
             )
     def clean_submission_date(self):
         is_submitted = self.cleaned_data.get('is_submitted')

@@ -2218,19 +2218,19 @@ def get_limited_submissions_where_company_house_deadline_missed_of_inactive_clie
 def get_limited_submissions_where_HMRC_deadline_missed():
   return LimitedSubmissionDeadlineTracker.ordered_manager.ordered_filter(our_deadline__lt = timezone.now(), is_submitted_hmrc=False)
 
-def get_limited_submission_where_period_end(limit=-1):
+def get_limited_submissions_where_period_end(limit=-1):
   records = LimitedSubmissionDeadlineTracker.ordered_manager.ordered_filter(period__lt = timezone.now(), is_submitted=False)
   return records
 
-def get_limited_submission_where_payment_status_NOT_PAID(limit=-1):
+def get_limited_submissions_where_payment_status_NOT_PAID(limit=-1):
   records = LimitedSubmissionDeadlineTracker.ordered_manager.ordered_filter(payment_status="NOT PAID")
   return records
 
-def get_limited_submission_where_payment_status_PAID(limit=-1):
+def get_limited_submissions_where_payment_status_PAID(limit=-1):
   records = LimitedSubmissionDeadlineTracker.ordered_manager.ordered_filter(payment_status="PAID")
   return records
 
-def get_limited_submission_where_payment_status_INVOICE_SENT(limit=-1):
+def get_limited_submissions_where_payment_status_INVOICE_SENT(limit=-1):
   records = LimitedSubmissionDeadlineTracker.ordered_manager.ordered_filter(payment_status="INVOICE SENT")
   return records
 
@@ -2242,15 +2242,20 @@ def get_this_month_start_end():
   current_month_end_date = date(year=current_date.year, month=current_date.month, day=number_of_days)
   return current_month_start_date, current_month_end_date
 
-def get_limited_submission_where_HMRC_deadline_this_month(limit=-1):
+def get_limited_submissions_where_HMRC_deadline_this_month(limit=-1):
   start, end = get_this_month_start_end()
   records = LimitedSubmissionDeadlineTracker.ordered_manager.ordered_filter(HMRC_deadline__gte=start, HMRC_deadline__lte=end)
   return records
 
-def get_limited_submission_where_HMRC_deadline_this_month_submitted(limit=-1):
+def get_limited_submissions_where_HMRC_deadline_this_month_and_submitted(limit=-1):
   start, end = get_this_month_start_end()
   records = LimitedSubmissionDeadlineTracker.ordered_manager.ordered_filter(HMRC_deadline__gte=start, HMRC_deadline__lte=end, is_submitted=True)
   return records
+
+def get_limited_submissions_where_assigned_to_me(user):
+  records = LimitedSubmissionDeadlineTracker.ordered_manager.ordered_filter(assigned_to=user)
+  return records
+
 
 
 @login_required
@@ -2263,6 +2268,7 @@ def home_limited_submission_deadline_tracker(request):
   model_fields.append('file_#')
   keep_include_fields = False
   fk_fields = {
+      'assigned_to': { 'details_url_without_argument': user_details_url_without_argument, 'repr-format': HTML_Generator.CustomUser_repr_format },
       'updated_by': { 'details_url_without_argument': user_details_url_without_argument, 'repr-format': HTML_Generator.CustomUser_repr_format },
       'submitted_by': { 'details_url_without_argument': user_details_url_without_argument, 'repr-format': HTML_Generator.CustomUser_repr_format },
       'submitted_by_hmrc': { 'details_url_without_argument': user_details_url_without_argument, 'repr-format': HTML_Generator.CustomUser_repr_format },
@@ -2284,18 +2290,19 @@ def home_limited_submission_deadline_tracker(request):
     'submission_company_house_deadline_missed_of_active_clients': get_limited_submissions_where_company_house_deadline_missed_of_active_clients().count(),
     'submission_company_house_deadline_missed_of_inactive_clients': get_limited_submissions_where_company_house_deadline_missed_of_inactive_clients().count(),
     'submission_HMRC_deadline_missed': get_limited_submissions_where_HMRC_deadline_missed().count(),
-    'submission_period_ended': get_limited_submission_where_period_end().count(),
+    'submission_period_ended': get_limited_submissions_where_period_end().count(),
     'limited_submissions_status_DOCUMENT_REQUESTED': get_limited_submissions_where_status_DOCUMENT_REQUESTED().count(),
     'limited_submissions_status_WAITING_FOR_INFORMATION': get_limited_submissions_where_status_WAITING_FOR_INFORMATION().count(),
     'limited_submissions_status_DOCUMENT_RECEIVED': get_limited_submissions_where_status_DOCUMENT_RECEIVED().count(),
     'limited_submissions_status_PROCESSING': get_limited_submissions_where_status_PROCESSING().count(),
     'limited_submissions_status_WAITING_FOR_CONFIRMATION': get_limited_submissions_where_status_WAITING_FOR_CONFIRMATION().count(),
     'limited_submissions_status_COMPLETED': get_limited_submissions_where_status_COMPLETED().count(),
-    'limited_submissions_payment_status_NOT_PAID': get_limited_submission_where_payment_status_NOT_PAID().count(),
-    'limited_submissions_payment_status_PAID': get_limited_submission_where_payment_status_PAID().count(),
-    'limited_submissions_payment_status_INVOICE_SENT': get_limited_submission_where_payment_status_INVOICE_SENT().count(),
-    'limited_submission_where_HMRC_deadline_this_month': get_limited_submission_where_HMRC_deadline_this_month().count(),
-    'limited_submission_where_HMRC_deadline_this_month_submitted': get_limited_submission_where_HMRC_deadline_this_month_submitted().count(),
+    'limited_submissions_payment_status_NOT_PAID': get_limited_submissions_where_payment_status_NOT_PAID().count(),
+    'limited_submissions_payment_status_PAID': get_limited_submissions_where_payment_status_PAID().count(),
+    'limited_submissions_payment_status_INVOICE_SENT': get_limited_submissions_where_payment_status_INVOICE_SENT().count(),
+    'limited_submission_where_HMRC_deadline_this_month': get_limited_submissions_where_HMRC_deadline_this_month().count(),
+    'limited_submission_where_HMRC_deadline_this_month_and_submitted': get_limited_submissions_where_HMRC_deadline_this_month_and_submitted().count(),
+    'limited_submission_where_assigned_to_me': get_limited_submissions_where_assigned_to_me(request.user).count(),
 
     'template_tag': generate_template_tag_for_model(LimitedSubmissionDeadlineTracker, show_id=False, pk_field=pk_field, exclude_fields=exclude_fields, keep_include_fields=keep_include_fields, ordering=field_ordering, fk_fields=fk_fields),
     'data_container': generate_data_container_table(LimitedSubmissionDeadlineTracker, show_id=False, pk_field=pk_field, exclude_fields=exclude_fields, keep_include_fields=keep_include_fields, ordering=field_ordering),
@@ -2468,18 +2475,19 @@ def search_limited_submission_deadline_tracker(request, limit: int=-1):
         'submission_company_house_deadline_missed_of_active_clients': get_limited_submissions_where_company_house_deadline_missed_of_active_clients(),
         'submission_company_house_deadline_missed_of_inactive_clients': get_limited_submissions_where_company_house_deadline_missed_of_inactive_clients(),
         'submission_HMRC_deadline_missed': get_limited_submissions_where_HMRC_deadline_missed(),
-        'submission_period_ended': get_limited_submission_where_period_end(),
+        'submission_period_ended': get_limited_submissions_where_period_end(),
         'limited_submissions_status_DOCUMENT_REQUESTED': get_limited_submissions_where_status_DOCUMENT_REQUESTED(),
         'limited_submissions_status_WAITING_FOR_INFORMATION': get_limited_submissions_where_status_WAITING_FOR_INFORMATION(),
         'limited_submissions_status_DOCUMENT_RECEIVED': get_limited_submissions_where_status_DOCUMENT_RECEIVED(),
         'limited_submissions_status_PROCESSING': get_limited_submissions_where_status_PROCESSING(),
         'limited_submissions_status_WAITING_FOR_CONFIRMATION': get_limited_submissions_where_status_WAITING_FOR_CONFIRMATION(),
         'limited_submissions_status_COMPLETED': get_limited_submissions_where_status_COMPLETED(),
-        'limited_submissions_payment_status_NOT_PAID': get_limited_submission_where_payment_status_NOT_PAID(),
-        'limited_submissions_payment_status_PAID': get_limited_submission_where_payment_status_PAID(),
-        'limited_submissions_payment_status_INVOICE_SENT': get_limited_submission_where_payment_status_INVOICE_SENT(),
-        'limited_submission_where_HMRC_deadline_this_month': get_limited_submission_where_HMRC_deadline_this_month(),
-        'limited_submission_where_HMRC_deadline_this_month_submitted': get_limited_submission_where_HMRC_deadline_this_month_submitted(),
+        'limited_submissions_payment_status_NOT_PAID': get_limited_submissions_where_payment_status_NOT_PAID(),
+        'limited_submissions_payment_status_PAID': get_limited_submissions_where_payment_status_PAID(),
+        'limited_submissions_payment_status_INVOICE_SENT': get_limited_submissions_where_payment_status_INVOICE_SENT(),
+        'limited_submission_where_HMRC_deadline_this_month': get_limited_submissions_where_HMRC_deadline_this_month(),
+        'limited_submission_where_HMRC_deadline_this_month_and_submitted': get_limited_submissions_where_HMRC_deadline_this_month_and_submitted(),
+        'limited_submission_where_assigned_to_me': get_limited_submissions_where_assigned_to_me(request.user),
       }
       records = tasks.get(tasks_key, [])
       data = serialize(queryset=records, format='json')

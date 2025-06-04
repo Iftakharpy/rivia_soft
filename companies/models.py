@@ -796,12 +796,13 @@ class LimitedSubmissionDeadlineTracker(models.Model):
     is_documents_uploaded = models.BooleanField(verbose_name='Is Documents Uploaded', default=False, null=False)
     remarks = models.TextField(verbose_name='Remarks', blank=True, null=True)
     payment_status_choices = (
+        (None, "--------------"),
         ("NOT PAID", "NOT PAID"),
         ("INVOICE SENT", "INVOICE SENT"),
         ("PARTIALLY PAID", "PARTIALLY PAID"),
         ("PAID", "PAID"),
     )
-    payment_status = models.CharField("Payment Status", blank=False, max_length=55, choices=payment_status_choices, default="NOT PAID")
+    payment_status = models.CharField("Payment Status", blank=True, null=True, max_length=55, choices=payment_status_choices, default=None)
     payment_method_choices = (
         (None, "--------------"),
         ("CASH", "CASH"),
@@ -822,6 +823,14 @@ class LimitedSubmissionDeadlineTracker(models.Model):
         blank=False,
         null=True)
     last_updated_on = models.DateTimeField(verbose_name='Last Updated On', null=True, auto_now=True)
+    assigned_to = models.ForeignKey(
+        to='users.CustomUser',
+        on_delete=models.RESTRICT,
+        verbose_name='Assigned to',
+        related_name='limited_submission_assigned_to',
+        to_field='user_id',
+        blank=False,
+        null=True)
 
 
     def __str__(self) -> str:

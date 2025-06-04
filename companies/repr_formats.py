@@ -10,7 +10,7 @@ class Forms:
 
 
 class HTML_Generator:
-  CustomUser_repr_format = r"👥{first_name} {last_name}"
+  CustomUser_repr_format = r"👥{first_name}"
 
   Selfassesment_type_repr_format = r"{type_name}"
   Selfassemsent_tax_year_repr_format = r"📆 {tax_year}"

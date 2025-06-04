@@ -277,13 +277,17 @@
           <span class="task-tooltip">EMPTY SPACE FOR SEPARATION</span>
         </span>
         
-        <span class="task task-done" data-tasks='limited_submission_where_HMRC_deadline_this_month_submitted'>
-          <span id="task-count">{{ limited_submission_where_HMRC_deadline_this_month_submitted }}</span>
-          <span class="task-tooltip">Submitted(CH) this month</span>
-        </span>
         <span class="task task-today" data-tasks='limited_submission_where_HMRC_deadline_this_month'>
           <span id="task-count">{{ limited_submission_where_HMRC_deadline_this_month }}</span>
           <span class="task-tooltip">Deadline(CH) this month</span>
+        </span>
+        <span class="task task-done" data-tasks='limited_submission_where_HMRC_deadline_this_month_and_submitted'>
+          <span id="task-count">{{ limited_submission_where_HMRC_deadline_this_month_and_submitted }}</span>
+          <span class="task-tooltip">Deadline(CH) this month and Submitted(CH)</span>
+        </span>
+        <span class="task task-own" data-tasks='limited_submission_where_assigned_to_me'>
+          <span id="task-count">{{ limited_submission_where_assigned_to_me }}</span>
+          <span class="task-tooltip">Assigned to me</span>
         </span>
 
 
