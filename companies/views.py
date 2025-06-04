@@ -1,5 +1,6 @@
 from datetime import timedelta
 from dateutil.relativedelta import relativedelta
+import calendar
 from datetime import date
 
 import json
@@ -2229,6 +2230,28 @@ def get_limited_submission_where_payment_status_PAID(limit=-1):
   records = LimitedSubmissionDeadlineTracker.ordered_manager.ordered_filter(payment_status="PAID")
   return records
 
+def get_limited_submission_where_payment_status_INVOICE_SENT(limit=-1):
+  records = LimitedSubmissionDeadlineTracker.ordered_manager.ordered_filter(payment_status="INVOICE SENT")
+  return records
+
+
+def get_this_month_start_end():
+  current_date = date.today()
+  _, number_of_days = calendar.monthrange(year=current_date.year, month=current_date.month)
+  current_month_start_date = date(year=current_date.year, month=current_date.month, day=1)
+  current_month_end_date = date(year=current_date.year, month=current_date.month, day=number_of_days)
+  return current_month_start_date, current_month_end_date
+
+def get_limited_submission_where_HMRC_deadline_this_month(limit=-1):
+  start, end = get_this_month_start_end()
+  records = LimitedSubmissionDeadlineTracker.ordered_manager.ordered_filter(HMRC_deadline__gte=start, HMRC_deadline__lte=end)
+  return records
+
+def get_limited_submission_where_HMRC_deadline_this_month_submitted(limit=-1):
+  start, end = get_this_month_start_end()
+  records = LimitedSubmissionDeadlineTracker.ordered_manager.ordered_filter(HMRC_deadline__gte=start, HMRC_deadline__lte=end, is_submitted=True)
+  return records
+
 
 @login_required
 def home_limited_submission_deadline_tracker(request):
@@ -2270,6 +2293,9 @@ def home_limited_submission_deadline_tracker(request):
     'limited_submissions_status_COMPLETED': get_limited_submissions_where_status_COMPLETED().count(),
     'limited_submissions_payment_status_NOT_PAID': get_limited_submission_where_payment_status_NOT_PAID().count(),
     'limited_submissions_payment_status_PAID': get_limited_submission_where_payment_status_PAID().count(),
+    'limited_submissions_payment_status_INVOICE_SENT': get_limited_submission_where_payment_status_INVOICE_SENT().count(),
+    'limited_submission_where_HMRC_deadline_this_month': get_limited_submission_where_HMRC_deadline_this_month().count(),
+    'limited_submission_where_HMRC_deadline_this_month_submitted': get_limited_submission_where_HMRC_deadline_this_month_submitted().count(),
 
     'template_tag': generate_template_tag_for_model(LimitedSubmissionDeadlineTracker, show_id=False, pk_field=pk_field, exclude_fields=exclude_fields, keep_include_fields=keep_include_fields, ordering=field_ordering, fk_fields=fk_fields),
     'data_container': generate_data_container_table(LimitedSubmissionDeadlineTracker, show_id=False, pk_field=pk_field, exclude_fields=exclude_fields, keep_include_fields=keep_include_fields, ordering=field_ordering),
@@ -2451,6 +2477,9 @@ def search_limited_submission_deadline_tracker(request, limit: int=-1):
         'limited_submissions_status_COMPLETED': get_limited_submissions_where_status_COMPLETED(),
         'limited_submissions_payment_status_NOT_PAID': get_limited_submission_where_payment_status_NOT_PAID(),
         'limited_submissions_payment_status_PAID': get_limited_submission_where_payment_status_PAID(),
+        'limited_submissions_payment_status_INVOICE_SENT': get_limited_submission_where_payment_status_INVOICE_SENT(),
+        'limited_submission_where_HMRC_deadline_this_month': get_limited_submission_where_HMRC_deadline_this_month(),
+        'limited_submission_where_HMRC_deadline_this_month_submitted': get_limited_submission_where_HMRC_deadline_this_month_submitted(),
       }
       records = tasks.get(tasks_key, [])
       data = serialize(queryset=records, format='json')

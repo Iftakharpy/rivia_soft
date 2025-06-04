@@ -1400,6 +1400,9 @@ class LimitedSubmissionDeadlineTrackerChangeForm(forms.ModelForm):
     def clean_submission_date(self):
         is_submitted = self.cleaned_data.get('is_submitted')
         submission_date = self.cleaned_data.get('submission_date')
+        status = self.cleaned_data.get('status')
+        if status == "COMPLETED" and not type(submission_date)==type(date(2021, 6, 28)):
+            raise ValidationError('Status is COMPLETED therefore Submission Date is required.')
         if is_submitted == True and not type(submission_date)==type(date(2021, 6, 28)):
             raise ValidationError('Is Submitted is True therefore Submission Date is required.')
         return submission_date
