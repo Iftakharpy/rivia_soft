@@ -845,7 +845,7 @@ class LimitedSubmissionDeadlineTracker(models.Model):
         
         # set self.our_deadline 45 days before the self.HMRC_deadline
         self.our_deadline = self.HMRC_deadline + relativedelta(months=1, days=15)
-        self.save()
+        
 
 # Limited VAT Tracker
 class LimitedVATTracker(models.Model):

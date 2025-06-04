@@ -2262,7 +2262,7 @@ def get_limited_submissions_where_assigned_to_me(user):
 def home_limited_submission_deadline_tracker(request):
   pk_field = 'submission_id'
   exclude_fields = []
-  field_ordering = ['client_id', 'file_#', 'reg_num', 'status', 'period_start_date', 'period', 'remarks', 'HMRC_deadline', 'is_submitted', 'submitted_by', 'submission_date', 'our_deadline', 'is_submitted_hmrc', 'submitted_by_hmrc', 'submission_date_hmrc', 'is_documents_uploaded', ]
+  field_ordering = ['client_id', 'file_#', 'reg_num', 'status', 'assigned_to', 'period_start_date', 'period', 'remarks', 'HMRC_deadline', 'is_submitted', 'submitted_by', 'submission_date', 'our_deadline', 'is_submitted_hmrc', 'submitted_by_hmrc', 'submission_date_hmrc', 'is_documents_uploaded', ]
   model_fields = get_field_names_from_model(LimitedSubmissionDeadlineTracker)
   model_fields.append('reg_num')
   model_fields.append('file_#')
@@ -2372,6 +2372,14 @@ def update_limited_submission_deadline_tracker(request, submission_id:int):
   if request.method == 'POST':
     form = LimitedSubmissionDeadlineTrackerChangeForm(request.POST, instance=record)
     context['form'] = form
+
+    new_assigned_to = form.data.get('assigned_to')
+    old_assigned_to = str(record.assigned_to.pk) if record.assigned_to else None
+    if not request.user.is_superuser and (new_assigned_to != old_assigned_to):
+      form.add_error("assigned_to", "Only admins can update this field!")
+      messages.error(request, "Update failed due to permission error")
+      return render(request, template_name='companies/update.html', context=context)
+
     if form.is_valid():
       assesment = form.save(commit=False)
 
@@ -2386,7 +2394,6 @@ def update_limited_submission_deadline_tracker(request, submission_id:int):
           return render(request, template_name='companies/update.html', context=context)
 
       assesment.set_defaults(request)
-      assesment.save()
       context['form'] = LimitedSubmissionDeadlineTrackerChangeForm(instance=assesment)
       messages.success(request, f'Limited Submission Deadline Tracker has been updated having id {submission_id}!')
 

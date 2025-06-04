@@ -1364,7 +1364,7 @@ class LimitedSubmissionDeadlineTrackerChangeForm(forms.ModelForm):
         fk_field = 'user_id',
         disabled = False,
         required = False,
-        empty_label = None # remove default option '------' from select menu
+        empty_label = "--------------" # remove default option '------' from select menu
         )
     client_id = SearchableModelField(
         queryset=Limited.objects.all(),
@@ -1387,7 +1387,7 @@ class LimitedSubmissionDeadlineTrackerChangeForm(forms.ModelForm):
     submission_date_hmrc = forms.DateField(label="Submission Date(HM)", widget=forms.DateInput(attrs={'type': 'date'}), required=False)
     
     read_only_fields = ["client_id"]
-    def save(self, commit=True):
+    def save(self, commit=False):
         for ro_field in self.read_only_fields:
             self.cleaned_data.pop(ro_field, None)
         return super().save(commit=commit)
@@ -1441,7 +1441,8 @@ class LimitedSubmissionDeadlineTrackerChangeForm(forms.ModelForm):
         if is_submitted == True and not type(submission_date)==type(date(2021, 6, 28)):
             raise ValidationError('Is Submitted is True therefore Submission Date is required.')
         return submission_date
-    
+
+
     def clean(self):
         date_type = type(date(1,1,1))
 
