@@ -2253,7 +2253,7 @@ def get_limited_submissions_where_HMRC_deadline_this_month_and_submitted(limit=-
   return records
 
 def get_limited_submissions_where_assigned_to_me(user):
-  records = LimitedSubmissionDeadlineTracker.ordered_manager.ordered_filter(assigned_to=user)
+  records = LimitedSubmissionDeadlineTracker.objects.filter(assigned_to=user).exclude(is_submitted=True, is_submitted_hmrc=True)
   return records
 
 
@@ -2367,7 +2367,6 @@ def update_limited_submission_deadline_tracker(request, submission_id:int):
   except LimitedSubmissionDeadlineTracker.DoesNotExist:
     messages.error(request, f'Limited Submission Deadline Tracker having id {submission_id} does not exist!')
     return redirect(URL_NAMES_PREFIXED_WITH_APP_NAME.Limited_Submission_Deadline_Tracker_home_name)
-    raise Http404
 
   if request.method == 'POST':
     form = LimitedSubmissionDeadlineTrackerChangeForm(request.POST, instance=record)
