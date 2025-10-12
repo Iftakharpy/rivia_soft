@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 {% load companies_tags %}
 
 {% block title %}
@@ -13,6 +14,7 @@
       }
       form {
         max-height: 27dvh;
+        overflow: visible;
         overflow-y: auto;
       }
       @media (height >= 350px) { form { max-height: 33dvh; } }
@@ -118,5 +120,8 @@
       {% endif %}
       <button type="submit" class="create absolute translate-y-full -bottom-2">Create</button>
     </form>
+
+    <script defer type="module" src="{% static "js/unsaved_form_data_alert.js" %}"></script>
   </div>
+
 {% endblock %}

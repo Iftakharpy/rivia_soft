@@ -1,105 +1,154 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 {% load companies_tags %}
 {% load static %}
 
 {% block title %}
   {{ page_title }}
-{% endblock title %}
+{% endblock %}
 
+{% block head %}
+  {% autoescape off %}
+    <style>
+      body {
+        max-height: 100dvh;
+      }
+      form {
+        max-height: 27dvh;
+        overflow: visible;
+        overflow-y: auto;
+      }
+      @media (height >= 350px) {
+        form {
+          max-height: 33dvh;
+        }
+      }
+      @media (height >= 400px) {
+        form {
+          max-height: 43dvh;
+        }
+      }
+      @media (height >= 450px) {
+        form {
+          max-height: 50dvh;
+        }
+      }
+      @media (height >= 550px) {
+        form {
+          max-height: 58dvh;
+        }
+      }
+      @media (height >= 600px) {
+        form {
+          max-height: 63dvh;
+        }
+      }
+      @media (height >= 700px) {
+        form {
+          max-height: 70dvh;
+        }
+      }
+      @media (height >= 850px) {
+        form {
+          max-height: 74dvh;
+        }
+      }
+      @media (height >= 1000px) {
+        form {
+          max-height: 78dvh;
+        }
+      }
+    </style>
+  {% endautoescape %}
+{% endblock %}
 
 {% block content %}
+  <div class="relative max-w-6xl mx-auto mt-5">
+    <div class="text-right">
+      <a href="{% url view_url %}">View</a>
+    </div>
 
-<div class="max-w-6xl mx-auto mt-5">
-  <div class="text-right">
-    <a href="{% url view_url %}">View</a>
-  </div>
-
-  <!-- messages -->
-  {% if messages %}
-    {% for message in messages %}
-      <h1 class='message {{ message.tags }}'>
-        {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}Important: {% endif %}
-        {{ message }}
-      </h1>
-    {% endfor %}
-  {% endif %}
-
-  {% load companies_tags %}
-
-  <!-- form -->
-  <form action="{% url create_url %}" method="POST" class="my-10">
-    {% csrf_token %}
-    <h1 class="py-3 text-lg font-bold text-center rounded shadow-lg create select-none">{{ form_title }}</h1>
-    
-    <ol style="margin-top: 10px; margin-bottom: 10px; list-style: inside;">
-      {% for error in form|get_attr:'errors.__all__' %}
-        <li style="color: red; display: list-item;">{{ error }}</li>
-      {% endfor %}
-    </ol>
-    
-
-    {% if form|get_attr:'Meta.fieldsets' %}
-      {% comment %} fieldsets exists so organize them {% endcomment %}
-      {% for fieldset in form.Meta.fieldsets %}
-        <fieldset class="fieldset">
-          <h1 class="fieldset title">{{ fieldset.title }}</h1>
-
-          {% for field_name in fieldset.fields %}
-            {% with field=form|get_field:field_name  %}
-            <div class="flex flex-col align-middle items-start w-full">
-              <!-- input container -->
-              <div class="w-full mt-3.5">
-                <!-- input label -->
-                <label for="{{ 'id_'|addstr:field.name }}">{{ field.label }}
-                  {% if field.field.required %}
-                  <!-- required indicator -->
-                  {% include "companies/required_indicator.html" %}
-                  {% endif %}
-                </label>
-                <!-- input field -->
-                {{ field }}
-                <div class="text-red-500">
-                    {{ field.errors }}
-                </div>
-              </div>
-            </div>
-            {% endwith %}
-          {% endfor %}
-        </fieldset>
-      {% endfor %}
-    {% else %}
-      {% comment %} fieldsets doesn't exist so show all the fields {% endcomment %}
-
-      {% for field in form %}
-      <div class="flex flex-col align-middle items-start w-full">
-        <!-- input container -->
-        <div class="w-full mt-3.5">
-          <!-- input label -->
-          <label for="{{ 'id_'|addstr:field.name }}">{{ field.label }}
-            {% if field.field.required %}
-            <!-- required indicator -->
-            {% include "companies/required_indicator.html" %}
-            {% endif %}
-          </label>
-          <!-- input field -->
-          {{ field }}
-          <div class="text-red-500">
-              {{ field.errors }}
-          </div>
-        </div>
-      </div>
+    <!-- messages -->
+    {% if messages %}
+      {% for message in messages %}
+        <h1 class="message {{ message.tags }}">
+          {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}Important: {% endif %}
+          {{ message }}
+        </h1>
       {% endfor %}
     {% endif %}
-    <input type="text" hidden value="{{ redirect_to }}" name="redirect_to">
-    <button type="submit" class="create">Create</button>
-  </form>
 
-  <!-- data -->
-  {% autoescape off %}
-  <pre type="application/json" style="display: none;">
-    {{ frontend_data|convert_to_JSON }}
-  </pre>
-  {% endautoescape %}
-  <script defer type="module" src='{% static "js/merged_tracker_create.js" %}'></script>
-</div>
-{% endblock content %}
+    {% load companies_tags %}
+
+    <!-- form -->
+    <form action="{% url create_url %}" method="POST" class="my-5">
+      {% csrf_token %}
+      <h1 class="py-2 px-6 absolute -z-50 -top-3 text-lg font-bold text-center rounded shadow-lg create select-none">{{ form_title }}</h1>
+
+      <ol style="margin-top: 10px; margin-bottom: 10px; list-style: inside;">
+        {% for error in form|get_attr:'errors.__all__' %}
+          <li style="color: red; display: list-item;">{{ error }}</li>
+        {% endfor %}
+      </ol>
+
+      {% if form|get_attr:'Meta.fieldsets' %}
+        {% comment %}fieldsets exists so organize them{% endcomment %}
+        {% for fieldset in form.Meta.fieldsets %}
+          <fieldset class="fieldset">
+            <h1 class="fieldset title">{{ fieldset.title }}</h1>
+
+            {% for field_name in fieldset.fields %}
+              {% with field=form|get_field:field_name %}
+                <div class="flex flex-col align-middle items-start w-full">
+                  <!-- input container -->
+                  <div class="w-full mt-3.5">
+                    <!-- input label -->
+                    <label for="{{ 'id_'|addstr:field.name }}">
+                      {{ field.label }}
+                      {% if field.field.required %}
+                        <!-- required indicator -->
+                        {% include 'companies/required_indicator.html' %}
+                      {% endif %}
+                    </label>
+                    <!-- input field -->
+                    {{ field }}
+                    <div class="text-red-500">{{ field.errors }}</div>
+                  </div>
+                </div>
+              {% endwith %}
+            {% endfor %}
+          </fieldset>
+        {% endfor %}
+      {% else %}
+        {% comment %}fieldsets doesn't exist so show all the fields{% endcomment %}
+
+        {% for field in form %}
+          <div class="flex flex-col align-middle items-start w-full">
+            <!-- input container -->
+            <div class="w-full mt-3.5">
+              <!-- input label -->
+              <label for="{{ 'id_'|addstr:field.name }}">
+                {{ field.label }}
+                {% if field.field.required %}
+                  <!-- required indicator -->
+                  {% include 'companies/required_indicator.html' %}
+                {% endif %}
+              </label>
+              <!-- input field -->
+              {{ field }}
+              <div class="text-red-500">{{ field.errors }}</div>
+            </div>
+          </div>
+        {% endfor %}
+      {% endif %}
+      <input type="text" hidden value="{{ redirect_to }}" name="redirect_to" />
+      <button type="submit" class="create absolute translate-y-full -bottom-2">Create</button>
+    </form>
+    <script defer type="module" src="{% static 'js/unsaved_form_data_alert.js' %}"></script>
+
+    <!-- data -->
+    {% autoescape off %}
+      <pre type="application/json" style="display: none;">{{ frontend_data|convert_to_JSON }}</pre>
+    {% endautoescape %}
+    <script defer type="module" src="{% static 'js/merged_tracker_create.js' %}"></script>
+  </div>
+{% endblock %}

@@ -119,6 +119,7 @@ function getSelectedFieldNames() {
 window.addEventListener("load", function () {
 	// This function runs only after ALL resources (images, CSS, etc.) have loaded
 	let exportActionBtn = document.querySelector(".action-export");
+	if (exportActionBtn==undefined) return;
 	let exportActionAnchor = exportActionBtn?.querySelector("a");
 	let exportColumnsContainer = document.querySelector(
 		"[data-export-columns-container]"
