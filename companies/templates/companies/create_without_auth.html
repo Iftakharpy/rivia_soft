@@ -1,115 +1,125 @@
-{% extends "bare_base.html" %}
+{% extends 'bare_base.html' %}
 {% load static %}
 {% load companies_tags %}
 
 {% block title %}
   {{ page_title }}
-{% endblock title %}
+{% endblock %}
 
 {% block head %}
-<link rel="stylesheet" href='{% static "css/style.css" %}' />
-<link rel="stylesheet" href='{% static "css/custom_scrollbar.css" %}' />
-{% endblock head %}
-
+  <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/custom_scrollbar.css' %}" />
+{% endblock %}
 
 {% block content_body %}
-<body class="font-normal text-gray-700 dark:text-gray-400 bg-gray-200 dark:bg-gray-900 min-w-full min-h-screen">
+  <body class="font-normal text-gray-700 dark:text-gray-400 bg-gray-200 dark:bg-gray-900 min-w-full min-h-screen">
     <div class="max-w-screen-2xl px-4 md:px-6 lg:px-8 mx-auto">
-    <div class="max-w-6xl mx-auto mt-5">
-    <!-- messages -->
-    {% if messages %}
-        {% for message in messages %}
-        <h1 class='message {{ message.tags }}'>
-            {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}Important: {% endif %}
-            {{ message }}
-        </h1>
-        {% endfor %}
-    {% endif %}
+      <div class="max-w-6xl mx-auto mt-5">
+        <!-- messages -->
+        {% if messages %}
+          {% for message in messages %}
+            <h1 class="message {{ message.tags }}">
+              {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}Important: {% endif %}
+              {{ message }}
+            </h1>
+          {% endfor %}
+        {% endif %}
 
-    <!-- form -->
-    <form action="{% if has_url_args %}{% url create_url client_url_arg %}{% elif not has_url_args %}{% url create_url %}{% endif %}" method="POST" class="my-10">
-        {% csrf_token %}
-        <h1 class="py-3 text-lg font-bold text-center rounded shadow-lg create select-none">{{ form_title }}</h1>
-        
-        <ol style="margin-top: 10px; margin-bottom: 10px; list-style: inside;">
-        {% for error in form|get_attr:'errors.__all__' %}
-            <li style="color: red; display: list-item;">{{ error }}</li>
-        {% endfor %}
-        </ol>
-        
+        <!-- form -->
+        <form action="{% if has_url_args %}
+            {% url create_url client_url_arg %}
+          {% elif not has_url_args %}
+            {% url create_url %}
+          {% endif %}"
+          method="POST"
+          class="my-10">
+          {% csrf_token %}
+          <h1 class="py-3 text-lg font-bold text-center rounded shadow-lg create select-none">{{ form_title }}</h1>
 
-        {% if form|get_attr:'Meta.fieldsets' %}
-        {% comment %} fieldsets exists so organize them {% endcomment %}
-        {% for fieldset in form.Meta.fieldsets %}
-            <fieldset class="fieldset">
-            <h1 class="fieldset title">{{ fieldset.title }}</h1>
-            {% if fieldset.fieldset_message %}<p style="margin-top: .5em; font-weight:500; font-size:1.08rem;">{{fieldset.fieldset_message}}</p>{% endif %}
-            
+          <ol style="margin-top: 10px; margin-bottom: 10px; list-style: inside;">
+            {% for error in form|get_attr:'errors.__all__' %}
+              <li style="color: red; display: list-item;">{{ error }}</li>
+            {% endfor %}
+          </ol>
 
-            {% for field_name in fieldset.fields %}
-                {% with field=form|get_field:field_name  %}
-                <div class="flex flex-col align-middle items-start w-full">
+          {% if form|get_attr:'Meta.fieldsets' %}
+            {% comment %}fieldsets exists so organize them{% endcomment %}
+            {% for fieldset in form.Meta.fieldsets %}
+              <fieldset class="fieldset">
+                <h1 class="fieldset title">{{ fieldset.title }}</h1>
+                {% if fieldset.fieldset_message %}
+                  <p style="margin-top: .5em; font-weight:500; font-size:1.08rem;">{{ fieldset.fieldset_message }}</p>
+                {% endif %}
+
+                {% for field_name in fieldset.fields %}
+                  {% with field=form|get_field:field_name %}
+                    <div class="flex flex-col align-middle items-start w-full">
+                      <!-- input container -->
+                      <div class="w-full mt-3.5">
+                        <!-- input label -->
+                        <label for="{{ 'id_'|addstr:field.name }}">
+                          {{ field.label }}
+                          {% if field.field.required %}
+                            <!-- required indicator -->
+                            {% include 'companies/required_indicator.html' %}
+                          {% endif %}
+                        </label>
+                        <!-- input field -->
+                        {{ field }}
+                        <div class="text-red-500">{{ field.errors }}</div>
+
+                        {% with nest_field='Meta.message_for_fields.'|addstr:field_name %}
+                          {% if form|get_attr:nest_field %}
+                            <p style="margin-top: 1em; font-weight: 300;">{{ form|get_attr:nest_field }}</p>
+                          {% endif %}
+                        {% endwith %}
+                      </div>
+                    </div>
+                  {% endwith %}
+                {% endfor %}
+              </fieldset>
+            {% endfor %}
+          {% else %}
+            {% comment %}fieldsets doesn't exist so show all the fields{% endcomment %}
+
+            {% for field in form %}
+              <div class="flex flex-col align-middle items-start w-full">
                 <!-- input container -->
                 <div class="w-full mt-3.5">
-                    <!-- input label -->
-                    <label for="{{ 'id_'|addstr:field.name }}">{{ field.label }}
+                  <!-- input label -->
+                  <label for="{{ 'id_'|addstr:field.name }}">
+                    {{ field.label }}
                     {% if field.field.required %}
-                    <!-- required indicator -->
-                    {% include "companies/required_indicator.html" %}
+                      <!-- required indicator -->
+                      {% include 'companies/required_indicator.html' %}
                     {% endif %}
-                    </label>
-                    <!-- input field -->
-                    {{ field }}
-                    <div class="text-red-500">
-                        {{ field.errors }}
-                    </div>
-
-                    {% with 'Meta.message_for_fields.'|addstr:field_name as nest_field %}
-                        {% if form|get_attr:nest_field %}
-                        <p style='margin-top: 1em; font-weight: 300;'>{{form|get_attr:nest_field}}</p>
-                        {% endif %}
-                    {% endwith %}
+                  </label>
+                  <!-- input field -->
+                  {{ field }}
+                  <div class="text-red-500">{{ field.errors }}</div>
+                  {% with nest_field='Meta.message_for_fields.'|addstr:field.name %}
+                    {% if form|get_attr:nest_field %}
+                      <p style="margin-top: 1em; font-weight: 300;">{{ form|get_attr:nest_field }}</p>
+                    {% endif %}
+                  {% endwith %}
                 </div>
-                </div>
-                {% endwith %}
+              </div>
             {% endfor %}
-            </fieldset>
-        {% endfor %}
-        {% else %}
-        {% comment %} fieldsets doesn't exist so show all the fields {% endcomment %}
+          {% endif %}
 
-        {% for field in form %}
-        <div class="flex flex-col align-middle items-start w-full">
-            
-            <!-- input container -->
-            <div class="w-full mt-3.5">
-            <!-- input label -->
-            <label for="{{ 'id_'|addstr:field.name }}">{{ field.label }}
-                {% if field.field.required %}
-                <!-- required indicator -->
-                {% include "companies/required_indicator.html" %}
-                {% endif %}
-            </label>
-            <!-- input field -->
-            {{ field }}
-            <div class="text-red-500">
-                {{ field.errors }}
-            </div>
-            {% with 'Meta.message_for_fields.'|addstr:field.name as nest_field %}
-                {% if form|get_attr:nest_field %}
-                <p style='margin-top: 1em; font-weight: 300;'>{{form|get_attr:nest_field}}</p>
-                {% endif %}
-            {% endwith %}
-            </div>
-        </div>
-        {% endfor %}
-        {% endif %}
+          {% if not hide_submit_button %}
+            <button type="submit" class="create">
+              {% if submit_button_text %}
+                {{ submit_button_text }}
+              {% elif not submit_button_text %}
+                Create
+              {% endif %}
+            </button>
+          {% endif %}
+        </form>
         
-        {% if not hide_submit_button %}
-            <button type="submit" class="create"> {% if submit_button_text %}{{submit_button_text}} {% elif not submit_button_text %}Create{% endif %}</button>
-        {% endif %}
-    </form>
+        <script defer type="module" src="{% static 'js/unsaved_form_data_alert.js' %}"></script>
+      </div>
     </div>
-</div>
-</body>
-{% endblock content_body %}
+  </body>
+{% endblock %}

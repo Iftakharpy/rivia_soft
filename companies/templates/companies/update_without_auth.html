@@ -1,92 +1,91 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 {% load companies_tags %}
 
 {% block title %}
   {{ page_title }}
-{% endblock title %}
-
+{% endblock %}
 
 {% block content %}
-<div class="max-w-6xl mx-auto mt-5">
-  <div class="text-right">
-  <a href="{% url view_url %}">View</a>
-  </div>
+  <div class="max-w-6xl mx-auto mt-5">
+    <div class="text-right">
+      <a href="{% url view_url %}">View</a>
+    </div>
 
-  <!-- messages -->
-  {% if messages %}
-  {% for message in messages %}
-  <h1 class='message {{ message.tags }}'>
-    {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}Important: {% endif %}
-    {{ message }}
-  </h1>
-  {% endfor %}
-  {% endif %}
-    
-  <!-- form -->
-  <form action="{% url update_url id %}" method="POST" class="my-10">
-    {% csrf_token %}
-    <h1 class="header update-header">{{ form_title }}</h1>
-    <!-- form -->
-
-    <ol style="margin-top: 10px; margin-bottom: 10px; list-style: inside;">
-      {% for error in form.errors|get_attr:'__all__' %}
-        <li style="color: red; display: list-item;">{{ error }}</li>
-      {% endfor %}
-    </ol>
-
-    {% if form|get_attr:'Meta.fieldsets' %}
-      {% comment %} fieldsets exists so organize them {% endcomment %}
-      {% for fieldset in form.Meta.fieldsets %}
-        <fieldset class="fieldset">
-          <h1 class="fieldset title">{{ fieldset.title }}</h1>
-
-          {% for field_name in fieldset.fields %}
-            {% with field=form|get_field:field_name  %}
-            <div class="flex flex-col align-middle items-start w-full">
-              <!-- input container -->
-              <div class="w-full mt-3.5">
-                <!-- input label -->
-                <label for="{{ 'id_'|addstr:field.name }}">{{ field.label }}
-                  {% if field.field.required %}
-                  <!-- required indicator -->
-                  {% include "companies/required_indicator.html" %}
-                  {% endif %}
-                </label>
-                <!-- input field -->
-                {{ field }}
-                <div class="text-red-500">
-                    {{ field.errors }}
-                </div>
-              </div>
-            </div>
-            {% endwith %}
-          {% endfor %}
-        </fieldset>
-      {% endfor %}
-    {% else %}
-      {% comment %} fieldsets doesn't exist so show all the fields {% endcomment %}
-      
-      {% for field in form %}
-      <div class="flex flex-col align-middle items-start w-full">
-        <!-- input container -->
-        <div class="w-full mt-3.5">
-          <!-- input label -->
-          <label for="{{ 'id_'|addstr:field.name }}">{{ field.label }}
-            {% if field.field.required %}
-            <!-- required indicator -->
-            {% include "companies/required_indicator.html" %}
-            {% endif %}
-          </label>
-          <!-- input field -->
-          {{ field }}
-          <div class="text-red-500">
-              {{ field.errors }}
-          </div>
-        </div>
-      </div>
+    <!-- messages -->
+    {% if messages %}
+      {% for message in messages %}
+        <h1 class="message {{ message.tags }}">
+          {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}Important: {% endif %}
+          {{ message }}
+        </h1>
       {% endfor %}
     {% endif %}
-    <button type="submit" class="update">Update</button>
-  </form>
-</div>
-{% endblock content %}
+
+    <!-- form -->
+    <form action="{% url update_url id %}" method="POST" class="my-10">
+      {% csrf_token %}
+      <h1 class="header update-header">{{ form_title }}</h1>
+      <!-- form -->
+
+      <ol style="margin-top: 10px; margin-bottom: 10px; list-style: inside;">
+        {% for error in form.errors|get_attr:'__all__' %}
+          <li style="color: red; display: list-item;">{{ error }}</li>
+        {% endfor %}
+      </ol>
+
+      {% if form|get_attr:'Meta.fieldsets' %}
+        {% comment %}fieldsets exists so organize them{% endcomment %}
+        {% for fieldset in form.Meta.fieldsets %}
+          <fieldset class="fieldset">
+            <h1 class="fieldset title">{{ fieldset.title }}</h1>
+
+            {% for field_name in fieldset.fields %}
+              {% with field=form|get_field:field_name %}
+                <div class="flex flex-col align-middle items-start w-full">
+                  <!-- input container -->
+                  <div class="w-full mt-3.5">
+                    <!-- input label -->
+                    <label for="{{ 'id_'|addstr:field.name }}">
+                      {{ field.label }}
+                      {% if field.field.required %}
+                        <!-- required indicator -->
+                        {% include 'companies/required_indicator.html' %}
+                      {% endif %}
+                    </label>
+                    <!-- input field -->
+                    {{ field }}
+                    <div class="text-red-500">{{ field.errors }}</div>
+                  </div>
+                </div>
+              {% endwith %}
+            {% endfor %}
+          </fieldset>
+        {% endfor %}
+      {% else %}
+        {% comment %}fieldsets doesn't exist so show all the fields{% endcomment %}
+
+        {% for field in form %}
+          <div class="flex flex-col align-middle items-start w-full">
+            <!-- input container -->
+            <div class="w-full mt-3.5">
+              <!-- input label -->
+              <label for="{{ 'id_'|addstr:field.name }}">
+                {{ field.label }}
+                {% if field.field.required %}
+                  <!-- required indicator -->
+                  {% include 'companies/required_indicator.html' %}
+                {% endif %}
+              </label>
+              <!-- input field -->
+              {{ field }}
+              <div class="text-red-500">{{ field.errors }}</div>
+            </div>
+          </div>
+        {% endfor %}
+      {% endif %}
+      <button type="submit" class="update">Update</button>
+    </form>
+
+    <script defer type="module" src="{% static 'js/unsaved_form_data_alert.js' %}"></script>
+  </div>
+{% endblock %}
