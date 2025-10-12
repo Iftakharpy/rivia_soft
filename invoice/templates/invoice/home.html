@@ -50,7 +50,7 @@
       </span>
       {% endif %}
       
-    <script src='{% static "js/tracker_search.js" %}' type='module'></script>
+    <script defer type="module" src='{% static "js/tracker_search.js" %}'></script>
   {% endif %}
   </div>
   
@@ -109,5 +109,5 @@
 </pre>
 {% endautoescape %}
 
-<script src='{% static "js/table_sort.js" %}'></script>
+<script defer type="module" src='{% static "js/table_sort.js" %}'></script>
 {% endblock content %}

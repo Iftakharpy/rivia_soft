@@ -1,37 +1,18 @@
+from typing import Type
 from django.db import models
-from .url_variables import URL_PATHS, URL_NAMES, Full_URL_PATHS_WITHOUT_ARGUMENTS, URL_NAMES_PREFIXED_WITH_APP_NAME
+from .utils import is_includeable, get_field_names_from_model, get_header_name_from_field_name
 
+from .url_variables import URL_PATHS, URL_NAMES, Full_URL_PATHS_WITHOUT_ARGUMENTS, URL_NAMES_PREFIXED_WITH_APP_NAME
 from .repr_formats import HTML_Generator
+
+
+ModelClass = Type[models.Model] 
 
 # foreign key fields
 user_details_url_without_argument = '/u/details/'
 
-def get_field_names_from_model(django_model:models.Model):
-  field_names = []
-  for field in django_model._meta.fields:
-    field_names.append(field.name)
-  return field_names
-
-def get_header_name_from_field_name(django_model, field_name:str):
-  try:
-    return django_model._meta.get_field(field_name).verbose_name
-  except:
-    try:
-      return django_model._meta.get_field(field_name).name
-    except:
-      return ' '.join(map(lambda word: word.capitalize(), field_name.split('_')))
-
-def is_includeable(field, include_fields=[], exclude_fields=[], keep_include_fields=True, show_others=False):
-  # skip if exclude_fields contains the field and keep_include_fields is False
-  if field in exclude_fields and keep_include_fields is False:
-    return False
-  # skip if neither include_fields nor exclude_fields contains the field and show others is False
-  if (field not in include_fields and field not in exclude_fields) and show_others is False:
-    return False
-  return True
-
 def generate_template_tag_for_model(
-    django_model:models.Model,
+    django_model: ModelClass,
     pk_field = 'id',
     exclude_fields = [],
     include_fields = [],
@@ -156,7 +137,7 @@ def generate_template_tag_for_model(
 
 
 def generate_data_container_table(
-    django_model:models.Model,
+    django_model: ModelClass,
     pk_field='id',
     exclude_fields=[],
     include_fields=[],

@@ -3,5 +3,5 @@
 
 {% block extrahead %}
     {{ block.super }}
-    <script src="{% static 'js/auto_logout.js' %}"></script>
+    <script defer type="module" src="{% static 'js/auto_logout.js' %}"></script>
 {% endblock %}

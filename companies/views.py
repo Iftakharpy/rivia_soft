@@ -4,17 +4,18 @@ import calendar
 from datetime import date
 
 import json
-from django.http.response import Http404, HttpResponse
-from django.core.serializers import serialize
-from django.shortcuts import get_object_or_404, redirect, render
-from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from django.urls.exceptions import NoReverseMatch
-from django.db.models import DurationField, F, ExpressionWrapper, Q
-from django.db.utils import IntegrityError
 from django.utils.safestring import mark_safe
+from django.core.serializers import serialize
+from django.core.exceptions import ObjectDoesNotExist
+from django.http import HttpRequest, HttpResponse, Http404
+from django.db.utils import IntegrityError
+from django.db.models import DurationField, F, ExpressionWrapper, Q, QuerySet
+from django.urls.exceptions import NoReverseMatch
+from django.views.decorators.csrf import csrf_exempt
+from django.shortcuts import get_object_or_404, redirect, render
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 
 
 #forms
@@ -78,8 +79,12 @@ from .url_variables import APPLICATION_NAME, URL_NAMES, URL_PATHS, Full_URL_PATH
 from .url_variables import *
 
 # html generator
+from .utils import get_field_names_with_label, group_fields_by_uniqueness
 from .html_generator import get_field_names_from_model, generate_template_tag_for_model, generate_data_container_table
 from .repr_formats import HTML_Generator, Forms as FK_Formats
+
+
+
 
 application_name = APPLICATION_NAME
 # these path names will be passed to templates to use in the navbar links
@@ -91,8 +96,6 @@ URLS = {
 }
 user_details_url_without_argument = '/u/details/'
 
-from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import QuerySet
 
 def get_object_or_None(model, *args, pk=None, delete_duplicate=False, return_all=False,**kwargs):
     try:
@@ -201,6 +204,9 @@ def home_selfassesment(request):
       'delete_url':  Full_URL_PATHS_WITHOUT_ARGUMENTS.Selfassesment_delete_url,  
       'model_fields': model_fields
     },
+    "export_field_names": group_fields_by_uniqueness({
+      "Selfassesment": get_field_names_with_label(Selfassesment),
+    })
   }
   return render(request=request, template_name='companies/home.html', context=context)
 
@@ -452,10 +458,19 @@ def export_selfassesment(request):
     content_type='text/csv',
     headers={'Content-Disposition': f'attachment; filename="selfassesment_{timezone.localtime()}.csv"'},
   )
-  include_fields = ['is_active', 'client_file_number', 'client_name', 'personal_phone_number', 'personal_email', 'UTR', 'NINO', 'HMRC_agent']
+  # get field names to export these are in '.' separated format for nested fields
+  params = request.GET
+  field_names = params.get('export_fields', None)
+  if field_names:
+    field_names = field_names.split(",")
+  else:
+    field_names = []
+  
+  default_include_fields = ['is_active', 'client_file_number', 'client_name', 'personal_phone_number', 'personal_email', 'UTR', 'NINO', 'HMRC_agent']
+  include_fields = field_names if len(field_names)>0 else default_include_fields
   exclude_fields = []
   keep_include_fields = True
-  show_others = True
+  show_others = (include_fields==default_include_fields)
   export_to_csv(
     django_model = Selfassesment,
     write_to = response,
@@ -553,6 +568,10 @@ def home_selfassesment_data_collection(request):
 
     'tax_years': SelfassesmentAccountSubmissionTaxYear.objects.all(),
     'current_tax_year': current_tax_year,
+
+    "export_field_names": group_fields_by_uniqueness({
+      "SelfemploymentIncomeAndExpensesDataCollection": get_field_names_with_label(SelfemploymentIncomeAndExpensesDataCollection),
+    })
   }
   return render(request=request, template_name='companies/home.html', context=context)
 
@@ -813,6 +832,14 @@ def all_selfassesment_data_collection(request, limit:int=-1):
   message="Sorry! You are not authorized to export this.",
   redirect_to=URL_NAMES_PREFIXED_WITH_APP_NAME.Selfassesment_Data_Collection_home_name)
 def export_selfassesment_data_collection(request):
+  # get field names to export these are in '.' separated format for nested fields
+  params = request.GET
+  field_names = params.get('export_fields', None)
+  if field_names:
+    field_names = field_names.split(",")
+  else:
+    field_names = []
+
   tax_year_id = request.GET.get('tax_year', None)
   if tax_year_id:
     try:
@@ -828,14 +855,15 @@ def export_selfassesment_data_collection(request):
     content_type='text/csv',
     headers={'Content-Disposition': f'attachment; filename="selfassesment_{timezone.localtime()}.csv"'},
   )
-  include_fields = []
+  default_include_fields = []
+  include_fields = field_names if len(field_names)>0 else default_include_fields
   exclude_fields = []
   fk_fields = {
     'selfassesment': SELFASSESMENT_FK_FIELDS_FOR_EXPORT,
     'tax_year': ['tax_year']
   }
   keep_include_fields = True
-  show_others = True
+  show_others = (include_fields==default_include_fields)
   export_to_csv(
     django_model = django_model,
     write_to = response,
@@ -976,6 +1004,10 @@ def home_selfassesment_account_submission(request):
 
     'tax_years': SelfassesmentAccountSubmissionTaxYear.objects.all(),
     'current_tax_year': current_tax_year,
+
+    "export_field_names": group_fields_by_uniqueness({
+      "SelfassesmentAccountSubmission": get_field_names_with_label(SelfassesmentAccountSubmission),
+    })
   }
   return render(request=request, template_name='companies/home.html', context=context)
 
@@ -1191,6 +1223,14 @@ SELFASSESMENT_FK_FIELDS_TO_EXPORT.remove('client_name')
   message="Sorry! You are not authorized to export this.",
   redirect_to=URL_NAMES_PREFIXED_WITH_APP_NAME.Selfassesment_Account_Submission_home_name)
 def export_selfassesment_account_submission(request):
+  # get field names to export these are in '.' separated format for nested fields
+  params = request.GET
+  field_names = params.get('export_fields', None)
+  if field_names:
+    field_names = field_names.split(",")
+  else:
+    field_names = []
+  
   tax_year_id = request.GET.get('tax_year', None)
   if tax_year_id:
     try:
@@ -1206,7 +1246,8 @@ def export_selfassesment_account_submission(request):
     content_type='text/csv',
     headers={'Content-Disposition': f'attachment; filename="selfassesment_account_submimssion_{timezone.localtime()}.csv"'},
   )
-  include_fields = []
+  default_include_fields = []
+  include_fields = field_names if len(field_names)>0 else default_include_fields
   exclude_fields = ['submission_id']
   fk_fields = {
     'client_id': [
@@ -1218,7 +1259,7 @@ def export_selfassesment_account_submission(request):
       ] + SELFASSESMENT_FK_FIELDS_TO_EXPORT
   }
   keep_include_fields = True
-  show_others = True
+  show_others = (include_fields==default_include_fields)
   export_to_csv(
     django_model = django_model,
     write_to = response,
@@ -1259,7 +1300,7 @@ def add_all_selfassesment_to_selfassesment_account_submission_w_submission_year(
       for assesment in all_Selfassesments:
         form.cleaned_data['client_id'] = assesment
         instance = SelfassesmentAccountSubmission(**form.cleaned_data)
-        instance.set_defaults()
+        instance.set_defaults(request)
         if form.cleaned_data.get('prepared_by'):
           instance.prepared_by = form.cleaned_data.get('prepared_by')
         instance.save()
@@ -1325,6 +1366,10 @@ def home_selfassesment_tracker(request):
       'delete_url':  Full_URL_PATHS_WITHOUT_ARGUMENTS.Selfassesment_Tracker_delete_url,  
       'model_fields': get_field_names_from_model(SelfassesmentTracker)
     },
+
+    "export_field_names": group_fields_by_uniqueness({
+      "SelfassesmentTracker": get_field_names_with_label(SelfassesmentTracker),
+    })
   }
   return render(request=request, template_name='companies/home.html', context=context)
 
@@ -1459,7 +1504,7 @@ def search_selfassesment_tracker(request, limit: int=-1):
         'my_tasks': get_selfassesment_trackers_where_tasks_assigned_to_user(request.user)
       }
       records = tasks.get(request.GET.get('tasks'), [])
-      records.order_by('deadline')
+      records.order_by('deadline') # type: ignore
       data = serialize(queryset=records, format='json')
       return HttpResponse(data, content_type='application/json')
     if not client_id==None:
@@ -1498,13 +1543,22 @@ def export_selfassesment_tracker(request):
     content_type='text/csv; charset=utf-8',
     headers={'Content-Disposition': f'attachment; filename="selfassesment_tracker_{timezone.localtime()}.csv"'},
   )
-  include_fields = []
+  # get field names to export these are in '.' separated format for nested fields
+  params = request.GET
+  field_names = params.get('export_fields', None)
+  if field_names:
+    field_names = field_names.split(",")
+  else:
+    field_names = []
+  
+  default_include_fields = []
+  include_fields = field_names if len(field_names)>0 else default_include_fields
   exclude_fields = set(['tracker_id', 'is_updated', 'creation_date'])
   fk_fields = {
     'client_id': SELFASSESMENT_FK_FIELDS_FOR_EXPORT
   }
   keep_include_fields = True
-  show_others = True
+  show_others = (include_fields==default_include_fields)
   export_to_csv(
     django_model = SelfassesmentTracker,
     write_to = response,
@@ -1614,6 +1668,10 @@ def home_limited(request):
       'delete_url':  Full_URL_PATHS_WITHOUT_ARGUMENTS.Limited_delete_url,  
       'model_fields': model_fields
     },
+
+    "export_field_names": group_fields_by_uniqueness({
+      "Limited": get_field_names_with_label(Limited),
+    })
   }
   return render(request=request, template_name='companies/home.html', context=context)
 
@@ -1717,7 +1775,7 @@ def update_limited(request, client_id:int):
         # Create record in Limited VAT Tracker
         for i in range(3):
           vat = LimitedVATTracker()
-          vat.client_id = record
+          vat.client_id = record.pk
           vat.updated_by = request.user
           vat.save()
           messages.success(request, f'New Limited VAT Tracker has been created {vat}')
@@ -1804,10 +1862,20 @@ def export_limited(request):
     content_type='text/csv',
     headers={'Content-Disposition': f'attachment; filename="limited_{timezone.localtime()}.csv"'},
   )
-  include_fields = ['is_active', 'is_payroll', 'payment_method', 'direct_debit_amount', 'client_file_number', 'client_name', 'company_reg_number', 'company_auth_code', 'remarks', 'director_name', 'director_phone_number', 'director_email', 'UTR', 'NINO', 'HMRC_agent', 'vat']
+  # get field names to export these are in '.' separated format for nested fields
+  params = request.GET
+  field_names = params.get('export_fields', None)
+  if field_names:
+    field_names = field_names.split(",")
+  else:
+    field_names = []
+  
+  default_include_fields = ['is_active', 'is_payroll', 'payment_method', 'direct_debit_amount', 'client_file_number', 'client_name', 'company_reg_number', 'company_auth_code', 'remarks', 'director_name', 'director_phone_number', 'director_email', 'UTR', 'NINO', 'HMRC_agent', 'vat']
+  include_fields = field_names if len(field_names)>0 else default_include_fields
+  
   exclude_fields = ['client_id',]
   keep_include_fields = True
-  show_others = False
+  show_others = not(include_fields==default_include_fields)
   export_to_csv(
     django_model = Limited,
     write_to = response,
@@ -1874,8 +1942,8 @@ def update_limited_onboarding_tasks(request, client_id:int):
     except LimitedOnboardingTasks.DoesNotExist:
       onboarding_task_for_limited = LimitedOnboardingTasks()
     
-    onboarding_task_for_limited.client_id = limited
-    onboarding_task_for_limited.task_id = task
+    onboarding_task_for_limited.client_id = limited.pk
+    onboarding_task_for_limited.task_id = task.pk
     
     if status!=None:
       onboarding_task_for_limited.task_status = status
@@ -1911,15 +1979,16 @@ def search_limited_onboarding_tasks(request, limit: int=-1):
 
       if task_lookup=='__all__' and count_only!=None:
         for key in tasks:
-          tasks[key] = tasks[key].count()
+          tasks[key] = tasks[key].count() # type: ignore
         return HttpResponse(json.dumps(tasks), content_type='application/json')
 
       records = tasks.get(task_lookup, [])
       if count_only != None:
-        return HttpResponse(json.dumps({'count': records.count()}), content_type='application/json')
+        return HttpResponse(json.dumps({'count': records.count()}), content_type='application/json') # type: ignore
       data = serialize(queryset=records, format='json')
       return HttpResponse(data, content_type='application/json')
     
+    data = serialize(queryset=[], format='json')
     return HttpResponse(data, content_type='application/json')
   raise Http404
 
@@ -1991,6 +2060,10 @@ def home_limited_tracker(request):
       'delete_url':  Full_URL_PATHS_WITHOUT_ARGUMENTS.Limited_Tracker_delete_url,  
       'model_fields': get_field_names_from_model(LimitedTracker)
     },
+
+    "export_field_names": group_fields_by_uniqueness({
+      "LimitedTracker": get_field_names_with_label(LimitedTracker),
+    })
   }
   return render(request=request, template_name='companies/home.html', context=context)
 
@@ -2125,7 +2198,7 @@ def search_limited_tracker(request, limit: int=-1):
         'my_tasks': get_limited_trackers_where_tasks_assigned_to_user(request.user),
       }
       records = tasks.get(request.GET.get('tasks'), [])
-      records.order_by('deadline')
+      records.order_by('deadline') # type: ignore
       data = serialize(queryset=records, format='json')
       return HttpResponse(data, content_type='application/json')
     if not client_id==None:
@@ -2164,13 +2237,22 @@ def export_limited_tracker(request):
     content_type='text/csv; charset=utf-8',
     headers={'Content-Disposition': f'attachment; filename="limited_tracker_{timezone.localtime()}.csv"'},
   )
-  include_fields = []
+  # get field names to export these are in '.' separated format for nested fields
+  params = request.GET
+  field_names = params.get('export_fields', None)
+  if field_names:
+    field_names = field_names.split(",")
+  else:
+    field_names = []
+  
+  default_include_fields = []
+  include_fields = field_names if len(field_names)>0 else default_include_fields
   exclude_fields = set(['tracker_id', 'is_updated', 'creation_date'])
   fk_fields = {
     'client_id': LIMITED_FK_FIELDS_FOR_EXPORT
   }
   keep_include_fields = True
-  show_others = True
+  show_others = (include_fields==default_include_fields)
   export_to_csv(
     django_model = LimitedTracker,
     write_to = response,
@@ -2314,6 +2396,10 @@ def home_limited_submission_deadline_tracker(request):
       'delete_url':  Full_URL_PATHS_WITHOUT_ARGUMENTS.Limited_Submission_Deadline_Tracker_delete_url,  
       'model_fields': model_fields
     },
+
+    "export_field_names": group_fields_by_uniqueness({
+      "LimitedSubmissionDeadlineTracker": get_field_names_with_label(LimitedSubmissionDeadlineTracker),
+    })
   }
   return render(request=request, template_name='companies/home.html', context=context)
 
@@ -2524,13 +2610,22 @@ def export_limited_submission_deadline_tracker(request):
     content_type='text/csv',
     headers={'Content-Disposition': f'attachment; filename="limited_submission_deadline_tracker_{timezone.localtime()}.csv"'},
   )
-  include_fields = []
+  # get field names to export these are in '.' separated format for nested fields
+  params = request.GET
+  field_names = params.get('export_fields', None)
+  if field_names:
+    field_names = field_names.split(",")
+  else:
+    field_names = []
+  
+  default_include_fields = []
+  include_fields = field_names if len(field_names)>0 else default_include_fields
   exclude_fields = ['submission_id']
   fk_fields = {
     'client_id': LIMITED_FK_FIELDS_FOR_EXPORT
   }
   keep_include_fields = False
-  show_others = True
+  show_others = (include_fields==default_include_fields)
   export_to_csv(
     django_model = LimitedSubmissionDeadlineTracker,
     write_to = response,
@@ -2600,6 +2695,10 @@ def home_limited_vat_tracker(request):
       'delete_url':  Full_URL_PATHS_WITHOUT_ARGUMENTS.Limited_VAT_Tracker_delete_url,  
       'model_fields': get_field_names_from_model(LimitedVATTracker)
     },
+    
+    "export_field_names": group_fields_by_uniqueness({
+      "LimitedVATTracker": get_field_names_with_label(LimitedVATTracker),
+    })
   }
   return render(request=request, template_name='companies/home.html', context=context)
 
@@ -2676,7 +2775,7 @@ def update_limited_vat_tracker(request, vat_id:int):
         vat.updated_by = request.user
         vat.period_start = assesment.period_end + relativedelta(days=1)
         vat.period_end = assesment.period_end + relativedelta(assesment.period_end + relativedelta(days=1), assesment.period_start)
-        vat.HMRC_deadline = vat.period_end + relativedelta(months=1)
+        vat.HMRC_deadline = vat.period_end + relativedelta(months=1) # type: ignore
         vat.save()
         messages.success(request, f'New Limited VAT Tracker has been created {vat}')
 
@@ -2762,13 +2861,22 @@ def export_limited_vat_tracker(request):
     content_type='text/csv',
     headers={'Content-Disposition': f'attachment; filename="limited_vat_tracker_{timezone.localtime()}.csv"'},
   )
-  include_fields = []
+  # get field names to export these are in '.' separated format for nested fields
+  params = request.GET
+  field_names = params.get('export_fields', None)
+  if field_names:
+    field_names = field_names.split(",")
+  else:
+    field_names = []
+  
+  default_include_fields = []
+  include_fields = field_names if len(field_names)>0 else default_include_fields
   fk_fields = {
     'client_id': LIMITED_FK_FIELDS_FOR_EXPORT
   }
   exclude_fields = ['vat_id']
   keep_include_fields = False
-  show_others = True
+  show_others = (include_fields==default_include_fields)
   export_to_csv(
     django_model = LimitedVATTracker,
     write_to = response,
@@ -2841,6 +2949,10 @@ def home_limited_confirmation_statement_tracker(request):
       'delete_url':  Full_URL_PATHS_WITHOUT_ARGUMENTS.Limited_Confirmation_Statement_Tracker_delete_url,  
       'model_fields': model_fields
     },
+
+    "export_field_names": group_fields_by_uniqueness({
+      "LimitedConfirmationStatementTracker": get_field_names_with_label(LimitedConfirmationStatementTracker),
+    })
   }
   return render(request=request, template_name='companies/home.html', context=context)
 
@@ -2994,13 +3106,22 @@ def export_limited_confirmation_statement_tracker(request):
     content_type='text/csv',
     headers={'Content-Disposition': f'attachment; filename="limited_confirmation_statement_tracker_{timezone.localtime()}.csv"'},
   )
-  include_fields = []
+  # get field names to export these are in '.' separated format for nested fields
+  params = request.GET
+  field_names = params.get('export_fields', None)
+  if field_names:
+    field_names = field_names.split(",")
+  else:
+    field_names = []
+  
+  default_include_fields = []
+  include_fields = field_names if len(field_names)>0 else default_include_fields
   exclude_fields = ['statement_id']
   fk_fields = {
     'client_id': LIMITED_FK_FIELDS_FOR_EXPORT
   }
   keep_include_fields = False
-  show_others = True
+  show_others = (include_fields==default_include_fields)
   export_to_csv(
     django_model = LimitedConfirmationStatementTracker,
     write_to = response,
@@ -3086,6 +3207,10 @@ def home_merged_tracker(request):
         "model_fields": get_field_names_from_model(LimitedTracker),
       },
     },
+    "export_field_names": group_fields_by_uniqueness({
+      "LimitedTracker": get_field_names_with_label(LimitedTracker),
+      "SelfassesmentTracker": get_field_names_with_label(SelfassesmentTracker),
+    })
   }
   return render(request, 'companies/merged_tracker.html', context=context)
 
@@ -3123,15 +3248,24 @@ def create_merged_tracker(request):
   return render(request, template_name='companies/merged_tracker_create.html', context=context)
 
 @login_required
-def export_merged_tracker(request):
+def export_merged_tracker(request:HttpRequest):
   response = HttpResponse(
     content_type='text/csv; charset=utf-8',
     headers={'Content-Disposition': f'attachment; filename="merged_tracker_{timezone.localtime()}.csv"'},
   )
-  include_fields = []
+  # get field names to export these are in '.' separated format for nested fields
+  params = request.GET
+  field_names = params.get('export_fields', None)
+  if field_names:
+    field_names = field_names.split(",")
+  else:
+    field_names = []
+  
+  default_include_fields = []
+  include_fields = field_names if len(field_names)>0 else default_include_fields
   exclude_fields = set(['is_updated'])
   keep_include_fields = True
-  show_others = True
+  show_others = (include_fields==default_include_fields)
   export_to_csv(
     django_model = LimitedTracker,
     write_to = response,

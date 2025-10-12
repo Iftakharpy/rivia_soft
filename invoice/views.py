@@ -16,7 +16,8 @@ from companies.url_variables import APPLICATION_NAME, URL_NAMES, URL_PATHS, Full
 from companies.url_variables import *
 
 # html generator
-from companies.html_generator import get_field_names_from_model, generate_template_tag_for_model, generate_data_container_table
+from companies.utils import get_field_names_from_model
+from companies.html_generator import generate_template_tag_for_model, generate_data_container_table
 from companies.repr_formats import HTML_Generator, Forms as FK_Formats
 
 from .helper_functions import get_amount_for_invoice

@@ -1,22 +1,10 @@
+from typing import Type
 from django.db.models.fields.related import ForeignKey
 from django.db.models import Model
-from .html_generator import get_header_name_from_field_name, get_field_names_from_model, is_includeable
+from .utils import is_includeable, get_nested_attr, get_header_name_from_field_name, get_field_names_from_model
 import csv
 from pprint import pp
 
-def get_nested_attr(obj, attr, default=None, attr_split_on='.'):
-    """Filter tag to get python object's attributes.
-    Supportes nested attributes separated by '.'.
-    If attribute doesn't exists returns None as default.
-    """
-    attrs = attr.split(attr_split_on)
-    value = obj
-    for attr in attrs:
-        if hasattr(value, 'get'):
-            value = value.get(attr, default)
-        else:
-            value = getattr(value, attr, default)
-    return value
 
 def export_to_csv(
     django_model,
@@ -44,26 +32,26 @@ def export_to_csv(
     if field not in field_order:
       field_order.append(field)
   
-  # build header
-  header = []
+  # prepare csv file header
+  header = [] # header row
   columns = []
   for field in field_order:
     # skip if field is pk_field
     if not is_includeable(field, include_fields, exclude_fields, keep_include_fields, show_others):
       continue
     
-    # hanlde foreign key field
+    # handle foreign key field
     if field in fk_fields:
       nested_model:Model = get_nested_attr(django_model, f'{field}.field.related_model')
-      nested_fileds = fk_fields[field]
+      nested_fields = fk_fields[field]
       
-      if nested_fileds == "all":
-        django_fileds = nested_model._meta.get_fields()
-        nested_fileds = []
-        for dj_filed in django_fileds:
-          nested_fileds.append(dj_filed.name)
+      if nested_fields == "all":
+        django_fields = nested_model._meta.get_fields()
+        nested_fields = []
+        for dj_filed in django_fields:
+          nested_fields.append(dj_filed.name)
 
-      for nested_field in nested_fileds:
+      for nested_field in nested_fields:
         nested_header_name = get_header_name_from_field_name(nested_model, nested_field)
         nested_column_name = f'{field}.{nested_field}'
         header.append(f"{nested_model.__name__} - {nested_header_name}")
@@ -80,6 +68,7 @@ def export_to_csv(
     writer.writerow(header)
   del(header)
 
+  # write data rows
   if records is None:
     records = django_model.objects.all()
   for record in records:
@@ -91,4 +80,3 @@ def export_to_csv(
     writer.writerow(row)
   del(records)
   del(writer)
-  

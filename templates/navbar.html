@@ -2,7 +2,7 @@
 {% load static %}
 
 {% if user.is_authenticated %}
-<script type="module" src="{% static 'js/alpine/alpine.v2.min.js' %}" defer></script>
+<script defer type="module" src="{% static 'js/alpine/alpine.v2.min.js' %}"></script>
 <link rel="stylesheet" href="{% static 'css/icon_styles.css' %}">
 <div class="w-full text-gray-700 bg-white dark:text-gray-200 dark:bg-gray-800 nav-container">
   

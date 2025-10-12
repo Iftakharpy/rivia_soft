@@ -100,6 +100,6 @@
     {{ frontend_data|convert_to_JSON }}
   </pre>
   {% endautoescape %}
-  <script src='{% static "js/merged_tracker_create.js" %}' type="module"></script>
+  <script defer type="module" src='{% static "js/merged_tracker_create.js" %}'></script>
 </div>
 {% endblock content %}

@@ -24,5 +24,5 @@
   <select class="hidden" name="{{ widget.name }}" id="{{ 'id_'|addstr:widget.name }}" {% include "companies/widgets/attrs.html" %}>
     <option value="{{ value.pk }}" selected>{{ value }}</option>
   </select>
-  <script type="module" src='{% static "js/form_search.js" %}'></script>
+  <script defer type="module" src='{% static "js/form_search.js" %}'></script>
 </div>
