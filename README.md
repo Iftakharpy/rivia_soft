@@ -3,6 +3,9 @@
 
 ## Prod commands
 ```bash
+# update static files
+python manage.py collectstatic
+
 # optimize css for production
 tailwind -c "tailwind.config.js" -i "static\css\tailwind.css" -o "static\css\style.css" --minify
 ```

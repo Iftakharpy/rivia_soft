@@ -6,8 +6,32 @@
 {% endblock title %}
 
 
+
+{% block head %}
+  {% autoescape off %}
+    <style>
+      body {
+        max-height: 100dvh;
+      }
+      form {
+        max-height: 27dvh;
+        overflow-y: auto;
+      }
+      @media (height >= 350px) { form { max-height: 33dvh; } }
+      @media (height >= 400px) { form { max-height: 43dvh; } }
+      @media (height >= 450px) { form { max-height: 50dvh; } }
+      @media (height >= 550px) { form { max-height: 58dvh; } }
+      @media (height >= 600px) { form { max-height: 63dvh; } }
+      @media (height >= 700px) { form { max-height: 70dvh; } }
+      @media (height >= 850px) { form { max-height: 74dvh; } }
+      @media (height >= 1000px) { form { max-height: 78dvh; } }
+    </style>
+  {% endautoescape %}
+{% endblock %}
+
+
 {% block content %}
-<div class="max-w-6xl mx-auto mt-5">
+<div class="relative max-w-6xl mx-auto mt-5">
   {% if not hide_navbar %}
   <div class="text-right">
   <a href="{% url view_url %}">View</a>
@@ -25,12 +49,12 @@
   {% endif %}
     
   <!-- form -->
-  <form action="{% url update_url id %}" method="POST" class="my-10">
+  <form action="{% url update_url id %}" method="POST" class="my-6">
     {% csrf_token %}
-    <h1 class="header update-header">{{ form_title }}</h1>
+    <h1 class="header py-2 px-6 absolute -z-50 -top-3 update-header">{{ form_title }}</h1>
     <!-- form -->
 
-    <ol style="margin-top: 10px; margin-bottom: 10px; list-style: inside;">
+    <ol style="margin-bottom: 10px; list-style: inside;">
       {% for error in form.errors|get_attr:'__all__' %}
         <li style="color: red; display: list-item;">{{ error }}</li>
       {% endfor %}
@@ -88,7 +112,7 @@
       </div>
       {% endfor %}
     {% endif %}
-    <button type="submit" class="update">Update</button>
+    <button type="submit" class="update absolute translate-y-full -bottom-2">Update</button>
   </form>
 </div>
 {% endblock content %}
