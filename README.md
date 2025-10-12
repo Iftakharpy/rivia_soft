@@ -1,6 +1,12 @@
 # RIVIAGW
 
 
+## Prod commands
+```bash
+# optimize css for production
+tailwind -c "tailwind.config.js" -i "static\css\tailwind.css" -o "static\css\style.css" --minify
+```
+
 ## Dev env commands
 
 ```bash
