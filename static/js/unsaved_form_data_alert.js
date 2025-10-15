@@ -26,7 +26,7 @@ function getFormData(form) {
 let oldFormRef = document.querySelector("form");
 const formDataSnapshots = {
 	initial: getFormData(document.querySelector("form")),
-	latest: null,
+	latest: getFormData(document.querySelector("form")),
 	isSubmitClicked: false,
 };
 const setIsSubmitClicked = (ev) => {

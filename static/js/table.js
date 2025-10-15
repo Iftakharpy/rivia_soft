@@ -47,7 +47,7 @@ export async function get_tr_for_table(
 		serial_num &&
 		location.pathname == selfassesmentAccountSubmission_home_pathname
 	) {
-		serial_num.innerHTML = `<a href="/accounts/?pk=${data.pk}">${data.pk}</a>`;
+		serial_num.innerHTML = `<a target="_blank" href="/accounts/?pk=${data.pk}">${data.pk}</a>`;
 	} else if (serial_num) {
 		serial_num.textContent = data.pk;
 	}
