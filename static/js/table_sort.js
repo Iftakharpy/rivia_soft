@@ -38,8 +38,10 @@ tables.forEach((element) => {
 // ===================================================================================
 // Table header index finder
 function indexOfChildElement(child) {
-  for (i = 0; (child = child.previousElementSibling); i++);
-  return i;
+  let idx=0; // initializing inside for loop init block gets rid of the "idx" after the loop is done
+          // So, define it outside the for loop's init block to be able to return the value of "idx"
+  for (idx=0; (child = child?.previousElementSibling); idx++);
+  return idx;
 }
 
 // Find parent element using selector
