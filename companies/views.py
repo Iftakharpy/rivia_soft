@@ -1941,8 +1941,8 @@ def update_limited_onboarding_tasks(request, client_id:int):
     except LimitedOnboardingTasks.DoesNotExist:
       onboarding_task_for_limited = LimitedOnboardingTasks()
     
-    onboarding_task_for_limited.client_id = limited.pk
-    onboarding_task_for_limited.task_id = task.pk
+    onboarding_task_for_limited.client_id = limited
+    onboarding_task_for_limited.task_id = task
     
     if status!=None:
       onboarding_task_for_limited.task_status = status
