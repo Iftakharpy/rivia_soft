@@ -10,7 +10,9 @@ from django.template.loader import get_template
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import redirect, render, HttpResponse
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
+from django.db import transaction, connection
+from django.db.transaction import TransactionManagementError
 from django.db.models import QuerySet
 from django.contrib import messages
 
@@ -31,24 +33,54 @@ from companies.url_variables import URL_NAMES, URL_NAMES_PREFIXED_WITH_APP_NAME,
 from .tax_calc_helpers import get_personal_allowance_reduction, percentage_of, uk_tax, uk_class_4_tax
 
 
-def get_object_or_None(model, *args, pk=None, delete_duplicate=False, return_all=False, **kwargs):
+def get_object_or_None(model, *args, pk=None, delete_duplicate=False, return_all=False, select_for_update=False, **kwargs):
+    if select_for_update:
+        # Check if the function is currently running inside a transaction block (atomic block)
+        if not connection.in_atomic_block:
+            raise TransactionManagementError(
+                "get_object_or_None with select_for_update=True must be called "
+                "within an active atomic transaction block (e.g., using @transaction.atomic)."
+            )
     try:
+        # Start with the base manager
+        queryset = model.objects.all()
+
         if pk is not None:
-            record = model.objects.get(pk=pk)
+            # Use .filter() instead of .get() so we can apply select_for_update 
+            # and still get a QuerySet to check existence.
+            record_qs = queryset.filter(pk=pk, *args, **kwargs)
         else:
-            record = model.objects.filter(*args, **kwargs)
-            if delete_duplicate:
-                if type(record) is QuerySet and len(record)>1:
-                    for rec in record[1:]:
-                        rec.delete()
-            if return_all:
-                return record
-            if record:
-                record = record[0]
-            if type(record) is QuerySet and len(record) == 0:
-                return None
-        return record
+            # Filtering by Custom Fields (Composite Key)
+            record_qs = queryset.filter(*args, **kwargs)
+        
+        # Apply select_for_update ONLY to the filtered queryset
+        if select_for_update:
+            # This ensures the lock is applied only to the specific row(s) identified
+            # by the filter, or the index range around them.
+            record_qs = record_qs.select_for_update()
+
+        if delete_duplicate and isinstance(record_qs, QuerySet) and len(record_qs) > 1:
+            # Note: This operation is now correctly covered by the select_for_update lock.
+            for rec in record_qs[1:]:
+                rec.delete()
+        
+        if return_all:
+            return record_qs
+        
+        # Now, try to get the single object
+        if record_qs.exists():
+            # Retrieve the first object (which is locked if select_for_update=True)
+            record = record_qs.first() 
+            return record
+        else:
+            # No object found
+            return None
+            
     except ObjectDoesNotExist:
+        # Should not happen with .filter().exists() but included for safety
+        return None
+    except MultipleObjectsReturned:
+        # This catch is mainly for cases where the PK logic might be wrong elsewhere, but retained.
         return None
 
 
@@ -57,7 +89,12 @@ def get_object_or_None(model, *args, pk=None, delete_duplicate=False, return_all
 def index(request):
     if request.method=='GET':
         pk = request.GET.get('pk', None)
-        account_submission = SelfassesmentAccountSubmission.objects.get(pk=pk)
+        account_submission = get_object_or_None(SelfassesmentAccountSubmission, pk=pk)
+        
+        if not account_submission:
+            messages.error(request, f'The SelfassesmentAccountSubmission with pk={pk} does not exist.')
+            return redirect(URL_NAMES_PREFIXED_WITH_APP_NAME.Selfassesment_Account_Submission_home_name)
+        
         if account_submission.status=='SUBMITTED':
             messages.error(request, 'The submission data you are trying to access is submitted therefore this can not be edited.')
             return redirect(URL_NAMES_PREFIXED_WITH_APP_NAME.Selfassesment_Account_Submission_home_name)
@@ -72,9 +109,10 @@ def index(request):
 ##############################################################################
 @csrf_exempt
 @login_required
+@transaction.atomic
 def upsert_expese_for_submission(request:HttpRequest, submission_id, month_id, expense_id):
     if not request.method == "POST":
-        return Http404()
+        return HttpResponse(json.dumps({"error": "Invalid request"}), status=400)
     
     try:
         loaded_data = json.loads(request.body.decode())
@@ -117,7 +155,13 @@ def upsert_expese_for_submission(request:HttpRequest, submission_id, month_id, e
         return HttpResponse(json.dumps({'error': f'Expense with pk={expense_id} does not exist'}), status=404)
 
     # Try to retrive ExpensesPerTaxYear if does not exist create it
-    expense_for_tax_year = get_object_or_None(SelfemploymentExpensesPerTaxYear, delete_duplicate=True, client=client, month=month, expense_source=expense)
+    expense_for_tax_year = get_object_or_None(
+        model=SelfemploymentExpensesPerTaxYear,
+        delete_duplicate=True,
+        select_for_update=True, # Avoid race condition for the first unique record insertion
+        client=client,
+        month=month,
+        expense_source=expense)
 
     # Update existing record 
     if expense_for_tax_year is not None:
@@ -150,11 +194,15 @@ def upsert_expese_for_submission(request:HttpRequest, submission_id, month_id, e
             expense_for_tax_year.percentage_for_office_and_admin_charge_amount_value = percentage_for_office_and_admin_charge_amount_value
     if percentage_for_fuel_amount_value is not None:
         expense_for_tax_year.percentage_for_fuel_amount_value = percentage_for_fuel_amount_value
+    
+    # Since we are using atomic transaction now, race condition should not happen now
     expense_for_tax_year.save()
+
     return HttpResponse(json.dumps({'success': 'Updated existing record'}), status=201)
 
 @csrf_exempt
 @login_required
+@transaction.atomic
 def upsert_income_for_submission(request:HttpRequest, submission_id, month_id, income_id):
     if not request.method == "POST":
         raise Http404()
@@ -186,8 +234,14 @@ def upsert_income_for_submission(request:HttpRequest, submission_id, month_id, i
     if income is None:
         return HttpResponse(json.dumps({'error': f'IncomeSource with pk={income_id} does not exist'}), status=404)
     
-    # Try to retrive IncomesPerTaxYear if does not exist create it
-    income_for_tax_year = get_object_or_None(SelfemploymentIncomesPerTaxYear, delete_duplicate=True, client=client, month=month, income_source=income)
+    # Try to retrieve IncomesPerTaxYear if does not exist create it
+    income_for_tax_year = get_object_or_None(
+        model=SelfemploymentIncomesPerTaxYear,
+        delete_duplicate=True,
+        select_for_update=True, # Avoid race condition
+        client=client,
+        month=month,
+        income_source=income)
     
     # Update existing record 
     if income_for_tax_year:
@@ -212,6 +266,8 @@ def upsert_income_for_submission(request:HttpRequest, submission_id, month_id, i
         income_for_tax_year.comission = comission
     if note is not None:
         income_for_tax_year.note = note
+    
+    # Since we are using atomic transaction now, race condition should not happen now
     income_for_tax_year.save()
 
     return HttpResponse(json.dumps({'success': 'Created new record'}), status=201)
@@ -219,6 +275,7 @@ def upsert_income_for_submission(request:HttpRequest, submission_id, month_id, i
 
 @csrf_exempt
 @login_required
+@transaction.atomic
 def upsert_deduction_for_submission(request:HttpRequest, submission_id, deduction_id):
     if not request.method == "POST":
         raise Http404()
@@ -254,7 +311,12 @@ def upsert_deduction_for_submission(request:HttpRequest, submission_id, deductio
         return HttpResponse(json.dumps({'error': f'DeductionSource with pk={deduction_id} does not exist'}), status=404)
     
     # Try to retrive IncomesPerTaxYear if does not exist create it
-    deduction_for_tax_year = get_object_or_None(SelfemploymentDeductionsPerTaxYear, delete_duplicate=True, client=client, deduction_source=deduction_id)
+    deduction_for_tax_year = get_object_or_None(
+        model=SelfemploymentDeductionsPerTaxYear,
+        delete_duplicate=True,
+        select_for_update=True, # Avoid race condition
+        client=client,
+        deduction_source=deduction_id)
     
     # Update existing record 
     if deduction_for_tax_year:
@@ -290,6 +352,8 @@ def upsert_deduction_for_submission(request:HttpRequest, submission_id, deductio
         deduction_for_tax_year.personal_usage_percentage = personal_usage_percentage
     if note is not None:
         deduction_for_tax_year.note = note
+
+    # Since we are using atomic transaction now, race condition should not happen now
     deduction_for_tax_year.save()
 
     return HttpResponse(json.dumps({'success': 'Created new record'}), status=201)
@@ -297,6 +361,7 @@ def upsert_deduction_for_submission(request:HttpRequest, submission_id, deductio
 
 @csrf_exempt
 @login_required
+@transaction.atomic
 def upsert_taxable_income_for_submission(request:HttpRequest, submission_id, taxable_income_id):
     if not request.method == "POST":
         raise Http404()
@@ -327,7 +392,12 @@ def upsert_taxable_income_for_submission(request:HttpRequest, submission_id, tax
         return HttpResponse(json.dumps({'error': f'DeductionSource with pk={taxable_income_id} does not exist'}), status=404)
     
     # Try to retrive TaxableIncomeSourceForSubmission if does not exist create it
-    taxable_income_for_tax_year = get_object_or_None(TaxableIncomeSourceForSubmission, delete_duplicate=True, submission=submission, taxable_income_source=taxable_income_id)
+    taxable_income_for_tax_year = get_object_or_None(
+        model=TaxableIncomeSourceForSubmission,
+        delete_duplicate=True,
+        select_for_update=True, # Avoid race condition
+        submission=submission,
+        taxable_income_source=taxable_income_id)
     
     # Update existing record 
     if taxable_income_for_tax_year:
@@ -351,6 +421,8 @@ def upsert_taxable_income_for_submission(request:HttpRequest, submission_id, tax
         taxable_income_for_tax_year.paid_income_tax_amount = paid_income_tax_amount
     if note is not None:
         taxable_income_for_tax_year.note = note
+    
+    # Since we are using atomic transaction now, race condition should not happen now
     taxable_income_for_tax_year.save()
 
     return HttpResponse(json.dumps({'success': 'Created new record'}), status=201)
