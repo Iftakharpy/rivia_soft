@@ -18,12 +18,12 @@ from django.contrib import messages
 
 # Models
 from companies.models import SelfassesmentAccountSubmission
-from .models import SelfemploymentIncomeSources, SelfemploymentExpenseSources, SelfemploymentDeductionSources, Months, SelfemploymentExpensesPerTaxYear, SelfemploymentIncomesPerTaxYear, SelfemploymentDeductionsPerTaxYear, TaxableIncomeSources, TaxableIncomeSourceForSubmission
+from .models import SelfemploymentIncomeSources, SelfemploymentExpenseSources, SelfemploymentDeductionSources, Months, SelfemploymentExpensesPerTaxYear, SelfemploymentIncomesPerTaxYear, SelfemploymentDeductionsPerTaxYear, TaxableIncomeSources, TaxableIncomeSourceForSubmissionPerTaxYear
 from .models import SelfemploymentUkTaxConfigForTaxYear, SelfemploymentClass4TaxConfigForTaxYear, SelfemploymentClass2TaxConfigForTaxYear
 
 # Serializers
 from rest_framework.renderers import JSONRenderer
-from .serializers import SelfemploymentIncomeSourcesSerializer, SelfemploymentExpenseSourcesSerializer, SelfemploymentDeductionSourcesSerializer, MonthsSerializer, SelfemploymentIncomesPerTaxYearSerializer, SelfemploymentExpensesPerTaxYearSerializer, SelfemploymentDeductionsPerTaxYearSerializer, TaxableIncomeSourcesSerializer, TaxableIncomeSourceForSubmissionSerializer
+from .serializers import SelfemploymentIncomeSourcesSerializer, SelfemploymentExpenseSourcesSerializer, SelfemploymentDeductionSourcesSerializer, MonthsSerializer, SelfemploymentIncomesPerTaxYearSerializer, SelfemploymentExpensesPerTaxYearSerializer, SelfemploymentDeductionsPerTaxYearSerializer, TaxableIncomeSourcesSerializer, TaxableIncomeSourceForSubmissionPerTaxYearSerializer
 dump_to_json = JSONRenderer()
 
 from companies.views import URLS, serialized
@@ -336,7 +336,7 @@ def upsert_taxable_income_for_submission(request:HttpRequest, submission_id, tax
     is_created = False
     with transaction.atomic():
         # Try to retrive TaxableIncomeSourceForSubmission if does not exist create it
-        taxable_income_for_tax_year, is_created = TaxableIncomeSourceForSubmission.objects.get_or_create(
+        taxable_income_for_tax_year, is_created = TaxableIncomeSourceForSubmissionPerTaxYear.objects.get_or_create(
             submission=submission,
             taxable_income_source=taxable_income_source,
             )
@@ -382,8 +382,8 @@ def get_deductions_for_submission(request: HttpRequest, submission_id):
 
 @login_required
 def get_taxable_incomes_for_submission(request: HttpRequest, submission_id):
-    taxable_incomes = TaxableIncomeSourceForSubmission.objects.filter(submission=submission_id)
-    serialized_data = TaxableIncomeSourceForSubmissionSerializer(taxable_incomes, many=True)
+    taxable_incomes = TaxableIncomeSourceForSubmissionPerTaxYear.objects.filter(submission=submission_id)
+    serialized_data = TaxableIncomeSourceForSubmissionPerTaxYearSerializer(taxable_incomes, many=True)
     json_response = dump_to_json.render(serialized_data.data)
     return HttpResponse(json_response, content_type='application/json')
 
@@ -575,7 +575,7 @@ def get_total_taxable_income_by_submission_id(submission_id):
         error_messages.append(f"Uk tax configuration for {tax_year} tax-year not found.")
         raise RaiseErrorMessages(error_messages)
     
-    taxable_incomes = get_object_or_None(TaxableIncomeSourceForSubmission, delete_duplicate=False, return_all=True, submission=submission_id)
+    taxable_incomes = get_object_or_None(TaxableIncomeSourceForSubmissionPerTaxYear, delete_duplicate=False, return_all=True, submission=submission_id)
     taxable_incomes = filter_taxable_incomes(taxable_incomes)
     
     total_taxable_income = get_total_taxable_income(taxable_incomes)
@@ -600,7 +600,7 @@ def get_total_tax_by_submission_id(submission_id):
         raise RaiseErrorMessages(error_messages)
     tax_year = account_submission.tax_year
 
-    taxable_incomes = get_object_or_None(TaxableIncomeSourceForSubmission, delete_duplicate=False, return_all=True, submission=submission_id)
+    taxable_incomes = get_object_or_None(TaxableIncomeSourceForSubmissionPerTaxYear, delete_duplicate=False, return_all=True, submission=submission_id)
     taxable_incomes = filter_taxable_incomes(taxable_incomes)
 
     UK_tax_config = get_object_or_None(SelfemploymentUkTaxConfigForTaxYear, delete_duplicate=False, tax_year=tax_year)
@@ -703,7 +703,7 @@ def generate_tax_report_pdf(account_submission):
     personal_usage_heading_value = selfemployment_expenses.order_by('-personal_usage_percentage')[0].personal_usage_percentage if selfemployment_expenses else 20
     selfemployment_expenses = filter_selfemployment_expenses(selfemployment_expenses)
 
-    taxable_incomes = get_object_or_None(TaxableIncomeSourceForSubmission, delete_duplicate=False, return_all=True, submission=submission_id)
+    taxable_incomes = get_object_or_None(TaxableIncomeSourceForSubmissionPerTaxYear, delete_duplicate=False, return_all=True, submission=submission_id)
     taxable_incomes = [taxable_income for taxable_income in taxable_incomes if taxable_income.amount>0]
     
     deductions_and_allowances = get_object_or_None(SelfemploymentDeductionsPerTaxYear, delete_duplicate=False, return_all=True, client=submission_id)

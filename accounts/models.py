@@ -67,11 +67,13 @@ class SelfemploymentIncomesPerTaxYear(models.Model):
     class Meta:
         verbose_name = "Income Per Tax Year"
         verbose_name_plural = "Incomes Per Tax Year"
-        constraints = [
-            models.UniqueConstraint(fields=['client', 'month', 'income_source'], name="unique record")
-        ]
         ordering = [F('income_source__index_position').asc(nulls_last=True)]
-        
+        constraints = [
+            models.UniqueConstraint(
+                fields=['client', 'month', 'income_source'],
+                name="unique_SelfemploymentIncomesPerTaxYear",
+                )
+        ]
 
     income_source = models.ForeignKey(SelfemploymentIncomeSources, on_delete=models.CASCADE)
     client = models.ForeignKey(SelfassesmentAccountSubmission, on_delete=models.CASCADE)
@@ -88,10 +90,13 @@ class SelfemploymentExpensesPerTaxYear(models.Model):
     class Meta:
         verbose_name = "Expense Per Tax Year"
         verbose_name_plural = "Expenses Per Tax Year"
-        constraints = [
-            models.UniqueConstraint(fields=['client', 'month', 'expense_source'], name="unique expense record")
-        ]
         ordering = [F('expense_source__index_position').asc(nulls_last=True)]
+        constraints = [
+            models.UniqueConstraint(
+                fields=['client', 'month', 'expense_source'], 
+                name="unique_SelfemploymentExpensesPerTaxYear",
+                )
+        ]
 
     expense_source = models.ForeignKey(SelfemploymentExpenseSources, on_delete=models.CASCADE)
     client = models.ForeignKey(SelfassesmentAccountSubmission, on_delete=models.CASCADE)
@@ -118,10 +123,13 @@ class SelfemploymentDeductionsPerTaxYear(models.Model):
     class Meta:
         verbose_name = "Deductions Per Tax Year"
         verbose_name_plural = "Deductions Per Tax Year"
-        constraints = [
-            models.UniqueConstraint(fields=['client', 'deduction_source'], name="unique deduction record")
-        ]
         ordering = [F('deduction_source__index_position').asc(nulls_last=True)]
+        constraints = [
+            models.UniqueConstraint(
+                fields=['client', 'deduction_source'],
+                name="unique_SelfemploymentDeductionsPerTaxYear",
+                )
+        ]
 
     deduction_source = models.ForeignKey(SelfemploymentDeductionSources, on_delete=models.CASCADE)
     client = models.ForeignKey(SelfassesmentAccountSubmission, on_delete=models.CASCADE)
@@ -152,11 +160,16 @@ class TaxableIncomeSources(models.Model):
     def __str__(self) -> str:
         return f"TaxableIncomeSource(order={self.index_position}, name={self.name}, uk_tax={self.apply_uk_tax}, class4_tax={self.apply_class4_tax}, class2_tax={self.apply_class2_tax})"
 
-class TaxableIncomeSourceForSubmission(models.Model):
+class TaxableIncomeSourceForSubmissionPerTaxYear(models.Model):
     class Meta:
         verbose_name = "Taxable Income Source For Submission"
         verbose_name_plural = "Taxable Income Sources For Submissions"
         ordering = [F('taxable_income_source__index_position').asc(nulls_last=True)]
+        constraints = [
+            UniqueConstraint(
+                fields=['submission', 'taxable_income_source'],
+                name="unique_TaxableIncomeSourceForSubmissionPerTaxYear")
+            ]
     
     submission = models.ForeignKey(SelfassesmentAccountSubmission, on_delete=models.CASCADE)
     taxable_income_source = models.ForeignKey(TaxableIncomeSources, on_delete=models.CASCADE)

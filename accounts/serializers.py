@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from companies.serializers import SelfassesmentAccountSubmissionSerializer
-from .models import SelfemploymentIncomeSources, SelfemploymentExpenseSources, SelfemploymentDeductionSources, Months, SelfemploymentIncomesPerTaxYear, SelfemploymentExpensesPerTaxYear,  SelfemploymentDeductionsPerTaxYear, TaxableIncomeSources, TaxableIncomeSourceForSubmission
+from .models import SelfemploymentIncomeSources, SelfemploymentExpenseSources, SelfemploymentDeductionSources, Months, SelfemploymentIncomesPerTaxYear, SelfemploymentExpensesPerTaxYear,  SelfemploymentDeductionsPerTaxYear, TaxableIncomeSources, TaxableIncomeSourceForSubmissionPerTaxYear
 
 
 class SelfemploymentIncomeSourcesSerializer(serializers.ModelSerializer):
@@ -63,9 +63,9 @@ class TaxableIncomeSourcesSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class TaxableIncomeSourceForSubmissionSerializer(serializers.ModelSerializer):
+class TaxableIncomeSourceForSubmissionPerTaxYearSerializer(serializers.ModelSerializer):
     # taxable_income_source = TaxableIncomeSourcesSerializer()
 
     class Meta:
-        model = TaxableIncomeSourceForSubmission
+        model = TaxableIncomeSourceForSubmissionPerTaxYear
         fields = '__all__'
