@@ -109,7 +109,6 @@ def index(request):
 ##############################################################################
 @csrf_exempt
 @login_required
-@transaction.atomic
 def upsert_expese_for_submission(request:HttpRequest, submission_id, month_id, expense_id):
     if not request.method == "POST":
         return HttpResponse(json.dumps({"error": "Invalid request"}), status=400)
@@ -153,18 +152,16 @@ def upsert_expese_for_submission(request:HttpRequest, submission_id, month_id, e
     expense = get_object_or_None(SelfemploymentExpenseSources, pk=expense_id, delete_duplicate=True)
     if expense is None:
         return HttpResponse(json.dumps({'error': f'Expense with pk={expense_id} does not exist'}), status=404)
+    
 
-    # Try to retrive ExpensesPerTaxYear if does not exist create it
-    expense_for_tax_year = get_object_or_None(
-        model=SelfemploymentExpensesPerTaxYear,
-        delete_duplicate=True,
-        select_for_update=True, # Avoid race condition for the first unique record insertion
-        client=client,
-        month=month,
-        expense_source=expense)
-
-    # Update existing record 
-    if expense_for_tax_year is not None:
+    is_created = False
+    with transaction.atomic():
+        expense_for_tax_year, is_created = SelfemploymentExpensesPerTaxYear.objects.get_or_create( 
+            client=client,
+            month=month,
+            expense_source=expense,
+            )
+        # Update data
         if amount is not None:
             expense_for_tax_year.amount = amount
         if personal_usage_percentage is not None:
@@ -176,36 +173,16 @@ def upsert_expese_for_submission(request:HttpRequest, submission_id, month_id, e
         if percentage_for_fuel_amount_value is not None:
             expense_for_tax_year.percentage_for_fuel_amount_value = percentage_for_fuel_amount_value
         expense_for_tax_year.save()
-        return HttpResponse(json.dumps({'success': 'Updated existing record'}))
 
-    # Save new record
-    expense_for_tax_year = SelfemploymentExpensesPerTaxYear(
-        expense_source=expense,
-        client=client,
-        month=month,
-        )
-    if amount is not None:
-        expense_for_tax_year.amount = amount
-    if personal_usage_percentage is not None:
-        expense_for_tax_year.personal_usage_percentage = personal_usage_percentage
-    if note is not None:
-        expense_for_tax_year.note = note
-    if percentage_for_office_and_admin_charge_amount_value is not None:
-            expense_for_tax_year.percentage_for_office_and_admin_charge_amount_value = percentage_for_office_and_admin_charge_amount_value
-    if percentage_for_fuel_amount_value is not None:
-        expense_for_tax_year.percentage_for_fuel_amount_value = percentage_for_fuel_amount_value
-    
-    # Since we are using atomic transaction now, race condition should not happen now
-    expense_for_tax_year.save()
-
-    return HttpResponse(json.dumps({'success': 'Updated existing record'}), status=201)
+    if is_created:
+        return HttpResponse(json.dumps({'success': 'Created new record'}), status=201)
+    return HttpResponse(json.dumps({'success': 'Updated existing record'}))
 
 @csrf_exempt
 @login_required
-@transaction.atomic
 def upsert_income_for_submission(request:HttpRequest, submission_id, month_id, income_id):
     if not request.method == "POST":
-        raise Http404()
+        return HttpResponse(json.dumps({"error": "Invalid request"}), status=400)
     
     try:
         loaded_data = json.loads(request.body.decode())
@@ -234,17 +211,16 @@ def upsert_income_for_submission(request:HttpRequest, submission_id, month_id, i
     if income is None:
         return HttpResponse(json.dumps({'error': f'IncomeSource with pk={income_id} does not exist'}), status=404)
     
-    # Try to retrieve IncomesPerTaxYear if does not exist create it
-    income_for_tax_year = get_object_or_None(
-        model=SelfemploymentIncomesPerTaxYear,
-        delete_duplicate=True,
-        select_for_update=True, # Avoid race condition
-        client=client,
-        month=month,
-        income_source=income)
-    
-    # Update existing record 
-    if income_for_tax_year:
+    is_created = False
+    with transaction.atomic():
+        # Try to retrieve IncomesPerTaxYear if does not exist create it
+        income_for_tax_year, is_created = SelfemploymentIncomesPerTaxYear.objects.get_or_create(
+            client=client,
+            month=month,
+            income_source=income,
+            )
+
+        # Update the record
         if amount is not None:
             income_for_tax_year.amount = amount
         if comission is not None:
@@ -252,33 +228,18 @@ def upsert_income_for_submission(request:HttpRequest, submission_id, month_id, i
         if note is not None:
             income_for_tax_year.note = note
         income_for_tax_year.save()
-        return HttpResponse(json.dumps({'success': 'Updated existing record'}))
     
-    # Save new record
-    income_for_tax_year = SelfemploymentIncomesPerTaxYear(
-        income_source=income,
-        client=client,
-        month=month,
-        )
-    if amount is not None:
-        income_for_tax_year.amount = amount
-    if comission is not None:
-        income_for_tax_year.comission = comission
-    if note is not None:
-        income_for_tax_year.note = note
+    if is_created:
+        return HttpResponse(json.dumps({'success': 'Created new record'}), status=201)
+    return HttpResponse(json.dumps({'success': 'Updated existing record'}))
     
-    # Since we are using atomic transaction now, race condition should not happen now
-    income_for_tax_year.save()
-
-    return HttpResponse(json.dumps({'success': 'Created new record'}), status=201)
 
 
 @csrf_exempt
 @login_required
-@transaction.atomic
 def upsert_deduction_for_submission(request:HttpRequest, submission_id, deduction_id):
     if not request.method == "POST":
-        raise Http404()
+        return HttpResponse(json.dumps({"error": "Invalid request"}), status=400)
     
     try:
         loaded_data = json.loads(request.body.decode())
@@ -310,16 +271,16 @@ def upsert_deduction_for_submission(request:HttpRequest, submission_id, deductio
     if deduction_source is None:
         return HttpResponse(json.dumps({'error': f'DeductionSource with pk={deduction_id} does not exist'}), status=404)
     
-    # Try to retrive IncomesPerTaxYear if does not exist create it
-    deduction_for_tax_year = get_object_or_None(
-        model=SelfemploymentDeductionsPerTaxYear,
-        delete_duplicate=True,
-        select_for_update=True, # Avoid race condition
-        client=client,
-        deduction_source=deduction_id)
-    
-    # Update existing record 
-    if deduction_for_tax_year:
+
+    is_created = False
+    with transaction.atomic():
+        # Try to retrive IncomesPerTaxYear if does not exist create it
+        deduction_for_tax_year, is_created = SelfemploymentDeductionsPerTaxYear.objects.get_or_create(
+            client=client,
+            deduction_source=deduction_id,
+            )
+
+        # Update the record
         if amount is not None:
             deduction_for_tax_year.amount = amount
         if addition is not None:
@@ -333,38 +294,18 @@ def upsert_deduction_for_submission(request:HttpRequest, submission_id, deductio
         if note is not None:
             deduction_for_tax_year.note = note
         deduction_for_tax_year.save()
-        return HttpResponse(json.dumps({'success': 'Updated existing record'}))
     
-    # Save new record
-    deduction_for_tax_year = SelfemploymentDeductionsPerTaxYear(
-        client=client,
-        deduction_source=deduction_source
-    )
-    if amount is not None:
-        deduction_for_tax_year.amount = amount
-    if addition is not None:
-        deduction_for_tax_year.addition = addition
-    if disposal is not None:
-        deduction_for_tax_year.disposal = disposal
-    if allowance_percentage is not None:
-        deduction_for_tax_year.allowance_percentage = allowance_percentage
-    if personal_usage_percentage is not None:
-        deduction_for_tax_year.personal_usage_percentage = personal_usage_percentage
-    if note is not None:
-        deduction_for_tax_year.note = note
-
-    # Since we are using atomic transaction now, race condition should not happen now
-    deduction_for_tax_year.save()
-
-    return HttpResponse(json.dumps({'success': 'Created new record'}), status=201)
+    if is_created:
+        return HttpResponse(json.dumps({'success': 'Created new record'}), status=201)
+    return HttpResponse(json.dumps({'success': 'Updated existing record'}))
+    
 
 
 @csrf_exempt
 @login_required
-@transaction.atomic
 def upsert_taxable_income_for_submission(request:HttpRequest, submission_id, taxable_income_id):
     if not request.method == "POST":
-        raise Http404()
+        return HttpResponse(json.dumps({"error": "Invalid request"}), status=400)
     
     try:
         loaded_data = json.loads(request.body.decode())
@@ -391,16 +332,16 @@ def upsert_taxable_income_for_submission(request:HttpRequest, submission_id, tax
     if taxable_income_source is None:
         return HttpResponse(json.dumps({'error': f'DeductionSource with pk={taxable_income_id} does not exist'}), status=404)
     
-    # Try to retrive TaxableIncomeSourceForSubmission if does not exist create it
-    taxable_income_for_tax_year = get_object_or_None(
-        model=TaxableIncomeSourceForSubmission,
-        delete_duplicate=True,
-        select_for_update=True, # Avoid race condition
-        submission=submission,
-        taxable_income_source=taxable_income_id)
-    
-    # Update existing record 
-    if taxable_income_for_tax_year:
+
+    is_created = False
+    with transaction.atomic():
+        # Try to retrive TaxableIncomeSourceForSubmission if does not exist create it
+        taxable_income_for_tax_year, is_created = TaxableIncomeSourceForSubmission.objects.get_or_create(
+            submission=submission,
+            taxable_income_source=taxable_income_id,
+            )
+
+        # Update the record
         if amount is not None:
             taxable_income_for_tax_year.amount = amount
         if paid_income_tax_amount is not None:
@@ -408,24 +349,11 @@ def upsert_taxable_income_for_submission(request:HttpRequest, submission_id, tax
         if note is not None:
             taxable_income_for_tax_year.note = note
         taxable_income_for_tax_year.save()
-        return HttpResponse(json.dumps({'success': 'Updated existing record'}))
     
-    # Save new record
-    taxable_income_for_tax_year = TaxableIncomeSourceForSubmission(
-        submission=submission,
-        taxable_income_source=taxable_income_source
-    )
-    if amount is not None:
-        taxable_income_for_tax_year.amount = amount
-    if paid_income_tax_amount is not None:
-        taxable_income_for_tax_year.paid_income_tax_amount = paid_income_tax_amount
-    if note is not None:
-        taxable_income_for_tax_year.note = note
+    if is_created:
+        return HttpResponse(json.dumps({'success': 'Created new record'}), status=201)
+    return HttpResponse(json.dumps({'success': 'Updated existing record'}))
     
-    # Since we are using atomic transaction now, race condition should not happen now
-    taxable_income_for_tax_year.save()
-
-    return HttpResponse(json.dumps({'success': 'Created new record'}), status=201)
 
 
 ##############################################################################
