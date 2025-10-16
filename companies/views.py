@@ -1756,7 +1756,6 @@ def update_limited(request, client_id:int):
   except Limited.DoesNotExist:
     messages.error(request, f'Limited Account having id {client_id} does not exists!')
     return redirect(URL_NAMES_PREFIXED_WITH_APP_NAME.Limited_home_name)
-    raise Http404
 
   if request.method == 'POST':
     form = LimitedChangeForm(request.POST, instance=record)
@@ -1775,7 +1774,7 @@ def update_limited(request, client_id:int):
         # Create record in Limited VAT Tracker
         for i in range(3):
           vat = LimitedVATTracker()
-          vat.client_id = record.pk
+          vat.client_id = record
           vat.updated_by = request.user
           vat.save()
           messages.success(request, f'New Limited VAT Tracker has been created {vat}')
