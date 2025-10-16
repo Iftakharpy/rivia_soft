@@ -277,7 +277,7 @@ def upsert_deduction_for_submission(request:HttpRequest, submission_id, deductio
         # Try to retrive IncomesPerTaxYear if does not exist create it
         deduction_for_tax_year, is_created = SelfemploymentDeductionsPerTaxYear.objects.get_or_create(
             client=client,
-            deduction_source=deduction_id,
+            deduction_source=deduction_source,
             )
 
         # Update the record
@@ -338,7 +338,7 @@ def upsert_taxable_income_for_submission(request:HttpRequest, submission_id, tax
         # Try to retrive TaxableIncomeSourceForSubmission if does not exist create it
         taxable_income_for_tax_year, is_created = TaxableIncomeSourceForSubmission.objects.get_or_create(
             submission=submission,
-            taxable_income_source=taxable_income_id,
+            taxable_income_source=taxable_income_source,
             )
 
         # Update the record
