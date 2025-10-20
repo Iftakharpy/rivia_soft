@@ -10,17 +10,8 @@
 <link rel="stylesheet" href="/static/css/table-column-resize.css">
 {% endblock head %}
 
-{% block content %}
 
-<!-- messages -->
-{% if messages %}
-{% for message in messages %}
-<h1 class='message {{ message.tags }}'>
-  {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}Important: {% endif %}
-  {{ message }}
-</h1>
-{% endfor %}
-{% endif %}
+{% block content %}
 
 {% if caption %}
 <h1 class="mt-5 text-2xl text-center">{{ caption }}</h1>
@@ -442,6 +433,7 @@
 
       <button data-export-columns-submit type="submit" class="update !mt-0">Export</button>
     </form>
+    <script defer type="module" src="{% static 'js/export_column_selection.js' %}"></script>
   </div>
 
 

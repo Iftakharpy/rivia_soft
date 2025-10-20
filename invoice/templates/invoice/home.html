@@ -12,16 +12,6 @@
 
 {% block content %}
 
-<!-- messages -->
-{% if messages %}
-{% for message in messages %}
-<h1 class='message {{ message.tags }}'>
-  {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}Important: {% endif %}
-  {{ message }}
-</h1>
-{% endfor %}
-{% endif %}
-
 {% if caption %}
 <h1 class="mt-5 text-2xl text-center">{{ caption }}</h1>
 {% if add_all_url %}

@@ -21,11 +21,27 @@
   </head>
   
   <body class="font-normal text-gray-700 dark:text-gray-400 bg-gray-200 dark:bg-gray-900 min-w-full min-h-screen">
-    {% if not hide_navbar %}
+    {% if not request.GET.hide_navbar %}
       <!-- navbar -->
       {% include "navbar.html" %}
     {% endif %}
     
+    <!-- messages -->
+    {% if messages %}
+      <div class="z-[100] rounded-xl border-2 border-gray-400 max-w-[75dvw] max-h-[75dvh] overflow-y-auto flex flex-col gap-3 fixed left-4 top-4 bg-gray-900/80" data-messages>
+        <div class="sticky top-0 flex rounded-xl border-2 border-gray-400 px-4 py-3 backdrop-blur-md bg-gray-800/75 dark:bg-gray-900/75 text-white">
+          <h2 class="flex-grow font-semibold text-lg">Messages</h2>
+          <button class="btn px-6 py-1 rounded-md bg-red-600 dark:bg-red-700" onclick="document.querySelector('[data-messages]').remove()">X</button>
+        </div>
+        {% for message in messages %}
+        <h3 class="message {{ message.tags }}">
+          {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}Important: {% endif %}
+          {{ message }}
+        </h3>
+        {% endfor %}
+        </div>
+    {% endif %}
+
     <!-- content -->
     <div class="mx-auto" id="main-content">
       {% block content %} {% endblock content %}
@@ -44,7 +60,7 @@
     <script>
       {% comment %} Open decendent links of table in new tab {% endcomment %}
       const tbody = document.querySelector('tbody')
-      tbody?.addEventListener('click', e=>{
+      tbody?.addEventListener('click', (e)=>{
         let element = e.target
         if(element.tagName=='A' && element.matches('td[id="client_id"]>a')){
           e.preventDefault()

@@ -34,22 +34,12 @@
 
 {% block content %}
 <div class="relative max-w-6xl mx-auto mt-5">
-  {% if not hide_navbar %}
+  {% if not request.GET.hide_navbar %}
   <div class="text-right">
   <a href="{% url view_url %}">View</a>
   </div>
   {% endif %}
 
-  <!-- messages -->
-  {% if messages %}
-  {% for message in messages %}
-  <h1 class='message {{ message.tags }}'>
-    {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}Important: {% endif %}
-    {{ message }}
-  </h1>
-  {% endfor %}
-  {% endif %}
-    
   <!-- form -->
   <form action="{% url update_url id %}" method="POST" class="my-6">
     {% csrf_token %}

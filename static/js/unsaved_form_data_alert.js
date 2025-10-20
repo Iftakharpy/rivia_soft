@@ -48,8 +48,8 @@ eventNames.forEach((ev) => {
 		formDataSnapshots.latest = getFormData(document.querySelector("form"));
 	});
 
-	// needed because when the form attribute changes the reference to
-	// old form is useless
+	// needed because when the form attribute changes, the reference to
+	// the form is useless, so find the new element ref
 	let newFormRef = document.querySelector("form");
 	if (oldFormRef != newFormRef) {
 		oldFormRef = newFormRef;

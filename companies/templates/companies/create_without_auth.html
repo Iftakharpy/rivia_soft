@@ -15,15 +15,6 @@
   <body class="font-normal text-gray-700 dark:text-gray-400 bg-gray-200 dark:bg-gray-900 min-w-full min-h-screen">
     <div class="max-w-screen-2xl px-4 md:px-6 lg:px-8 mx-auto">
       <div class="max-w-6xl mx-auto mt-5">
-        <!-- messages -->
-        {% if messages %}
-          {% for message in messages %}
-            <h1 class="message {{ message.tags }}">
-              {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}Important: {% endif %}
-              {{ message }}
-            </h1>
-          {% endfor %}
-        {% endif %}
 
         <!-- form -->
         <form action="{% if has_url_args %}

@@ -147,8 +147,14 @@
 	}
 
 	/* message styles */
+	[data-messages]:not(:has(>.message)){
+		display: none;
+	}
+	[data-messages] {
+		@apply px-4 py-4;
+	}
 	.message {
-		@apply w-full px-4 py-2 mx-auto mt-5 rounded-md text-gray-50 max-w-screen-2xl md:px-6 lg:px-8;
+		@apply w-full px-4 py-1 rounded-md text-gray-50 max-w-screen-2xl text-base;
 	}
 
 	/* form headers */

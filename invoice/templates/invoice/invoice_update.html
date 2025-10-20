@@ -11,22 +11,12 @@
 <link rel="stylesheet" href="{% static 'css/invoice_update.css' %}">
 
 <div class="max-w-6xl mx-auto mt-5">
-  {% if not hide_navbar %}
+  {% if not request.GET.hide_navbar %}
   <div class="text-right">
   <a href="{{ view_url }}">View</a>
   </div>
   {% endif %}
 
-  <!-- messages -->
-  {% if messages %}
-  {% for message in messages %}
-  <h1 class='message {{ message.tags }}'>
-    {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}Important: {% endif %}
-    {{ message }}
-  </h1>
-  {% endfor %}
-  {% endif %}
-    
 
 {% comment %}  {% endcomment %}
   <div>

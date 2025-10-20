@@ -8,22 +8,36 @@
 
 
 
+{% block head %}
+  {% autoescape off %}
+    <style>
+      body {
+        max-height: 100dvh;
+      }
+      [data-form] {
+        max-height: 27dvh;
+        overflow: visible;
+        overflow-y: auto;
+      }
+      @media (height >= 350px) { [data-form] { max-height: 33dvh; } }
+      @media (height >= 400px) { [data-form] { max-height: 43dvh; } }
+      @media (height >= 450px) { [data-form] { max-height: 50dvh; } }
+      @media (height >= 550px) { [data-form] { max-height: 58dvh; } }
+      @media (height >= 600px) { [data-form] { max-height: 63dvh; } }
+      @media (height >= 700px) { [data-form] { max-height: 70dvh; } }
+      @media (height >= 850px) { [data-form] { max-height: 74dvh; } }
+      @media (height >= 1000px) { [data-form] { max-height: 78dvh; } }
+    </style>
+  {% endautoescape %}
+{% endblock %}
+
+
 {% block content %}
-<div class="max-w-6xl mx-auto mt-5">
-  {% if not hide_navbar %}
-  <div class="text-right">
+<div class="relative max-w-6xl mx-auto mt-5">
+  {% if not request.GET.hide_navbar %}
+  <div class="text-right pb-6">
   <a href="{% url view_url %}">View</a>
   </div>
-  {% endif %}
-
-  <!-- messages -->
-  {% if messages %}
-  {% for message in messages %}
-  <h1 class='message {{ message.tags }}'>
-    {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}Important: {% endif %}
-    {{ message }}
-  </h1>
-  {% endfor %}
   {% endif %}
     
 
@@ -64,12 +78,13 @@
     }
   </style>
 
+    <div data-form>
   <!-- form -->
-    <p class="header update-header" style='margin-bottom: 1rem'>{{ form_title }}</p>
+    <p class="header update-header py-2 px-6 absolute -z-50 -top-3">{{ form_title }}</p>
     <!-- form -->
     {% for onboarding_task in limited_onboarding_tasks %}
     <form action="{% url update_url id %}" method='POST'  class="onboarding-task-group" data-task-id="{{ onboarding_task.task_id.id }}">
-        <h2 class='name'>
+        <h2 class='name' class="header py-2 px-6 absolute -z-50 -top-3 update-header">
             <span>{{ onboarding_task.task_id.name }}</span>
             <hr>
         </h2>
@@ -90,7 +105,8 @@
         </div>
     </form>
     {% endfor %}
-    <button type="submit" class="update">Update</button>
+    <button type="submit" class="update absolute translate-y-full -bottom-2">Update</button>
+    </div>
 </div>
 
 <script defer type='module' src='{% static "js/limited_onboarding_tasks.js" %}'></script>

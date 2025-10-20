@@ -35,16 +35,6 @@
       <a href="{% url view_url %}">View</a>
     </div>
 
-    <!-- messages -->
-    {% if messages %}
-      {% for message in messages %}
-        <h1 class="message {{ message.tags }}">
-          {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}Important: {% endif %}
-          {{ message }}
-        </h1>
-      {% endfor %}
-    {% endif %}
-
     {% load companies_tags %}
 
     <!-- form -->

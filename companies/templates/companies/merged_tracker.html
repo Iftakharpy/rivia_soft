@@ -12,19 +12,11 @@
 
 {% block content %}
 
-<!-- messages -->
-{% if messages %}
-{% for message in messages %}
-<h1 class="message {{ message.tags }}">
-  {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}Important: {% endif %}
-  {{ message }}
-</h1>
-{% endfor %}
-{% endif %}
 
 {% if caption %}
   <h1 class="mt-5 text-2xl text-center">{{ caption }}</h1>
 {% endif %}
+
 
 <!-- searchbar -->
 {% include "companies/searchbar.html" %}
@@ -181,6 +173,7 @@
 
       <button data-export-columns-submit type="submit" class="update !mt-0">Export</button>
     </form>
+    <script defer type="module" src="{% static 'js/export_column_selection.js' %}"></script>
   </div>
 
 
@@ -198,6 +191,36 @@
   {{ frontend_data|convert_to_JSON }}
 </pre>
 
+
+{% comment %}
+{% if not request.GET.hide_iframes %}
+<aside data-iframes-container class="hidden z-[100] rounded-md overflow-hidden fixed inset-0 flex flex-col min-w-[100dvw] min-h-[100dvh] bg-gray-400/35 p-5">
+  <div class="flex gap-2 px-3 py-2 bg-gray-800">
+    <div class="links flex-grow flex flex-wrap items-center gap-2">
+      {% for i in "i"|center:25 %}
+        <a class="" href="/companies/SAS/create/">Create</a>
+      {% endfor %}
+    </div>
+    <div class="buttons flex flex-wrap gap-2 items-center flex-grow min-w-fit">
+      <button class="px-4 py-1 bg-red-600 text-white">X</button>
+      <button class="px-4 py-1 bg-red-600 text-white">X</button>
+    </div>
+  </div>
+  <div class="flex-grow flex">
+    <!-- <iframe src="/?hide_iframes=T" class="flex-grow"></iframe>
+    <iframe src="/?hide_iframes=T" class="flex-grow"></iframe>
+    <iframe src="/companies/SAS/create/" class="flex-grow"></iframe> -->
+    <iframe src="/companies/SA/create/?hide_iframes=t&hide_navbar=1" class="flex-grow relative"></iframe>
+  </div>
+</aside>
+
+<script defer type="module" src='{% static "js/floating_iframes.js" %}'></script>
+{% endif %}
+{% endcomment%}
+
+
 <script defer type="module" src="{% static "js/merged_tracker.js" %}"></script>
 <script defer type="module" src="{% static "js/table_sort.js" %}"></script>
 {% endblock content %}
+
+
