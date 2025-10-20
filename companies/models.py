@@ -759,6 +759,7 @@ class LimitedSubmissionDeadlineTracker(models.Model):
         ("READY FOR SUBMISSION", "READY FOR SUBMISSION"),
         ("WAITING FOR CONFIRMATION", "WAITING FOR CONFIRMATION"),
         ("COMPLETED", "COMPLETED"),
+        ("EXTENDED", "EXTENDED"),
     )
     status = models.CharField("Status", blank=True, null=True, max_length=55, choices=status_choices, default=None)
 
