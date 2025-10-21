@@ -80,8 +80,8 @@ exportActionBtn?.addEventListener("click", (ev) => {
 
 // Handle export fields
 exportColumnsSubmit?.addEventListener("click", (ev) => {
+	const tax_year_select_input = document.querySelector('select#tax_years')	
 	let url = new URL(exportActionAnchor.href);
-	
 	// add "tax_year" query param
 	if (tax_year_select_input != null) {
 		let tax_year = tax_year_select_input.value;
