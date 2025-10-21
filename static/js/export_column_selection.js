@@ -80,16 +80,23 @@ exportActionBtn?.addEventListener("click", (ev) => {
 
 // Handle export fields
 exportColumnsSubmit?.addEventListener("click", (ev) => {
-	const tax_year_select_input = document.querySelector('select#tax_years')	
 	let url = new URL(exportActionAnchor.href);
+	
 	// add "tax_year" query param
+	const tax_year_select_input = document.querySelector('select#tax_years')
 	if (tax_year_select_input != null) {
 		let tax_year = tax_year_select_input.value;
 		url.searchParams.set("tax_year", tax_year);
 	}
 	
+	// add "data_filter_query" text to filter rows
+	const data_filter_query_text = document.querySelector('input[name="data_filter_query"]')
+	url.searchParams.set("data_filter_query", data_filter_query_text.value)
+	
+	// add "export_fields" to export only selected columns
 	const selectedFieldNames = getSelectedFieldNames();
 	url.searchParams.set("export_fields", selectedFieldNames.join(","));
+	
 	// opening a new tab will download the csv file
 	window.open(url.href);
 });

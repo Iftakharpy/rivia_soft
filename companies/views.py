@@ -2600,6 +2600,8 @@ def all_limited_submission_deadline_tracker(request, limit=-1):
     return HttpResponse(data, content_type='application/json')
   raise Http404
 
+from .data_filter_query_parser import parse_data_filter_queryset
+from error_handler.error_logger import log_server_error_to_file
 @login_required
 @allowed_for_superuser(
   message="Sorry! You are not authorized to export this.",
@@ -2611,6 +2613,18 @@ def export_limited_submission_deadline_tracker(request):
   )
   # get field names to export these are in '.' separated format for nested fields
   params = request.GET
+  
+  data_filter_query = params.get('data_filter_query', None)
+  # data_filter_query = '>HMRC_deadline__gte="2025-01-01" and HMRC_deadline__lte="2025-12-31"'
+  filtered_records = None
+  try:
+    filter_queryset = parse_data_filter_queryset(LimitedSubmissionDeadlineTracker, data_filter_query)
+    filtered_records = LimitedSubmissionDeadlineTracker.objects.filter(filter_queryset)
+  except Exception as e:
+    log_server_error_to_file(e)
+    messages.add_message(request, messages.ERROR, f"Invalid Query: {data_filter_query}")
+    return HttpResponse(status=400, content=f"Invalid query or couldn't parse query")
+
   field_names = params.get('export_fields', None)
   if field_names:
     field_names = field_names.split(",")
@@ -2632,7 +2646,8 @@ def export_limited_submission_deadline_tracker(request):
     exclude_fields = exclude_fields,
     keep_include_fields = keep_include_fields,
     show_others = show_others,
-    fk_fields = fk_fields
+    fk_fields = fk_fields,
+    records=filtered_records
     )
   return response
 

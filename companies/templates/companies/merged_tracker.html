@@ -108,73 +108,7 @@
 
 
   <!-- Export field selection form -->
-  {% comment %} This is duplicated in "home.html" template {% endcomment %}
-  <div data-export-columns-container data-hide-class="hidden" class="hidden px-4 py-4 w-full h-full fixed inset-0 bg-gray-200/90 dark:bg-gray-600/90 z-[100] flex items-center justify-center">
-    <form data-export-form class="export-columns min-w-fit max-w-full max-h-min flex gap-5 flex-col">
-      <div class="w-full flex-grow flex-shrink flex gap-5 items-center justify-between">
-        <h3 class="w-fit text-2xl font-semibold text-gray-900 dark:text-white">Select columns to export</h3>
-        <button data-export-columns-close class="delete px-4 rounded-md py-1">X</button>
-      </div>
-
-      <div class="max-w-[90dvw] overflow-x-auto max-h-[70dvh] flex-grow flex-shrink flex gap-4">
-        {% for group_name, field_list in export_field_names.items %}
-          <div data-field-group class="max-w-fit flex flex-col gap-2 items-center {{group_name}}">
-            {# Iterate over the groups in the "export_field_names" context variable #}
-            <div class="w-full flex gap-2 items-center">
-              <h4 class="flex-grow w-max px-3 py-2 bg-transparent text-gray-700 dark:text-gray-200 text-lg font-bold mt-2 first:mt-0">
-                {# Display a human-readable title for the group #}
-                {% if group_name == 'common_fields' %}
-                  Common Fields
-                {% elif group_name|startswith:'unique_' and group_name|endswith:'_fields' %}
-                  Unique Fields ({{ group_name|cut:'unique_'|cut:'_fields'|title }})
-                {% else %}
-                  {{ group_name }}
-                {% endif %}
-              </h4>
-              
-              <label class="!flex items-center gap-1 cursor-pointer">
-                <input 
-                  type="checkbox"
-                  name="select_or_deselect_all"
-                  class="peer"
-                  aria-checked="true"
-                  data-field-group-toggle
-                />
-                <span data-select class="peer-checked:hidden">Select</span><span data-deselect class="hidden peer-checked:inline">Deselect</span>all
-              </label>
-            </div>
-
-            <ul class="w-full max-h-full overflow-auto text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-              {# Iterate over the fields in the current group list #}
-              {% for field in field_list %}
-                <li class="w-full border-b border-gray-200 dark:border-gray-600">
-                  <div class="flex items-center ps-3">
-                    {# Checkbox input: name is "export_fields", value is the field"s "name" (e.g., "client_id","user__first_name") #}
-                    <input data-field id="checkbox-{{ field.name|slugify }}" type="checkbox" name="export_fields" value="{{ field.name }}" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500" 
-                      {%if group_name == 'common_fields'%}
-                      checked
-                      {%endif%}
-                    />
-
-                    {# Label for the checkbox: uses the field"s "label" (verbose name) #}
-                    <label for="checkbox-{{ field.name|slugify }}" class="w-fit py-3 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">
-                      {{ field.label }}
-                      {% if field.is_nested %}
-                        <span class="text-xs text-gray-500 dark:text-gray-400">({{ field.foreign_key_model }})</span>
-                      {% endif %}
-                    </label>
-                  </div>
-                </li>
-              {% endfor %}
-            </ul>
-          </div>
-        {% endfor %}
-      </div>
-
-      <button data-export-columns-submit type="submit" class="update !mt-0">Export</button>
-    </form>
-    <script defer type="module" src="{% static 'js/export_column_selection.js' %}"></script>
-  </div>
+  {% include "companies/export_field_selection_template.html" %}
 
 
 <!-- data template -->
