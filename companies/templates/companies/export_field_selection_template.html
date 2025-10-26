@@ -28,7 +28,7 @@
                 {% if group_name == 'common_fields' %}
                   Common Fields
                 {% elif group_name|startswith:'unique_' and group_name|endswith:'_fields' %}
-                  Unique Fields ({{ group_name|cut:'unique_'|cut:'_fields'|title }})
+                  Unique Fields ({{ group_name|cut:'unique_'|cut:'_fields' }})
                 {% else %}
                   {{ group_name }}
                 {% endif %}

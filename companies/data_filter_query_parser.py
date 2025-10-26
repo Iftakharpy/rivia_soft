@@ -2,12 +2,14 @@ from django.db.models import Q
 from django.db.models.fields import (
     DateField, DateTimeField, IntegerField, FloatField, BooleanField, UUIDField
 )
+from django.db.models.fields.related import ForeignKey
 from django.core.exceptions import FieldDoesNotExist
 from django.utils.dateparse import parse_datetime
 from uuid import UUID
 import re
 from functools import reduce
 import operator
+
 
 def parse_data_filter_queryset(model, data_filter_query):
     """
@@ -29,11 +31,10 @@ def parse_data_filter_queryset(model, data_filter_query):
     if data_filter_query.startswith('>'):
         data_filter_query = data_filter_query[1:].strip()
 
-    # This regex is the key fix. It captures:
+    # This regex captures:
     # 1. The key (field name and optional lookup)
     # 2. The operator (>, <, =, !=, etc.)
-    # 3. A value in double quotes (if present)
-    # 4. An unquoted value (if present)
+    # 3. A value in double quotes OR an unquoted value
     pattern = re.compile(r'([\w__]+)\s*([<>]=?|==|!=|=)\s*(?:"([^"]*)"|([^\s]+))')
     
     or_queries = []
@@ -56,7 +57,7 @@ def parse_data_filter_queryset(model, data_filter_query):
             key, op, quoted_value, unquoted_value = match.groups()
             value_str = quoted_value if quoted_value is not None else unquoted_value
             
-            # Normalize '=' to '==' for the lookup map
+            # Normalize '=' to '==' for internal lookup mapping
             if op == '=':
                 op = '=='
 
@@ -69,13 +70,25 @@ def parse_data_filter_queryset(model, data_filter_query):
             value = value_str
             try:
                 field = model._meta.get_field(base_field_name)
-                if isinstance(field, DateTimeField): value = parse_datetime(value_str)
+                
+                # If filtering directly on a ForeignKey (e.g., assigned_to=5),
+                # cast the value to the type of the related model's primary key.
+                if isinstance(field, ForeignKey) and '__' not in key:
+                    pk_field = field.related_model._meta.pk
+                    if isinstance(pk_field, IntegerField):
+                        value = int(value_str)
+                    elif isinstance(pk_field, UUIDField):
+                        value = UUID(value_str)
+                # Handle other standard field types
+                elif isinstance(field, DateTimeField): value = parse_datetime(value_str)
                 elif isinstance(field, DateField): value = parse_datetime(value_str).date()
                 elif isinstance(field, IntegerField): value = int(value_str)
                 elif isinstance(field, FloatField): value = float(value_str)
                 elif isinstance(field, BooleanField): value = value_str.lower() in ('true', '1', 'yes')
                 elif isinstance(field, UUIDField): value = UUID(value_str)
+
             except (FieldDoesNotExist, ValueError, TypeError, AttributeError):
+                # Fallback to using the raw string value if casting fails
                 pass
 
             q_object = Q(**{filter_key: value})
@@ -91,3 +104,7 @@ def parse_data_filter_queryset(model, data_filter_query):
         return Q()
 
     return reduce(operator.or_, or_queries)
+
+
+def parse_data_filter_queryset_2(model, data_filter_query):
+    pass

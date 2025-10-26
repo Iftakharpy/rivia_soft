@@ -6,7 +6,6 @@ from django.conf import settings
 
 def log_server_error_to_file(e=None):
   # Get exception details
-  print(e)
   type_, value, tb = sys.exc_info()
   formatted_traceback = "".join(traceback.format_exception(type_, value, tb))
 

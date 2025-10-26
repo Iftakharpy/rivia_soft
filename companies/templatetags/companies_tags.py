@@ -60,10 +60,7 @@ def get_nested_attr(obj, attr, default=None, attr_split_on='.'):
     attrs = attr.split(attr_split_on)
     value = obj
     for attr in attrs:
-        if hasattr(value, 'get'):
-            value = value.get(attr, default)
-        else:
-            value = getattr(value, attr, default)
+        value = getattr(value, attr, default)
     return value
 
 

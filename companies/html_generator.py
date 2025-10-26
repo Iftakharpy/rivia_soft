@@ -169,7 +169,7 @@ def generate_data_container_table(
       else:
         continue
     header_name = get_header_name_from_field_name(django_model, field)
-    inner_header_tr += f'<th class="data-cell stick-top data-id">{header_name}</th>\n'
+    inner_header_tr += f'<th class="data-cell stick-top data-id" title="{field}">{header_name}</th>\n'
     
   
   header_tr = f"""

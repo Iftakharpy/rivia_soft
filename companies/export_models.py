@@ -7,7 +7,7 @@ from pprint import pp
 
 
 def export_to_csv(
-    django_model,
+    django_model: Model,
     write_to,
     exclude_fields = [],
     include_fields = [],
@@ -18,7 +18,8 @@ def export_to_csv(
       # 'fk_field_name_in_model': ['referenced_model_field_names']
     },
     write_header_row=True,
-    records=None
+    records=None,
+    column_name_split_on="__"
     ):
   model_fields = get_field_names_from_model(django_model)
   writer = csv.writer(write_to)
@@ -42,7 +43,7 @@ def export_to_csv(
     
     # handle foreign key field
     if field in fk_fields:
-      nested_model:Model = get_nested_attr(django_model, f'{field}.field.related_model')
+      nested_model:Model = get_nested_attr(django_model, f'{field}.field.related_model', attr_split_on=".")
       nested_fields = fk_fields[field]
       
       if nested_fields == "all":
@@ -53,7 +54,7 @@ def export_to_csv(
 
       for nested_field in nested_fields:
         nested_header_name = get_header_name_from_field_name(nested_model, nested_field)
-        nested_column_name = f'{field}.{nested_field}'
+        nested_column_name = f'{field}__{nested_field}'
         header.append(f"{nested_model.__name__} - {nested_header_name}")
         columns.append(nested_column_name)
       continue
@@ -74,7 +75,7 @@ def export_to_csv(
   for record in records:
     row = []
     for column in columns:
-      value = get_nested_attr(record, column, '')
+      value = get_nested_attr(record, column, attr_split_on=column_name_split_on)
       row.append(value)
     # write record
     writer.writerow(row)

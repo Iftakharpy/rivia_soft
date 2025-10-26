@@ -41,7 +41,7 @@ with open(CONFIG_FILE_PATH, 'r') as CONFIG_FILE:
 # ?: (security.W018) You should not have DEBUG set to True in deployment.
 DEBUG = CONFIG['DEBUG']
 WANT_TO_MIGRATE = False
-ERROR_LOG_FILE_PATH = BASE_DIR / "../500_errors.log"
+ERROR_LOG_FILE_PATH = BASE_DIR / "500_errors.log"
 ###############################################################################
 
 

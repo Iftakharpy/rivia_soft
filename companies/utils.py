@@ -3,9 +3,6 @@ from django.db import models
 from typing import Any, Type, Mapping
 
 
-ModelClass = Type[models.Model]
-
-
 class ChainedQuerysetsWithCount:
     def __init__(self, *querysets):
         self.chained_queryset = chain(*querysets)
@@ -30,6 +27,9 @@ def model_field_to_form_meta(field: models.Field, load_fk_options=False) -> dict
         dict: A dictionary containing the field name, Django field type, HTML tag, 
               HTML input type, Python type, and options.
     """
+    html_tag = ''
+    html_tag_type = None
+    python_type = None
     match field:
         case models.TextField:
             html_tag = "textarea"
@@ -79,14 +79,14 @@ def model_field_to_form_meta(field: models.Field, load_fk_options=False) -> dict
             html_tag = "select"
             html_tag_type = None
             python_type = "int"  # Typically refers to the related model's primary key
-        case models.field:
+        case models.Field:
             html_tag = "input"
             html_tag_type = "text"
             python_type = "str"
 
 
     # Check if the field has choices
-    if field.choices:
+    if getattr(field, 'choices'):
         html_tag = "select"
         html_tag_type = None  # Select tag doesn't use a "type" attribute
         options = [{"value": choice[0], "display": choice[1]} for choice in field.choices]
@@ -122,21 +122,18 @@ def is_includeable(field, include_fields=[], exclude_fields=[], keep_include_fie
   return True
 
 
-def get_nested_attr(obj: object, attr: str, default=None, attr_split_on='.'):
+def get_nested_attr(obj: object, attr: str, default=None, attr_split_on='__'):
     """Filter tag to get python object's attributes.
-    Supportes nested attributes separated by '.'.
+    Supports nested attributes separated by '__'.
     If attribute doesn't exists returns None as default.
     """
     attrs = attr.split(attr_split_on)
     value = obj
     for attr in attrs:
-        if hasattr(value, 'get'):
-            value = value.get(attr, default) # type: ignore
-        else:
-            value = getattr(value, attr, default)
+        value = getattr(value, attr, default)
     return value
 
-def get_field_names_from_model(django_model: ModelClass):
+def get_field_names_from_model(django_model: models.Model):
   field_names = []
   for field in django_model._meta.fields:
     field_names.append(field.name)
@@ -153,7 +150,7 @@ def get_header_name_from_field_name(django_model, field_name:str):
 
 
 def get_field_names_with_label(
-      django_model: ModelClass,
+      django_model: models.Model,
       exclude_fields_containing_name:list[str]=["password"]
     ) -> list[dict[str, str]]:
   """
@@ -184,13 +181,13 @@ def get_field_names_with_label(
     # Check if the field is a ForeignKey to look for nested attributes
     if isinstance(field, models.ForeignKey):
       # Get the related model class
-      related_model: ModelClass = get_nested_attr(field, 'related_model')
+      related_model: models.Model = get_nested_attr(field, 'related_model') #type:ignore
       
       if related_model:
         # Iterate over the fields of the related model
         for related_field in related_model._meta.fields:
           # Construct the nested field name (e.g., 'user__first_name')
-          nested_field_name = f'{field_name}.{related_field.name}'
+          nested_field_name = f'{field_name}__{related_field.name}'
           
           should_we_skip_it = False
           for exclude_name in exclude_fields_containing_name:
@@ -260,7 +257,7 @@ def group_fields_by_uniqueness(
     }
     
     for model_name in all_model_fields.keys():
-        results[f"unique_{model_name.lower()}_fields"] = []
+        results[f"unique_{model_name}_fields"] = []
 
     # 4. Process all field names based on the number of sources
     for name, sources in field_sources.items():
@@ -274,7 +271,7 @@ def group_fields_by_uniqueness(
         elif num_sources == 1:
             # Field is Unique to ONE model
             unique_model_name = list(sources)[0]
-            key = f"unique_{unique_model_name.lower()}_fields"
+            key = f"unique_{unique_model_name}_fields"
             results[key].append(field_dict)
             
         # Note: Fields present in a subset (1 < num_sources < total_models) are ignored 
