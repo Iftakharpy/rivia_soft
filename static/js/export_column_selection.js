@@ -90,7 +90,7 @@ exportColumnsSubmit?.addEventListener("click", (ev) => {
 	}
 	
 	// add "data_filter_query" text to filter rows
-	const data_filter_query_text = document.querySelector('input[name="data_filter_query"]')
+	const data_filter_query_text = document.querySelector('[name="data_filter_query"]')
 	url.searchParams.set("data_filter_query", data_filter_query_text.value)
 	
 	// add "export_fields" to export only selected columns

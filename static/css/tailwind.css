@@ -2,8 +2,8 @@
 @layer tw {
 	@tailwind base;
 	@tailwind components;
-  @tailwind utilities;
-  @tailwind variants;
+  	@tailwind utilities;
+  	@tailwind variants;
 }
 
 @layer r-base {
@@ -32,7 +32,7 @@
 		@apply form-radio;
 	}
 	textarea {
-		@apply w-full resize-x form-textarea h-28;
+		@apply w-full resize-x form-textarea min-h-10 h-28;
 	}
 
 	label {
@@ -95,8 +95,6 @@
 }
 
 @layer r-components {
-	@tailwind components;
-
 	/* customized button */
 	button[type] {
 		@apply w-full px-4 py-2 mt-6 font-bold border-none rounded-md outline-none appearance-none bg-none;

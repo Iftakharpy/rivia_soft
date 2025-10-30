@@ -117,7 +117,7 @@ function option_selected(event) {
   // options_container.appendChild(clicked_option)
 
   // Update search_bar
-  let search_bar = search_field.querySelector('input[name="search"]')
+  let search_bar = search_field.querySelector('[name="search"]')
   // search_bar.placeholder = text
   search_bar.value = text
   options_container.innerHTML = ''

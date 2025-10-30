@@ -58,7 +58,7 @@ let doneTypingInterval = 1000;//time in ms (4/5 seconds)
 //     }
 // });
 const tax_year_select_input = document.querySelector('select#tax_years')
-const search_bar = document.querySelector('input[name="search"]');
+const search_bar = document.querySelector('[name="search"]');
 function searchHandler(){
   let limited_search_url = Limited.search_url
   let selfassesment_search_url = Selfassesment.search_url

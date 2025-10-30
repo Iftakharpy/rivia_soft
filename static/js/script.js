@@ -42,7 +42,7 @@ let doneTypingInterval = 1000; //time in ms (4/5 seconds)
 //     }
 // });
 const tax_year_select_input = document.querySelector("select#tax_years");
-const search_bar = document.querySelector('input[name="search"]');
+const search_bar = document.querySelector('[name="search"]');
 function searchHandler(event) {
 	let search_url = DATA.search_url;
 	let search_text = search_bar.value.trim();

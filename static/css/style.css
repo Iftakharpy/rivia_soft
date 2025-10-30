@@ -752,7 +752,39 @@ video {
     outline: 1px auto -webkit-focus-ring-color;
   }
 
-  @tailwind components;
+  .container{
+    width: 100%;
+  }
+
+  @media (min-width: 640px){
+    .container{
+      max-width: 640px;
+    }
+  }
+
+  @media (min-width: 768px){
+    .container{
+      max-width: 768px;
+    }
+  }
+
+  @media (min-width: 1024px){
+    .container{
+      max-width: 1024px;
+    }
+  }
+
+  @media (min-width: 1280px){
+    .container{
+      max-width: 1280px;
+    }
+  }
+
+  @media (min-width: 1536px){
+    .container{
+      max-width: 1536px;
+    }
+  }
 
   .visible{
     visibility: visible;
@@ -931,6 +963,10 @@ video {
     display: flex;
   }
 
+  .inline-flex{
+    display: inline-flex;
+  }
+
   .table{
     display: table;
   }
@@ -975,6 +1011,10 @@ video {
     height: 100vh;
   }
 
+  .\!max-h-24{
+    max-height: 6rem !important;
+  }
+
   .max-h-\[70dvh\]{
     max-height: 70dvh;
   }
@@ -990,6 +1030,14 @@ video {
   .max-h-min{
     max-height: -moz-min-content;
     max-height: min-content;
+  }
+
+  .\!min-h-10{
+    min-height: 2.5rem !important;
+  }
+
+  .min-h-5{
+    min-height: 1.25rem;
   }
 
   .min-h-\[100dvh\]{
@@ -1139,6 +1187,14 @@ video {
     -webkit-user-select: none;
        -moz-user-select: none;
             user-select: none;
+  }
+
+  .\!resize-y{
+    resize: vertical !important;
+  }
+
+  .resize-y{
+    resize: vertical;
   }
 
   .appearance-none{
@@ -2325,6 +2381,7 @@ video {
 
   textarea{
     height: 7rem;
+    min-height: 2.5rem;
     width: 100%;
     resize: horizontal;
   }
@@ -2457,40 +2514,6 @@ video {
 }
 
 @layer r-components {
-  .container{
-    width: 100%;
-  }
-
-  @media (min-width: 640px){
-    .container{
-      max-width: 640px;
-    }
-  }
-
-  @media (min-width: 768px){
-    .container{
-      max-width: 768px;
-    }
-  }
-
-  @media (min-width: 1024px){
-    .container{
-      max-width: 1024px;
-    }
-  }
-
-  @media (min-width: 1280px){
-    .container{
-      max-width: 1280px;
-    }
-  }
-
-  @media (min-width: 1536px){
-    .container{
-      max-width: 1536px;
-    }
-  }
-
   /* customized button */
 
   button[type]{
