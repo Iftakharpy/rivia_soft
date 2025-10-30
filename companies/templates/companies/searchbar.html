@@ -11,7 +11,7 @@
           rows="2"
           type="search"
           name="search"
-          placeholder=">assigned_to__email $= 'gmail.com' or Text Search"
+          placeholder=">assigned_to__email $= gmail.com or Text Search"
         ></textarea>
 
         <span role="button" class="absolute right-0 top-0 mt-3 mr-4">
@@ -33,9 +33,10 @@
     {% if tax_years %}
       <div class="inline-block">
         <select name="tax_years" id="tax_years">
+          <option value="">-------------------</option>
           {% for tax_year in tax_years %}
             {% if tax_year.id == current_tax_year.id %}
-              <option selected value="{{tax_year.id}}">{{tax_year}}</option>
+            <option selected value="{{tax_year.id}}">{{tax_year}}</option>
             {% else %}
               <option value="{{tax_year.id}}">{{tax_year}}</option>
             {% endif %}
