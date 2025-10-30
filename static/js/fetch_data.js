@@ -260,7 +260,7 @@ export async function fetch_url({
 					jsonResponse: json_response,
 					errorMsg,
 				});
-				msg = `${msg}Query docs -> https://github.com/Iftakharpy/rivia_soft`
+				msg = `${msg}Query docs -> https://github.com/Iftakharpy/rivia_soft/blob/main/data_filter_query/README.md`
 				showMessage(msg);
 			});
 		}
