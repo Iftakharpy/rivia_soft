@@ -1,11 +1,13 @@
-from django.http.response import Http404, HttpResponse, HttpResponseForbidden
 import json
+from django.db.models import QuerySet
+from django.http.response import Http404, HttpResponse, HttpResponseForbidden, JsonResponse
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.core.serializers import serialize
 from django.shortcuts import get_object_or_404
 from django.forms.models import model_to_dict
+from data_filter_query import query_model
 
 
 # models and forms
@@ -124,11 +126,19 @@ def search_users_by_email(request, search_text='', limit=-1):
     raise Http404()
 
 @login_required
-def search_users_extended(request, limit=-1):
+def search_users(request, limit=-1):
     if request.method=='GET' and request.headers.get('Content-Type')==content_type:
-        search_text = request.GET.get('q', '')
-        results = search_CustomUser(search_text, limit)
-        return HttpResponse(serialize_queryset_to_json(results), content_type=content_type)
+        search_text = request.GET.get('q', '').strip()
+        
+        records = QuerySet()
+        if search_text.startswith('>'):
+            idx, is_success, error_msg_or_records = query_model(CustomUser, search_text[1:])
+            if not is_success:
+                return JsonResponse({'errors': [error_msg_or_records]}, status=400)
+            records = error_msg_or_records
+        else:
+            records = search_CustomUser(search_text, limit)
+        return HttpResponse(serialize_queryset_to_json(records), content_type=content_type)
     raise Http404()
 
 @login_required
