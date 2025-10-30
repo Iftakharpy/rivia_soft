@@ -1591,7 +1591,7 @@ def search_selfassesment_tracker(request, limit: int=-1):
     if search_text.startswith('>'):
       idx, is_success, error_msg_or_records = query_model(SelfassesmentTracker, search_text[1:])
       if not is_success:
-        return JsonResponse({'errors': [error_msg_or_records]}, status=400)
+        return JsonResponse({'errors': [f"SelfassesmentTracker: {error_msg_or_records}"]}, status=400)
       records = error_msg_or_records
     else:
       records = db_search_SelfassesmentTracker(
@@ -2328,7 +2328,7 @@ def search_limited_tracker(request, limit: int=-1):
     if search_text.startswith('>'):
       idx, is_success, error_msg_or_records = query_model(LimitedTracker, search_text[1:])
       if not is_success:
-        return JsonResponse({'errors': [error_msg_or_records]}, status=400)
+        return JsonResponse({'errors': [f"LimitedTracker: {error_msg_or_records}"]}, status=400)
       records = error_msg_or_records
     else: 
       records = db_search_LimitedTracker(
@@ -3483,7 +3483,7 @@ def export_merged_tracker(request:HttpRequest):
       queryset=limited_tracker_records,
       )
     if not is_success:
-      return JsonResponse({'errors': [f"LimitedTracker: {error_msg_or_records}"]}, status=400)
+      limited_tracker_records = []
     else:
       limited_tracker_records = error_msg_or_records
 
@@ -3495,7 +3495,7 @@ def export_merged_tracker(request:HttpRequest):
       queryset=selfassesment_tracker_records,
       )
     if not is_success:
-      return JsonResponse({'errors': [f"SelfassesmentTracker: {error_msg_or_records}"]}, status=400)
+      selfassesment_tracker_records = []
     else:
       selfassesment_tracker_records = error_msg_or_records
 
