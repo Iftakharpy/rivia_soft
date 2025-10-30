@@ -241,9 +241,9 @@ export async function fetch_url({
 	catchErrorAndLog(hideLoadingIndicator);
 
 	// Store request/response copies for debugging
+	window.last_request = request_cpy.clone();
 	let response_cpy = response.clone();
-	window.last_request = request_cpy;
-	window.last_response = response_cpy;
+	window.last_response = response.clone();
 
 	// Show any errors in UI
 	let response_content_type = response_cpy.headers.get("content-type") || "";
@@ -255,22 +255,38 @@ export async function fetch_url({
 			let errorList = Array.isArray(errors) ? errors : [errors];
 			errorList.forEach(async (errorMsg) => {
 				let msg = await formatHTTPErrorMessage({
-					request: request_cpy,
-					response,
+					request: request_cpy.clone(),
+					response: response.clone(),
 					jsonResponse: json_response,
 					errorMsg,
 				});
-				msg = `${msg}Query docs -> https://github.com/Iftakharpy/rivia_soft/blob/main/data_filter_query/README.md`
+				msg = `${msg}\n\nQuery docs -> https://github.com/Iftakharpy/rivia_soft/blob/main/data_filter_query/README.md`
 				showMessage(msg);
 			});
 		}
 	} else if (response_cpy.status >= 400) {
-		let msg = await formatHTTPErrorResponse({
-			request: request_cpy,
-			response: response_cpy,
-			showRequest: false,
-			// showResponse: false,
-		});
+		let msg = null
+		let error_json = null
+		try{
+			error_json = await response_cpy.json()
+		} catch(e){
+			// content JSON.parse error
+		}
+		if (error_json){
+			msg = error_json?.error || "Unknown error occurred"
+			msg = await formatHTTPErrorMessage({
+				request: request_cpy.clone(),
+				response: response.clone(),
+				errorMsg: msg
+			})
+		} else{
+			msg = await formatHTTPErrorResponse({
+				request: request_cpy.clone(),
+				response: response.clone(),
+				showRequest: true,
+				showResponse: true,
+			});
+		}
 		showMessage(msg);
 	}
 	return response;
@@ -316,14 +332,16 @@ export async function formatHTTPErrorMessage({
 		showRequest: false,
 		showResponse: false,
 	});
-	return `${errorMsg}\n\n${formattedHTTPError}`;
+	return `${errorMsg}${formattedHTTPError}`;
 }
 
 export async function formatHTTPErrorResponse({ 
 	request,
 	response,
 	showRequest=true,
-	showResponse=true
+	showResponse=true,
+	requestPrefix = "",
+	responsePrefix = "\n\n",
 }) {
 	if (!(request instanceof Request) || !(response instanceof Response)) {
 		return "[Invalid request or response object]";
@@ -364,23 +382,43 @@ export async function formatHTTPErrorResponse({
 	try {
 		const text = await resClone.text();
 		if (text) {
+			let responseLength = (parseInt(resClone.headers.get("content-length"))||1)
+			if (responseLength>1000){
+				responseLength = Math.round(responseLength/1000) //kb
+				responseLength = `${responseLength}kb`
+			}else {
+				responseLength = `${responseLength}bytes`
+			}
 			const contentType = resClone.headers.get("content-type") || "";
 			if (contentType.includes("application/json"))
 				resBody = JSON.parse(text);
+			else if (contentType.includes('text')){
+				// try to convert any response to json
+				try {
+					resBody = JSON.parse(text)
+				} catch (e) {
+					if (resBody.length >= 300){
+						resBody = `[too long response]: content-type=${contentType} length=${responseLength}`
+					}else{
+						resBody = `[JSON.parse failed]: content-type=${contentType} length=${responseLength}`
+					}
+				}
+			}
 			else resBody = text;
 		}
 	} catch (e) {
 		resBody = `[unreadable: ${e.message}]`;
 	}
 
+
 	// Build formatted output
 	return `${
 		showRequest ? 
-		`STATUS: ${reqClone.method} -> ${resClone.status} ${resClone.statusText}
-ReqURL: ${decodeURI(reqClone.url)}
-ReqBody: ${ typeof reqBody === "object" ? 
+		`${requestPrefix}STATUS: ${reqClone.method} -> ${resClone.status} ${resClone.statusText}
+URL: ${decodeURI(reqClone.url)}
+BODY: ${ typeof reqBody === "object" ? 
 				JSON.stringify(reqBody, null, 2) : reqBody
-			}`: ''}${showResponse? `RESPONSE: ${typeof resBody === "object" ? JSON.stringify(resBody, null, 2) : resBody}`: ''}`;
+			}`: ''}${showResponse? `${responsePrefix}RESPONSE: ${typeof resBody === "object" ? JSON.stringify(resBody, null, 2) : resBody}`: ''}`;
 }
 
 
