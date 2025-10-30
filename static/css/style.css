@@ -854,6 +854,10 @@ video {
     z-index: 100;
   }
 
+  .z-\[150\]{
+    z-index: 150;
+  }
+
   .m-1{
     margin: 0.25rem;
   }
@@ -1036,10 +1040,6 @@ video {
     min-height: 2.5rem !important;
   }
 
-  .min-h-5{
-    min-height: 1.25rem;
-  }
-
   .min-h-\[100dvh\]{
     min-height: 100dvh;
   }
@@ -1191,10 +1191,6 @@ video {
 
   .\!resize-y{
     resize: vertical !important;
-  }
-
-  .resize-y{
-    resize: vertical;
   }
 
   .appearance-none{

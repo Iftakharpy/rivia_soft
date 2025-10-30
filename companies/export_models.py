@@ -7,7 +7,7 @@ from pprint import pp
 
 
 def export_to_csv(
-    django_model: Model,
+    django_model: type[Model],
     write_to,
     exclude_fields = [],
     include_fields = [],
@@ -24,7 +24,7 @@ def export_to_csv(
   model_fields = get_field_names_from_model(django_model)
   writer = csv.writer(write_to)
 
-  # mantain field order
+  # maintain field order
   field_order = list(ordering) # provided order
   for field in include_fields: # include_field order
     if field not in field_order:
@@ -43,7 +43,7 @@ def export_to_csv(
     
     # handle foreign key field
     if field in fk_fields:
-      nested_model:Model = get_nested_attr(django_model, f'{field}.field.related_model', attr_split_on=".")
+      nested_model = get_nested_attr(django_model, f'{field}.field.related_model', attr_split_on=".")
       nested_fields = fk_fields[field]
       
       if nested_fields == "all":

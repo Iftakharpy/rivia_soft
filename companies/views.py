@@ -8,7 +8,7 @@ from django.utils import timezone
 from django.utils.safestring import mark_safe
 from django.core.serializers import serialize
 from django.core.exceptions import ObjectDoesNotExist
-from django.http import HttpRequest, HttpResponse, Http404
+from django.http import HttpRequest, HttpResponse, Http404, HttpResponseBadRequest, JsonResponse
 from django.db.utils import IntegrityError
 from django.db.models import DurationField, F, ExpressionWrapper, Q, QuerySet
 from django.urls.exceptions import NoReverseMatch
@@ -83,6 +83,10 @@ from .utils import get_field_names_with_label, group_fields_by_uniqueness
 from .html_generator import get_field_names_from_model, generate_template_tag_for_model, generate_data_container_table
 from .repr_formats import HTML_Generator, Forms as FK_Formats
 
+
+# query parser
+from data_filter_query import query_model
+from error_handler.error_logger import log_server_error_to_file
 
 
 
@@ -412,8 +416,6 @@ def delete_selfassesment(request, client_id:int):
 @login_required
 def search_selfassesment(request, limit: int=-1):
   if request.method=='GET' and request.headers.get('Content-Type')=='application/json':
-    search_text = request.GET.get('q', '')
-
     # if tasks query paramter exists then return tasks
     if request.GET.get('tasks'):
       current_tax_year = SelfassesmentAccountSubmissionTaxYear.get_max_year()
@@ -431,10 +433,20 @@ def search_selfassesment(request, limit: int=-1):
       records = tasks.get(request.GET.get('tasks'), [])
       data = serialize(queryset=records, format='json')
       return HttpResponse(data, content_type='application/json')
-
-    if search_text.strip()=='':
+    
+    # search queries
+    search_text = request.GET.get('q', '').strip()
+    if search_text=='':
       return redirect(URL_NAMES_PREFIXED_WITH_APP_NAME.Selfassesment_Tracker_viewall_name)
-    records = db_search_Selfassesment(search_text, limit)
+
+    records = QuerySet()
+    if search_text.startswith('>'):
+      idx, is_success, error_msg_or_records = query_model(Selfassesment, search_text[1:])
+      if not is_success:
+        return JsonResponse({'errors': [error_msg_or_records]}, status=400)
+      records = error_msg_or_records
+    else:
+      records = db_search_Selfassesment(search_text, limit)
     records = records.order_by("-client_file_number")
     data = serialize(queryset=records, format='json')
     return HttpResponse(data, content_type='application/json')
@@ -471,13 +483,24 @@ def export_selfassesment(request):
   exclude_fields = []
   keep_include_fields = True
   show_others = (include_fields==default_include_fields)
+
+  data_filter_query = params.get('data_filter_query', '').strip()
+  records = None
+  if data_filter_query.startswith('>'):
+    idx, is_success, error_msg_or_records = query_model(Selfassesment, data_filter_query[1:])
+    if not is_success:
+      return JsonResponse({'errors': [error_msg_or_records]}, status=400)
+    else:
+      records = error_msg_or_records
+
   export_to_csv(
     django_model = Selfassesment,
     write_to = response,
     include_fields = include_fields,
     exclude_fields = exclude_fields,
     keep_include_fields = keep_include_fields,
-    show_others = show_others
+    show_others = show_others,
+    records=records,
     )
   return response
 
@@ -503,10 +526,18 @@ def get_details_selfassesment_account_submission_tax_year(request, id=None):
 @login_required
 def search_selfassesment_account_submission_tax_year(request, limit: int=-1):
   if request.method=='GET' and request.headers.get('Content-Type')=='application/json':
-    search_text = request.GET.get('q', '')
-    if search_text.strip()=='':
+    search_text = request.GET.get('q', '').strip()
+    if search_text=='':
       return redirect(URL_NAMES_PREFIXED_WITH_APP_NAME.Selfassesment_Account_Submission_viewall_name)
-    records = db_search_SelfassesmentAccountSubmissionTaxYear(search_text, limit)
+    
+    records = QuerySet()
+    if search_text.startswith('>'):
+      idx, is_success, error_msg_or_records = query_model(SelfassesmentAccountSubmissionTaxYear, search_text[1:])
+      if not is_success:
+        return JsonResponse({'errors': [error_msg_or_records]}, status=400)
+      records = error_msg_or_records
+    else:
+      records = db_search_SelfassesmentAccountSubmissionTaxYear(search_text, limit)
     data = serialize(queryset=records, format='json')
     return HttpResponse(data, content_type='application/json')
   raise Http404
@@ -796,10 +827,19 @@ def search_selfassesment_data_collection(request, limit:int=-1):
       data = serialize(queryset=records, format='json')
       return HttpResponse(data, content_type='application/json')
 
-    search_text = request.GET.get('q', '')
-    if search_text.strip()=='':
+    search_text = request.GET.get('q', '').strip()
+    if search_text=='':
       return redirect(URL_NAMES_PREFIXED_WITH_APP_NAME.Selfassesment_Data_Collection_viewall_name)
-    records = db_search_SelfemploymentIncomeAndExpensesDataCollection(search_text, limit)
+    
+    records = QuerySet()
+    if search_text.startswith('>'):
+      idx, is_success, error_msg_or_records = query_model(SelfemploymentIncomeAndExpensesDataCollection, search_text[1:])
+      if not is_success:
+        return JsonResponse({'errors': [error_msg_or_records]}, status=400)
+      records = error_msg_or_records
+    else:
+      records = db_search_SelfemploymentIncomeAndExpensesDataCollection(search_text, limit)
+    
     if tax_year:
       records = records.filter(tax_year=tax_year)
     records = records.order_by("-created_at")
@@ -864,6 +904,20 @@ def export_selfassesment_data_collection(request):
   }
   keep_include_fields = True
   show_others = (include_fields==default_include_fields)
+
+  data_filter_query = params.get('data_filter_query', '').strip()
+  records = data_to_export
+  if data_filter_query.startswith('>'):
+    idx, is_success, error_msg_or_records = query_model(
+      model=SelfemploymentIncomeAndExpensesDataCollection,
+      data_filter_query=data_filter_query[1:],
+      queryset=records,
+      )
+    if not is_success:
+      return JsonResponse({'errors': [error_msg_or_records]}, status=400)
+    else:
+      records = error_msg_or_records
+
   export_to_csv(
     django_model = django_model,
     write_to = response,
@@ -872,7 +926,7 @@ def export_selfassesment_data_collection(request):
     keep_include_fields = keep_include_fields,
     show_others = show_others,
     fk_fields=fk_fields,
-    records=data_to_export
+    records=records,
     )
   return response
 
@@ -1133,7 +1187,6 @@ def delete_selfassesment_account_submission(request, submission_id:int):
 @login_required
 def search_selfassesment_account_submission(request, limit: int=-1):
   if request.method=='GET' and request.headers.get('Content-Type')=='application/json':
-    search_text = request.GET.get('q', '')
     submission_id = request.GET.get('pk', None)
     tax_year = request.GET.get('tax_year', None)
     if tax_year:
@@ -1141,8 +1194,6 @@ def search_selfassesment_account_submission(request, limit: int=-1):
         tax_year = int(tax_year)
       except ValueError:
         tax_year = None
-    else:
-      tax_year = SelfassesmentAccountSubmissionTaxYear.get_max_year()
 
     if submission_id:
       error_message = {'error': 'The resource you are looking for does not exist'}
@@ -1189,9 +1240,18 @@ def search_selfassesment_account_submission(request, limit: int=-1):
       data = serialize(queryset=records, format='json')
       return HttpResponse(data, content_type='application/json')
 
-    if search_text.strip()=='':
+    search_text = request.GET.get('q', '').strip()
+    if search_text=='':
       return redirect(URL_NAMES_PREFIXED_WITH_APP_NAME.Selfassesment_Account_Submission_viewall_name)
-    records = db_search_SelfassesmentAccountSubmission(search_text, limit)
+    
+    records = QuerySet()
+    if search_text.startswith('>'):
+      idx, is_success, error_msg_or_records = query_model(SelfassesmentAccountSubmission, search_text[1:])
+      if not is_success:
+        return JsonResponse({'errors': [error_msg_or_records]}, status=400)
+      records = error_msg_or_records
+    else:
+      records = db_search_SelfassesmentAccountSubmission(search_text, limit)
     if tax_year:
       records = records.filter(tax_year=tax_year)
 
@@ -1260,6 +1320,16 @@ def export_selfassesment_account_submission(request):
   }
   keep_include_fields = True
   show_others = (include_fields==default_include_fields)
+
+  data_filter_query = params.get('data_filter_query', '').strip()
+  records = data_to_export
+  if data_filter_query.startswith('>'):
+    idx, is_success, error_msg_or_records = query_model(SelfassesmentAccountSubmission, data_filter_query[1:], records)
+    if not is_success:
+      return JsonResponse({'errors': [error_msg_or_records]}, status=400)
+    else:
+      records = error_msg_or_records
+
   export_to_csv(
     django_model = django_model,
     write_to = response,
@@ -1268,7 +1338,7 @@ def export_selfassesment_account_submission(request):
     keep_include_fields = keep_include_fields,
     show_others = show_others,
     fk_fields = fk_fields,
-    records=data_to_export
+    records=records,
     )
   return response
 
@@ -1514,14 +1584,21 @@ def search_selfassesment_tracker(request, limit: int=-1):
       return HttpResponse(data, content_type='application/json')
     
     # filter results using the search_text
-    if not search_text:
+    if search_text=='':
       return redirect(URL_NAMES_PREFIXED_WITH_APP_NAME.Selfassesment_Tracker_viewall_name)
     
-    records = db_search_SelfassesmentTracker(
-      search_text=search_text,
-      user_email=request.user.email,
-      is_superuser=request.user.is_superuser,
-      limit=limit)
+    records = QuerySet()
+    if search_text.startswith('>'):
+      idx, is_success, error_msg_or_records = query_model(SelfassesmentTracker, search_text[1:])
+      if not is_success:
+        return JsonResponse({'errors': [error_msg_or_records]}, status=400)
+      records = error_msg_or_records
+    else:
+      records = db_search_SelfassesmentTracker(
+        search_text=search_text,
+        user_email=request.user.email,
+        is_superuser=request.user.is_superuser,
+        limit=limit)
     data = serialize(queryset=records, format='json')
     return HttpResponse(data, content_type='application/json')
   raise Http404
@@ -1559,6 +1636,19 @@ def export_selfassesment_tracker(request):
   }
   keep_include_fields = True
   show_others = (include_fields==default_include_fields)
+
+  data_filter_query = params.get('data_filter_query', '').strip()
+  records = None
+  if data_filter_query.startswith('>'):
+    idx, is_success, error_msg_or_records = query_model(
+      model=SelfassesmentTracker,
+      data_filter_query=data_filter_query[1:],
+      )
+    if not is_success:
+      return JsonResponse({'errors': [error_msg_or_records]}, status=400)
+    else:
+      records = error_msg_or_records
+
   export_to_csv(
     django_model = SelfassesmentTracker,
     write_to = response,
@@ -1566,7 +1656,8 @@ def export_selfassesment_tracker(request):
     exclude_fields = exclude_fields,
     keep_include_fields = keep_include_fields,
     show_others = show_others,
-    fk_fields = fk_fields
+    fk_fields = fk_fields,
+    records=records
     )
   return response
 
@@ -1816,7 +1907,7 @@ def delete_limited(request, client_id:int):
 @login_required
 def search_limited(request, limit: int=-1):
   if request.method=='GET' and request.headers.get('Content-Type')=='application/json':
-    search_text = request.GET.get('q', '')
+    search_text = request.GET.get('q', '').strip()
 
     # if tasks query paramter exists then return tasks
     if request.GET.get('tasks'):
@@ -1835,9 +1926,17 @@ def search_limited(request, limit: int=-1):
       data = serialize(queryset=records, format='json')
       return HttpResponse(data, content_type='application/json')
 
-    if search_text.strip()=='':
+    if search_text=='':
       return redirect(URL_NAMES_PREFIXED_WITH_APP_NAME.Limited_Tracker_viewall_name)
-    records = db_search_Limited(search_text, limit)
+    
+    records = QuerySet()
+    if search_text.startswith('>'):
+      idx, is_success, error_msg_or_records = query_model(Limited, search_text[1:])
+      if not is_success:
+        return JsonResponse({'errors': [error_msg_or_records]}, status=400)
+      records = error_msg_or_records
+    else:
+      records = db_search_Limited(search_text, limit)
     records = records.order_by("-client_file_number")
     data = serialize(queryset=records, format='json')
     return HttpResponse(data, content_type='application/json')
@@ -1875,13 +1974,28 @@ def export_limited(request):
   exclude_fields = ['client_id',]
   keep_include_fields = True
   show_others = not(include_fields==default_include_fields)
+
+  data_filter_query = params.get('data_filter_query', '').strip()
+  records = None
+  if data_filter_query.startswith('>'):
+    idx, is_success, error_msg_or_records = query_model(
+      model=Limited,
+      data_filter_query=data_filter_query[1:],
+      queryset=records,
+      )
+    if not is_success:
+      return JsonResponse({'errors': [error_msg_or_records]}, status=400)
+    else:
+      records = error_msg_or_records
+
   export_to_csv(
     django_model = Limited,
     write_to = response,
     include_fields = include_fields,
     exclude_fields = exclude_fields,
     keep_include_fields = keep_include_fields,
-    show_others = show_others
+    show_others = show_others,
+    records=records,
     )
   return response
 
@@ -2207,14 +2321,21 @@ def search_limited_tracker(request, limit: int=-1):
       return HttpResponse(data, content_type='application/json')
     
     # filter results using the search_text
-    if not search_text:
+    if search_text=='':
       return redirect(URL_NAMES_PREFIXED_WITH_APP_NAME.Limited_Tracker_viewall_name)
     
-    records = db_search_LimitedTracker(
-      search_text=search_text,
-      user_email=request.user.email,
-      is_superuser=request.user.is_superuser,
-      limit=limit)
+    records = QuerySet()
+    if search_text.startswith('>'):
+      idx, is_success, error_msg_or_records = query_model(LimitedTracker, search_text[1:])
+      if not is_success:
+        return JsonResponse({'errors': [error_msg_or_records]}, status=400)
+      records = error_msg_or_records
+    else: 
+      records = db_search_LimitedTracker(
+        search_text=search_text,
+        user_email=request.user.email,
+        is_superuser=request.user.is_superuser,
+        limit=limit)
     data = serialize(queryset=records, format='json')
     return HttpResponse(data, content_type='application/json')
   raise Http404
@@ -2252,6 +2373,20 @@ def export_limited_tracker(request):
   }
   keep_include_fields = True
   show_others = (include_fields==default_include_fields)
+
+  data_filter_query = params.get('data_filter_query', '').strip()
+  records = None
+  if data_filter_query.startswith('>'):
+    idx, is_success, error_msg_or_records = query_model(
+      model=LimitedTracker,
+      data_filter_query=data_filter_query[1:],
+      queryset=records,
+      )
+    if not is_success:
+      return JsonResponse({'errors': [error_msg_or_records]}, status=400)
+    else:
+      records = error_msg_or_records
+
   export_to_csv(
     django_model = LimitedTracker,
     write_to = response,
@@ -2259,7 +2394,8 @@ def export_limited_tracker(request):
     exclude_fields = exclude_fields,
     keep_include_fields = keep_include_fields,
     show_others = show_others,
-    fk_fields = fk_fields
+    fk_fields = fk_fields,
+    records=records,
     )
   return response
 
@@ -2555,12 +2691,8 @@ def delete_limited_submission_deadline_tracker(request, submission_id:int):
 @login_required
 def search_limited_submission_deadline_tracker(request, limit: int=-1):
   if request.method=='GET' and request.headers.get('Content-Type')=='application/json':
-    # get search text from url query parameter
-    search_text = request.GET.get('q', '').strip()
     tasks_key = request.GET.get('tasks')
-
-    # if tasks query paramter exists then return tasks
-    if tasks_key:
+    if tasks_key: # if tasks query paramter exists then return tasks
       tasks = {
         'submission_deadline_not_set': get_limited_submissions_where_deadline_not_set(),
         'submission_company_house_deadline_missed_of_active_clients': get_limited_submissions_where_company_house_deadline_missed_of_active_clients(),
@@ -2584,10 +2716,20 @@ def search_limited_submission_deadline_tracker(request, limit: int=-1):
       data = serialize(queryset=records, format='json')
       return HttpResponse(data, content_type='application/json')
     
+    # get search text from url query parameter
+    search_text = request.GET.get('q', '').strip()
     # filter results using the search_text
-    if search_text.strip()=='':
+    if search_text=='':
       return redirect(URL_NAMES_PREFIXED_WITH_APP_NAME.Limited_Submission_Deadline_Tracker_viewall_name)
-    records = db_search_LimitedSubmissionDeadlineTracker(search_text, limit)
+    
+    records = QuerySet()
+    if search_text.startswith('>'):
+      idx, is_success, error_msg_or_records = query_model(LimitedSubmissionDeadlineTracker, search_text[1:])
+      if not is_success:
+        return JsonResponse({'errors': [error_msg_or_records]})
+      records = error_msg_or_records
+    else:
+      records = db_search_LimitedSubmissionDeadlineTracker(search_text, limit)
     data = serialize(queryset=records, format='json')
     return HttpResponse(data, content_type='application/json')
   raise Http404
@@ -2601,8 +2743,6 @@ def all_limited_submission_deadline_tracker(request, limit=-1):
   raise Http404
 
 
-from .data_filter_query_parser import parse_data_filter_queryset
-from error_handler.error_logger import log_server_error_to_file
 @login_required
 @allowed_for_superuser(
   message="Sorry! You are not authorized to export this.",
@@ -2615,17 +2755,6 @@ def export_limited_submission_deadline_tracker(request):
   # get field names to export these are in '.' separated format for nested fields
   params = request.GET
   
-  data_filter_query = params.get('data_filter_query', None)
-  # data_filter_query = '>HMRC_deadline__gte="2025-01-01" and HMRC_deadline__lte="2025-12-31"'
-  filtered_records = None
-  try:
-    filter_queryset = parse_data_filter_queryset(LimitedSubmissionDeadlineTracker, data_filter_query)
-    filtered_records = LimitedSubmissionDeadlineTracker.objects.filter(filter_queryset)
-  except Exception as e:
-    log_server_error_to_file(e)
-    messages.add_message(request, messages.ERROR, f"Invalid Query: {data_filter_query}")
-    return HttpResponse(status=400, content=f"Invalid query or couldn't parse query")
-
   field_names = params.get('export_fields', None)
   if field_names:
     field_names = field_names.split(",")
@@ -2640,6 +2769,20 @@ def export_limited_submission_deadline_tracker(request):
   }
   keep_include_fields = False
   show_others = (include_fields==default_include_fields)
+
+  data_filter_query = params.get('data_filter_query', '').strip()
+  records = None
+  if data_filter_query.startswith('>'):
+    idx, is_success, error_msg_or_records = query_model(
+      model=LimitedSubmissionDeadlineTracker,
+      data_filter_query=data_filter_query[1:],
+      queryset=records,
+      )
+    if not is_success:
+      return JsonResponse({'errors': [error_msg_or_records]}, status=400)
+    else:
+      records = error_msg_or_records
+
   export_to_csv(
     django_model = LimitedSubmissionDeadlineTracker,
     write_to = response,
@@ -2648,7 +2791,7 @@ def export_limited_submission_deadline_tracker(request):
     keep_include_fields = keep_include_fields,
     show_others = show_others,
     fk_fields = fk_fields,
-    records=filtered_records
+    records=records,
     )
   return response
 
@@ -2852,9 +2995,17 @@ def search_limited_vat_tracker(request, limit: int=-1):
       return HttpResponse(data, content_type='application/json')
     
     # filter results using the search_text
-    if search_text.strip()=='':
+    if search_text=='':
       return redirect(URL_NAMES_PREFIXED_WITH_APP_NAME.Limited_VAT_Tracker_viewall_name)
-    records = db_search_LimitedVATTracker(search_text, limit)
+    
+    records = QuerySet()
+    if search_text.startswith('>'):
+      idx, is_success, error_msg_or_records = query_model(LimitedVATTracker, search_text[1:])
+      if not is_success:
+        return JsonResponse({'errors': [error_msg_or_records]}, status=400)
+      records = error_msg_or_records
+    else:
+      records = db_search_LimitedVATTracker(search_text, limit)
     data = serialize(queryset=records, format='json')
     return HttpResponse(data, content_type='application/json')
   raise Http404
@@ -2878,6 +3029,7 @@ def export_limited_vat_tracker(request):
   )
   # get field names to export these are in '.' separated format for nested fields
   params = request.GET
+
   field_names = params.get('export_fields', None)
   if field_names:
     field_names = field_names.split(",")
@@ -2892,6 +3044,20 @@ def export_limited_vat_tracker(request):
   exclude_fields = ['vat_id']
   keep_include_fields = False
   show_others = (include_fields==default_include_fields)
+
+  data_filter_query = params.get('data_filter_query', '').strip()
+  records = None
+  if data_filter_query.startswith('>'):
+    idx, is_success, error_msg_or_records = query_model(
+      model=LimitedVATTracker,
+      data_filter_query=data_filter_query[1:],
+      queryset=records,
+      )
+    if not is_success:
+      return JsonResponse({'errors': [error_msg_or_records]}, status=400)
+    else:
+      records = error_msg_or_records
+
   export_to_csv(
     django_model = LimitedVATTracker,
     write_to = response,
@@ -2899,7 +3065,8 @@ def export_limited_vat_tracker(request):
     exclude_fields = exclude_fields,
     keep_include_fields = keep_include_fields,
     show_others = show_others,
-    fk_fields = fk_fields
+    fk_fields = fk_fields,
+    records=records,
     )
   return response
 
@@ -3097,9 +3264,17 @@ def search_limited_confirmation_statement_tracker(request, limit: int=-1):
       return HttpResponse(data, content_type='application/json')
     
     # filter results using the search_text
-    if search_text.strip()=='':
+    if search_text=='':
       return redirect(URL_NAMES_PREFIXED_WITH_APP_NAME.Limited_Confirmation_Statement_Tracker_viewall_name)
-    records = db_search_LimitedConfirmationStatementTracker(search_text, limit)
+    
+    records = QuerySet()
+    if search_text.startswith('>'):
+      idx, is_success, error_msg_or_records = query_model(LimitedConfirmationStatementTracker, search_text[1:])
+      if not is_success:
+        return JsonResponse({'errors': [error_msg_or_records]}, status=400)
+      records = error_msg_or_records
+    else:
+      records = db_search_LimitedConfirmationStatementTracker(search_text, limit)
     data = serialize(queryset=records, format='json')
     return HttpResponse(data, content_type='application/json')
   raise Http404
@@ -3123,6 +3298,7 @@ def export_limited_confirmation_statement_tracker(request):
   )
   # get field names to export these are in '.' separated format for nested fields
   params = request.GET
+
   field_names = params.get('export_fields', None)
   if field_names:
     field_names = field_names.split(",")
@@ -3137,6 +3313,20 @@ def export_limited_confirmation_statement_tracker(request):
   }
   keep_include_fields = False
   show_others = (include_fields==default_include_fields)
+
+  data_filter_query = params.get('data_filter_query', '').strip()
+  records = None
+  if data_filter_query.startswith('>'):
+    idx, is_success, error_msg_or_records = query_model(
+      model=LimitedConfirmationStatementTracker,
+      data_filter_query=data_filter_query[1:],
+      queryset=records,
+      )
+    if not is_success:
+      return JsonResponse({'errors': [error_msg_or_records]}, status=400)
+    else:
+      records = error_msg_or_records
+
   export_to_csv(
     django_model = LimitedConfirmationStatementTracker,
     write_to = response,
@@ -3144,7 +3334,8 @@ def export_limited_confirmation_statement_tracker(request):
     exclude_fields = exclude_fields,
     keep_include_fields = keep_include_fields,
     show_others = show_others,
-    fk_fields = fk_fields
+    fk_fields = fk_fields,
+    records=records
     )
   return response
 
@@ -3281,13 +3472,41 @@ def export_merged_tracker(request:HttpRequest):
   exclude_fields = set(['is_updated'])
   keep_include_fields = True
   show_others = (include_fields==default_include_fields)
+
+  data_filter_query = params.get('data_filter_query', '').strip()
+  
+  limited_tracker_records = None
+  if data_filter_query.startswith('>'):
+    idx, is_success, error_msg_or_records = query_model(
+      model=LimitedTracker,
+      data_filter_query=data_filter_query[1:],
+      queryset=limited_tracker_records,
+      )
+    if not is_success:
+      return JsonResponse({'errors': [f"LimitedTracker: {error_msg_or_records}"]}, status=400)
+    else:
+      limited_tracker_records = error_msg_or_records
+
+  selfassesment_tracker_records = None
+  if data_filter_query.startswith('>'):
+    idx, is_success, error_msg_or_records = query_model(
+      model=SelfassesmentTracker,
+      data_filter_query=data_filter_query[1:],
+      queryset=selfassesment_tracker_records,
+      )
+    if not is_success:
+      return JsonResponse({'errors': [f"SelfassesmentTracker: {error_msg_or_records}"]}, status=400)
+    else:
+      selfassesment_tracker_records = error_msg_or_records
+
   export_to_csv(
     django_model = LimitedTracker,
     write_to = response,
     include_fields = include_fields,
     exclude_fields = exclude_fields,
     keep_include_fields = keep_include_fields,
-    show_others = show_others
+    show_others = show_others,
+    records=limited_tracker_records
     )
   export_to_csv(
     django_model = SelfassesmentTracker,
@@ -3296,6 +3515,7 @@ def export_merged_tracker(request:HttpRequest):
     exclude_fields = exclude_fields,
     keep_include_fields = keep_include_fields,
     show_others = show_others,
-    write_header_row=False
+    write_header_row=False,
+    records=selfassesment_tracker_records,
     )
   return response

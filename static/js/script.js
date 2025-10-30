@@ -7,17 +7,6 @@ import {
 import DATA from "./parse_data.js";
 //table cell compare attribute name = "data-cmp"
 
-// clear message after 10 seconds
-let delete_message_after = 10000; //millisecond
-setTimeout(function () {
-	let messages = document.querySelectorAll(".message");
-	if (messages) {
-		for (let element of messages) {
-			element.remove();
-		}
-	}
-}, delete_message_after);
-
 // ================================================================================================
 // Handle reload
 if (!["/companies/MTrc/home/", "/"].includes(location.pathname)) {

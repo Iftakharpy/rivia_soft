@@ -28,17 +28,6 @@ const selfassesment_template_query_string = 'template#selfassesment_tracker_temp
 
 //table cell compare attribute name = "data-cmp"
 
-// clear messsage after 10 seconds
-let delete_message_after = 10000 //milisecond
-setTimeout(function(){
-  let messages = document.querySelectorAll('.message')
-  if (messages){
-    for (let element of messages){
-      element.remove()
-    }
-  };
-}, delete_message_after);
-
 // ================================================================================================
 // Handle reload
 document.querySelector('.action-reload').addEventListener('click', async (event) => {
@@ -108,9 +97,11 @@ export function searchTrackers(doneTypingInterval, search_text, limited_search_u
   typingTimer = setTimeout(async (search_text, limited_search_url, selfassesment_search_url)=>{
     let limited_search_records = db_search_records(search_text, limited_search_url)
     let selfassesment_search_records = db_search_records(search_text, selfassesment_search_url)
-
+    
     Promise.all([limited_search_records, selfassesment_search_records]).then(data=>{
       let [limited_search_records, selfassesment_search_records] = data
+      if (Object.hasOwn(limited_search_records, 'errors')) limited_search_records = []
+      if (Object.hasOwn(selfassesment_search_records, 'errors')) selfassesment_search_records = []
       let merged = merge(limited_search_records, selfassesment_search_records)
 
       populate_with_merged_data(
@@ -183,5 +174,8 @@ async function searchTrackersTasks(
   }
   let response = await fetch_url(kwargs)
   let data = await response.json()
+  if (Object.hasOwn(data, 'errors') || Object.hasOwn(data, 'error')){
+    return []
+  }
   return data
 }

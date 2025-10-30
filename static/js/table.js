@@ -206,7 +206,8 @@ export async function populate_with_foreign_data(td, field, field_data, data) {
 		url: data_url,
 		req_method: "GET",
 	};
-	let resp = await fetch_url(kwargs).then((response) => response.json());
+	let resp = await fetch_url(kwargs)
+				.then((response) => response.json());
 
 	let string = repr_format.formatMultiplication(resp);
 	string = string.format(resp);

@@ -38,7 +38,6 @@ def convert_obj_to_JSON(obj, indent_spaces=None):
         return json.dumps(obj, indent=indent_val)
     except Exception as e:
         # Handle cases where the object is still not serializable or indent_spaces is invalid
-        print(f"Error in convert_to_JSON filter: {e}")
         return json.dumps(str(obj)) # Fallback to a string representation
 
 

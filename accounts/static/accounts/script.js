@@ -1,3 +1,6 @@
+import { fetch_url } from '/static/js/fetch_data.js'
+
+
 const DB_MAX_INT_VALUE = 2147483647
 const BACKEND_IDENTIFIERS = {
   OFFICE_AND_ADMIN_CHARGE: "office_and_admin_charge",
@@ -1471,38 +1474,7 @@ function handleDeductionUpdate(e){
 
 // =============================================================================================================================
 // Api caller
-async function fetch_url({url, req_method="GET", data_object={}, headers={'Content-Type': 'application/json'}, others={}}){
-  req_method = req_method.toUpperCase()
-  if (deepCompare(others, {})){
-    others = {
-      credentials: 'same-origin',
-      cache: 'no-cache',
-      mode: 'cors', // no-cors, *cors, same-origin
-      redirect: 'follow', // manual, *follow, error
-      referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin,
-                                    // same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
-    }
-  }
-  if (req_method==='GET'){
-    // send GET request
-    const response = await fetch( url, {
-      method: req_method,
-      headers: headers,
-      ...others
-    })
-    return response
-  }else{
-    // send other requests
-    const response = await fetch( url, {
-        method: req_method,
-        headers: headers,
-        body: data_object,
-        ...others
-      })
-    return response
-  }
-}
-  
+
 // Javascript object compare
 function deepCompare () {
   var i, l, leftChain, rightChain;

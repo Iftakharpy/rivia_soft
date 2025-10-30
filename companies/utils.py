@@ -15,7 +15,7 @@ class ChainedQuerysetsWithCount:
         return self.total_count
 
 
-def model_field_to_form_meta(field: models.Field, load_fk_options=False) -> dict[str, Any]:
+def model_field_to_form_meta(field: type[models.Field], load_fk_options=False) -> dict[str, Any]:
     """
     Maps a Django model field to its HTML and Python metadata.
     Includes options for fields with choices or foreign keys.
@@ -122,7 +122,7 @@ def is_includeable(field, include_fields=[], exclude_fields=[], keep_include_fie
   return True
 
 
-def get_nested_attr(obj: object, attr: str, default=None, attr_split_on='__'):
+def get_nested_attr(obj: type[models.Model], attr: str, default=None, attr_split_on='__'):
     """Filter tag to get python object's attributes.
     Supports nested attributes separated by '__'.
     If attribute doesn't exists returns None as default.
@@ -133,7 +133,7 @@ def get_nested_attr(obj: object, attr: str, default=None, attr_split_on='__'):
         value = getattr(value, attr, default)
     return value
 
-def get_field_names_from_model(django_model: models.Model):
+def get_field_names_from_model(django_model: type[models.Model]):
   field_names = []
   for field in django_model._meta.fields:
     field_names.append(field.name)
@@ -150,7 +150,7 @@ def get_header_name_from_field_name(django_model, field_name:str):
 
 
 def get_field_names_with_label(
-      django_model: models.Model,
+      django_model: type[models.Model],
       exclude_fields_containing_name:list[str]=["password"]
     ) -> list[dict[str, str]]:
   """

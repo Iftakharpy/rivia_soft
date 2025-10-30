@@ -130,7 +130,7 @@ export function catchErrorAndLog(func, ...args){
   }catch(error){
     let devLocations = ['127.0.0.1', 'localhost', '192.168.0']
     for(let location of devLocations){
-      if(window.location.host.match(location)){
+      if(window.location.host.includes(location)){
         console.log(error)
         break
       }

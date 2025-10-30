@@ -101,8 +101,3 @@ exportColumnsSubmit?.addEventListener("click", (ev) => {
 	window.open(url.href);
 });
 
-
-
-window.addEventListener("load", function () {
-	console.log("Export columns selection script loaded")
-});
