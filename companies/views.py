@@ -808,7 +808,7 @@ def delete_selfassesment_data_collection(request, data_id:int):
 @login_required
 def search_selfassesment_data_collection(request, limit:int=-1):
   if request.method=='GET' and request.headers.get('Content-Type')=='application/json':
-    tax_year = request.GET.get('tax_year', None)
+    tax_year = request.GET.get('tax_year', '').strip() or None
     if tax_year:
       try:
         tax_year = int(tax_year)
@@ -851,7 +851,7 @@ def search_selfassesment_data_collection(request, limit:int=-1):
 @login_required
 def all_selfassesment_data_collection(request, limit:int=-1):
   if request.method=='GET' and request.headers.get('Content-Type')=='application/json':
-    tax_year = request.GET.get('tax_year', None)
+    tax_year = request.GET.get('tax_year', '').strip() or None
     if tax_year:
       try:
         tax_year = int(tax_year)
@@ -880,7 +880,7 @@ def export_selfassesment_data_collection(request):
   else:
     field_names = []
 
-  tax_year_id = request.GET.get('tax_year', None)
+  tax_year_id = request.GET.get('tax_year', '').strip() or None
   if tax_year_id:
     try:
       tax_year_id = int(tax_year_id)
@@ -1188,7 +1188,7 @@ def delete_selfassesment_account_submission(request, submission_id:int):
 def search_selfassesment_account_submission(request, limit: int=-1):
   if request.method=='GET' and request.headers.get('Content-Type')=='application/json':
     submission_id = request.GET.get('pk', None)
-    tax_year = request.GET.get('tax_year', None)
+    tax_year = request.GET.get('tax_year', '').strip() or None
     if tax_year:
       try:
         tax_year = int(tax_year)
@@ -1215,23 +1215,23 @@ def search_selfassesment_account_submission(request, limit: int=-1):
     # if tasks query paramter exists then return tasks
     if request.GET.get('tasks'):
       tasks = {
-        "selfassesment_account_submission_status_PAID": get_selfassesment_account_submissions_where_status_PAID().filter(tax_year=tax_year),
-        "selfassesment_account_submission_status_NOT_PAID": get_selfassesment_account_submissions_where_status_NOT_PAID().filter(tax_year=tax_year),
-        "selfassesment_account_submission_status_SUBMITTED_BUT_NOT_PAID": get_selfassesment_account_submissions_where_status_SUBMITTED_BUT_NOT_PAID().filter(tax_year=tax_year),
-        "selfassesment_account_submission_status_REQUEST": get_selfassesment_account_submissions_where_status_REQUEST().filter(tax_year=tax_year),
-        "selfassesment_account_submission_status_PRIORITY": get_selfassesment_account_submissions_where_status_PRIORITY().filter(tax_year=tax_year),
-        "selfassesment_account_submission_status_PROCESSING": get_selfassesment_account_submissions_where_status_PROCESSING().filter(tax_year=tax_year),
-        "selfassesment_account_submission_status_BOOK_APPOINTMENT": get_selfassesment_account_submissions_where_status_BOOK_APPOINTMENT().filter(tax_year=tax_year),
-        "selfassesment_account_submission_status_READY_FOR_SUBMIT": get_selfassesment_account_submissions_where_status_READY_FOR_SUBMIT().filter(tax_year=tax_year),
-        "selfassesment_account_submission_status_WAITING_FOR_INFORMATION": get_selfassesment_account_submissions_where_status_WAITING_FOR_INFORMATION().filter(tax_year=tax_year),
-        "selfassesment_account_submission_status_WAITING_FOR_CONFIRMATION": get_selfassesment_account_submissions_where_status_WAITING_FOR_CONFIRMATION().filter(tax_year=tax_year),
-        "selfassesment_account_submission_status_SUBMITTED": get_selfassesment_account_submissions_where_status_SUBMITTED().filter(tax_year=tax_year),
-        "selfassesment_account_submission_status_ASSIGNED_TO_ME": get_selfassesment_account_submissions_where_status_ASSIGNED_TO_ME(request.user).filter(tax_year=tax_year),
-        "selfassesment_account_submission_status_NOT_ASSIGNED": get_selfassesment_account_submissions_where_status_NOT_ASSIGNED().filter(tax_year=tax_year),
-        "selfassesment_account_submission_status_NOT_ISSUED": get_selfassesment_account_submissions_where_status_NOT_ISSUED().filter(tax_year=tax_year),
-        "selfassesment_account_submission_status_CLIENT_CLOSED": get_selfassesment_account_submissions_where_status_CLIENT_CLOSED().filter(tax_year=tax_year),
-        "selfassesment_account_submission_data_collected": get_selfassesment_account_submissions_where_data_collected(tax_year=tax_year),
-        "selfassesment_not_added_in_selfassesment_account_submission": get_selfassesment_which_are_not_added_in_selfassesment_account_submission(tax_year=tax_year),
+        "selfassesment_account_submission_status_PAID": get_selfassesment_account_submissions_where_status_PAID(),
+        "selfassesment_account_submission_status_NOT_PAID": get_selfassesment_account_submissions_where_status_NOT_PAID(),
+        "selfassesment_account_submission_status_SUBMITTED_BUT_NOT_PAID": get_selfassesment_account_submissions_where_status_SUBMITTED_BUT_NOT_PAID(),
+        "selfassesment_account_submission_status_REQUEST": get_selfassesment_account_submissions_where_status_REQUEST(),
+        "selfassesment_account_submission_status_PRIORITY": get_selfassesment_account_submissions_where_status_PRIORITY(),
+        "selfassesment_account_submission_status_PROCESSING": get_selfassesment_account_submissions_where_status_PROCESSING(),
+        "selfassesment_account_submission_status_BOOK_APPOINTMENT": get_selfassesment_account_submissions_where_status_BOOK_APPOINTMENT(),
+        "selfassesment_account_submission_status_READY_FOR_SUBMIT": get_selfassesment_account_submissions_where_status_READY_FOR_SUBMIT(),
+        "selfassesment_account_submission_status_WAITING_FOR_INFORMATION": get_selfassesment_account_submissions_where_status_WAITING_FOR_INFORMATION(),
+        "selfassesment_account_submission_status_WAITING_FOR_CONFIRMATION": get_selfassesment_account_submissions_where_status_WAITING_FOR_CONFIRMATION(),
+        "selfassesment_account_submission_status_SUBMITTED": get_selfassesment_account_submissions_where_status_SUBMITTED(),
+        "selfassesment_account_submission_status_ASSIGNED_TO_ME": get_selfassesment_account_submissions_where_status_ASSIGNED_TO_ME(request.user),
+        "selfassesment_account_submission_status_NOT_ASSIGNED": get_selfassesment_account_submissions_where_status_NOT_ASSIGNED(),
+        "selfassesment_account_submission_status_NOT_ISSUED": get_selfassesment_account_submissions_where_status_NOT_ISSUED(),
+        "selfassesment_account_submission_status_CLIENT_CLOSED": get_selfassesment_account_submissions_where_status_CLIENT_CLOSED(),
+        "selfassesment_account_submission_data_collected": get_selfassesment_account_submissions_where_data_collected(),
+        "selfassesment_not_added_in_selfassesment_account_submission": get_selfassesment_which_are_not_added_in_selfassesment_account_submission(),
       }
       records = tasks.get(request.GET.get('tasks'), SelfassesmentAccountSubmission.objects.none())
       if tax_year:
@@ -1262,7 +1262,7 @@ def search_selfassesment_account_submission(request, limit: int=-1):
 @login_required
 def all_selfassesment_account_submission(request, limit=-1):
   if request.method=='GET' and request.headers.get('Content-Type')=='application/json':
-    tax_year = request.GET.get('tax_year', None)
+    tax_year = request.GET.get('tax_year', '').strip() or None
     if tax_year:
       try:
         tax_year = int(tax_year)
@@ -1291,7 +1291,7 @@ def export_selfassesment_account_submission(request):
   else:
     field_names = []
   
-  tax_year_id = request.GET.get('tax_year', None)
+  tax_year_id = request.GET.get('tax_year', '').strip() or None
   if tax_year_id:
     try:
       tax_year_id = int(tax_year_id)
