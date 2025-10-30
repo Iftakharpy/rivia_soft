@@ -1,7 +1,3 @@
-Of course. Here is a more detailed and example-rich user guide, written in Markdown. It's designed to be very clear for non-technical users, with multiple examples for every concept.
-
----
-
 # A Simple Guide to Filtering Your Data
 
 You can use the search bar to find exactly the information you need by typing in simple filters. This guide will show you how to build filters from simple to advanced.
