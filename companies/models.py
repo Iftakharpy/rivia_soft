@@ -553,6 +553,7 @@ class Limited(models.Model):
     director_post_code =models.CharField(verbose_name='Director Postal Code', max_length=10, blank=True, null=True)
     gateway_id = models.CharField(verbose_name='Director Gateway ID', max_length=255, blank=True, null=True, unique=True)
     gateway_password = models.CharField(verbose_name='Gateway Password', max_length=255, blank=True, null=True)
+    CH_personal_codes = models.TextField(verbose_name='CH Personal Codes', blank=True, null=True, db_index=True)
     
     # Business Info
     AOR_number = models.CharField(verbose_name='Account Office Reference number', max_length=511, blank=True, null=True, db_index=True)

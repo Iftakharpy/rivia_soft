@@ -17,7 +17,7 @@ if settings.WANT_TO_MIGRATE:
 class Fieldset:
     title: str = 'Fieldset Title'
     fieldset_message:str = ''
-    fields: list[str] = field(default_factory=lambda:[])
+    fields: Iterable[str] = field(default_factory=lambda:[])
 
 class Select(widgets.ChoiceWidget):
     template_name = 'companies/widgets/select.html'

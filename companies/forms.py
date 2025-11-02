@@ -931,6 +931,7 @@ class LimitedCreationForm(forms.ModelForm):
             'NINO',
             'gateway_id',
             'gateway_password',
+            'CH_personal_codes',
             
             'bank_name',
             'bank_account_number',
@@ -950,7 +951,7 @@ class LimitedCreationForm(forms.ModelForm):
                 ),
             Fieldset(
                 title = 'HMRC Details',
-                fields =  ('HMRC_referance', 'UTR', 'NINO', 'HMRC_agent', 'gateway_id', 'gateway_password', )
+                fields =  ('HMRC_referance', 'UTR', 'NINO', 'HMRC_agent', 'gateway_id', 'gateway_password', 'CH_personal_codes', )
             ),
             Fieldset(
                 title = 'Business Info', 
@@ -1012,6 +1013,7 @@ class LimitedChangeForm(forms.ModelForm):
             'NINO',
             'gateway_id',
             'gateway_password',
+            'CH_personal_codes',
             
             'bank_name',
             'bank_account_number',
@@ -1031,7 +1033,7 @@ class LimitedChangeForm(forms.ModelForm):
                 ),
             Fieldset(
                 title = 'HMRC Details',
-                fields =  ('HMRC_referance', 'UTR', 'NINO', 'HMRC_agent', 'gateway_id', 'gateway_password', )
+                fields =  ('HMRC_referance', 'UTR', 'NINO', 'HMRC_agent', 'gateway_id', 'gateway_password', 'CH_personal_codes', )
             ),
             Fieldset(
                 title = 'Business Info', 
