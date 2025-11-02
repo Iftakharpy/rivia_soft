@@ -229,6 +229,7 @@ def db_search_Limited(search_text: str, limit=-1):
             Q(vat__icontains                           = search_text) |\
             Q(gateway_id__icontains                    = search_text) |\
             Q(gateway_password__icontains              = search_text) |\
+            Q(CH_personal_codes__icontains             = search_text) |\
             Q(bank_name__icontains                     = search_text) |\
             Q(bank_account_number__icontains           = search_text) |\
             Q(bank_sort_code__icontains                = search_text) |\
