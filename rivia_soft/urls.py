@@ -15,14 +15,15 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.shortcuts import redirect
 from django.conf import settings
 from django.conf.urls.static import static
 
-from companies.views import home_merged_tracker
+from companies.url_variables import URL_NAMES_PREFIXED_WITH_APP_NAME
 
 
 urlpatterns = [
-    path('', home_merged_tracker),
+    path('', lambda *args, **kwargs:redirect(URL_NAMES_PREFIXED_WITH_APP_NAME.Merged_Tracker_home_name)),
     path('companies/', include('companies.urls'), name='companies'),
     path('accounts/', include('accounts.urls'), name='accounts'),
     path('u/', include('users.urls')),

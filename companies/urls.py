@@ -1,5 +1,6 @@
 from django.urls import path
 from django.urls.conf import include, re_path
+from django.shortcuts import redirect
 
 # selfassesment view functions
 from .views import delete_selfassesment_data_collection, home_selfassesment, create_selfassesment, update_selfassesment, \
@@ -65,7 +66,7 @@ application_name = app_name
 
 urlpatterns = [
     path(route='',
-        view=home_merged_tracker,
+        view=lambda *args, **kwargs:redirect(URL_NAMES_PREFIXED_WITH_APP_NAME.Merged_Tracker_home_name),
         name='home'),
 
     # =============================================================================================================

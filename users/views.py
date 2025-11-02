@@ -1,4 +1,6 @@
 import json
+from typing import Any
+
 from django.db.models import QuerySet
 from django.http.response import Http404, HttpResponse, HttpResponseForbidden, JsonResponse
 from django.shortcuts import render, redirect
@@ -60,7 +62,7 @@ def signup_user(request):
     return render(request, 'users/signup.html', context=context)
 
 def login_user(request):
-    context = {'form': CustomUserLoginForm()}
+    context: dict[Any, Any] = {'form': CustomUserLoginForm()}
     if hasattr(request, 'user') and request.user.is_authenticated:
         if hasattr(request.GET, "next"):
             return redirect(request.GET.get('next'))
