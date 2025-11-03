@@ -10,6 +10,9 @@
   #main-content {
     @apply px-4 py-1;
   }
+  pre{
+	overflow-wrap: break-word;
+  }
 	select {
 		@apply form-select;
 	}

@@ -1387,10 +1387,6 @@ video {
     fill: currentColor;
   }
 
-  .p-4{
-    padding: 1rem;
-  }
-
   .p-5{
     padding: 1.25rem;
   }
@@ -1474,10 +1470,6 @@ video {
 
   .pt-1{
     padding-top: 0.25rem;
-  }
-
-  .pb-0{
-    padding-bottom: 0px;
   }
 
   .pt-2{
@@ -1974,6 +1966,10 @@ video {
     padding-right: 1rem;
     padding-top: 0.25rem;
     padding-bottom: 0.25rem;
+  }
+
+  pre{
+    overflow-wrap: break-word;
   }
 
   select{
