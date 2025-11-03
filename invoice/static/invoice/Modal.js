@@ -17,5 +17,5 @@ export function openModal(modalTitle, modalBodyNode){
 }
 export function closeModal(){
     modalContainer.style.display = 'none';
-    modalBody.innerHTML = '';
+    modalBody.innerText = '';
 }

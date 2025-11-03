@@ -50,7 +50,7 @@ search_boxes.forEach((search_box) => {
 })
 function update_options(records, repr_format, select_element, options_container, option_element_tag='span') {
   // clear options
-  options_container.innerHTML = ''
+  options_container.innerText = ''
   // select previously selected one default
   let currently_selected_option = select_element.options[select_element.selectedIndex]
   // if (currently_selected_option.value){
@@ -108,19 +108,19 @@ function option_selected(event) {
   
   // Clear select element
   let select_element = search_field.querySelector('select')
-  select_element.innerHTML = ''
+  select_element.innerText = ''
   // add option
   select_element.add(selected_option)
 
   // Update options_container
-  options_container.innerHTML = ''
+  options_container.innerText = ''
   // options_container.appendChild(clicked_option)
 
   // Update search_bar
   let search_bar = search_field.querySelector('[name="search"]')
   // search_bar.placeholder = text
   search_bar.value = text
-  options_container.innerHTML = ''
+  options_container.innerText = ''
   search_bar.focus()
   return true
 }
@@ -175,7 +175,7 @@ async function searchOptions(search_text){
   Promise.all([limited_records, selfassesment_records]).then(data => {
     [limited_records, selfassesment_records] = data
     
-    options_container.innerHTML = ''
+    options_container.innerText = ''
     limited_records.forEach((record)=>{
       let option = createOption(record, 'Limited')
       options_container.appendChild(option)
@@ -194,7 +194,7 @@ async function loadAllOptions(){
   Promise.all([limited_all_records, selfassesment_all_records]).then(data=> {
     [limited_all_records, selfassesment_all_records] = data
     
-    options_container.innerHTML = ''
+    options_container.innerText = ''
     limited_all_records.forEach((record)=>{
       let option = createOption(record, 'Limited')
       options_container.appendChild(option)

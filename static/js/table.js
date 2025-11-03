@@ -87,7 +87,7 @@ export async function get_tr_for_table(
 		}
 		if (field_data == null) continue;
 
-		formatted_text.innerHTML = makeSafeHTML(`${field_data}`);
+		formatted_text.innerText =  field_data;
 
 		td.classList.add("whitespace-nowrap"); // show text in one line
 
@@ -252,7 +252,7 @@ export async function populate_with_data(
 	let template = document.querySelector(template_querySelector_string); //find template
 
 	let tbody = document.querySelector("tbody#data"); // find data container
-	if (clear_table_before_insertion) tbody.innerHTML = ""; // clear the container
+	if (clear_table_before_insertion) tbody.innerText = ""; // clear the container
 
 	// Populate the table using the provided data
 	for (let record of data_array) {
@@ -287,7 +287,7 @@ export async function populate_with_merged_data(
 	); //find template
 
 	let tbody = document.querySelector("tbody#data"); // find data container
-	if (clear_table_before_insertion) tbody.innerHTML = ""; // clear the container
+	if (clear_table_before_insertion) tbody.innerText = ""; // clear the container
 
 	// Populate the table using the provided data
 	for (let record of merged_data) {

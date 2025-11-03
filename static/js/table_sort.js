@@ -21,7 +21,7 @@ tables.forEach((element) => {
       table_rows = mergeSort(table_rows, reverse);
 
       // update table body
-      tbody.innerHTML = "";
+      tbody.innerText = "";
       for (let element of table_rows) {
         tbody.appendChild(element);
       }

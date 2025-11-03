@@ -1326,7 +1326,7 @@ async function getDisplayableSources(allSources, displayingSourceIds, searchText
 async function displayTaxableIncomeOptions(displayableTaxableIncomeSources=null){
   let incomeSources = await getTaxableIncomeSources()
   if (displayableTaxableIncomeSources==null) displayableTaxableIncomeSources = await getDisplayableSources(incomeSources, displayingTaxableIncomeIds)
-  taxableIncomeSearchOptions.innerHTML = ''
+  taxableIncomeSearchOptions.innerText = ''
   displayableTaxableIncomeSources.forEach(incomeSource=>{
     let option = createHtmlElement('div', {'data-taxable-income-id': incomeSource.id})
     option.textContent = incomeSource.name
@@ -1336,7 +1336,7 @@ async function displayTaxableIncomeOptions(displayableTaxableIncomeSources=null)
 async function displaySelfemploymentIncomeOptions(displayableIncomeSources=null){
   let incomeSources = await getSelfemploymentIncomeSources()
   if (displayableIncomeSources==null) displayableIncomeSources = await getDisplayableSources(incomeSources, displayingSelfemploymentIncomeIds)
-  selfemploymentIncomeSearchOptions.innerHTML = ''
+  selfemploymentIncomeSearchOptions.innerText = ''
     displayableIncomeSources.forEach(incomeSource=>{
       let option = createHtmlElement('div', {'data-income-id': incomeSource.id})
       option.textContent = incomeSource.name
@@ -1346,7 +1346,7 @@ async function displaySelfemploymentIncomeOptions(displayableIncomeSources=null)
 async function displayExpenseOptions(displayableExpenseSources=null){
   let expenseSources = await getExpneseSources()
   if (displayableExpenseSources==null) displayableExpenseSources = await getDisplayableSources(expenseSources, displayingExpenseIds)
-  expenseSearchOptions.innerHTML = ''
+  expenseSearchOptions.innerText = ''
   displayableExpenseSources.forEach(expenseSource=>{
       let option = createHtmlElement('div', {'data-expense-id': expenseSource.id})
       option.textContent = expenseSource.name
@@ -1356,7 +1356,7 @@ async function displayExpenseOptions(displayableExpenseSources=null){
 async function displayDeductionOptions(displayableDeductionSources=null){
   let deductionSources = await getDeductionSources()
   if (displayableDeductionSources==null) displayableDeductionSources = await getDisplayableSources(deductionSources, displayingDeductionIds)
-  deductionSearchOptions.innerHTML = ''
+  deductionSearchOptions.innerText = ''
   displayableDeductionSources.forEach(deductionSource=>{
       let option = createHtmlElement('div', {'data-deduction-id': deductionSource.id})
       option.textContent = deductionSource.name

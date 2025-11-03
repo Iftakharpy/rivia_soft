@@ -50,7 +50,7 @@ async function option_selected(event){
 }
 async function update_options(records, repr_format, options_container, option_element_tag='span') {
   // clear options
-  options_container.innerHTML = ''
+  options_container.innerText = ''
   items_in_invoice = await getAllItemsInInvoice(INVOICE_ID)
   
   // update options
@@ -160,7 +160,7 @@ async function showItemInInvoice(invoice_item_in_invoice){
 
 async function showInvoiceItemsInInvoice(invoice_id){
   let invoice_items_in_invoice_container = document.querySelector('div.invoice-items-in-invoice')
-  invoice_items_in_invoice_container.innerHTML = ''
+  invoice_items_in_invoice_container.innerText = ''
   await getAllItemsInInvoice(invoice_id)
   if (items_in_invoice===null || items_in_invoice.length==0 ) {
     invoice_items_in_invoice_container.innerHTML = 'No items in invoice'
