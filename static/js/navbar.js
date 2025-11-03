@@ -9,6 +9,45 @@ document.addEventListener('DOMContentLoaded', function() {
   const navGroupTemplate = document.getElementById('nav-group-template');
   const secondaryNavItemTemplate = document.getElementById('secondary-nav-item-template');
 
+  function getOverflowInfo(dropdownLinksWrapper){
+    // Adjust position to keep in viewport
+    let boundingRect = dropdownLinksWrapper.getBoundingClientRect()
+    let wrapperX = boundingRect.x
+    let wrapperWidth = boundingRect.width
+    let viewportWidth = document.body.clientWidth
+
+    let isOverflowingViewportToRight = (wrapperX+wrapperWidth) > viewportWidth
+    let isOverflowingViewportToLeft = (wrapperX<0)
+    let isOverflowing = (isOverflowingViewportToLeft || isOverflowingViewportToRight)
+    let doesWrapperFitInViewport = wrapperWidth <= viewportWidth;
+    let contains_center = dropdownLinksWrapper.classList.contains("absolute-centerX");
+    let contains_left = dropdownLinksWrapper.classList.contains("left-0");
+    let contains_right = dropdownLinksWrapper.classList.contains("right-0");
+    return {
+      isOverflowing,
+      isOverflowingViewportToLeft,
+      isOverflowingViewportToRight,
+      doesWrapperFitInViewport,
+      contains_left, contains_center, contains_right
+    }
+  }
+  function setAbsoluteCenter(dropdownLinksWrapper){
+    dropdownLinksWrapper.classList.remove('left-0')
+    dropdownLinksWrapper.classList.remove('right-0')
+    dropdownLinksWrapper.classList.add('absolute-centerX')
+  }
+  function setAbsoluteRight(dropdownLinksWrapper){
+    dropdownLinksWrapper.classList.remove('absolute-centerX')
+    dropdownLinksWrapper.classList.remove('left-0')
+    dropdownLinksWrapper.classList.add('right-0')
+  }
+  function setAbsoluteLeft(dropdownLinksWrapper){
+    dropdownLinksWrapper.classList.remove('absolute-centerX')
+    dropdownLinksWrapper.classList.remove('right-0')
+    dropdownLinksWrapper.classList.add('left-0')
+  }
+
+
   function createNavLink(item) {
     const link = navLinkTemplate.content.cloneNode(true).querySelector('[data-link-item]');
     link.href = item.url;
@@ -26,7 +65,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const dropdownLinks = dropdownLinksWrapper.querySelector('[data-links-container]');
 
     if (item.extraClassList) {
+      dropdownLinksWrapper.classList.add(...item.removeClassList);
       dropdownLinks.classList.add(...item.extraClassList);
+    }
+    if (item.removeClassList){
+      dropdownLinksWrapper.classList.remove(...item.removeClassList);
+      dropdownLinks.classList.remove(...item.removeClassList);
     }
 
     groupToggleBtn.querySelector('[data-group-name]').textContent = item.groupName;
@@ -48,6 +92,41 @@ document.addEventListener('DOMContentLoaded', function() {
       } else {
         dropdownLinksWrapper.classList.remove('hidden');
         groupToggleBtn.querySelector('svg').classList.add('rotate-180');
+        if (item.doNotAdjustPosition) return;
+        // Gather overflow info
+        let {
+          doesWrapperFitInViewport,
+          contains_center,
+          contains_left,
+          contains_right,
+        } = getOverflowInfo(dropdownLinksWrapper)
+
+        setAbsoluteRight(dropdownLinksWrapper)
+        let { isOverflowingViewportToLeft:willOverflowAtRight } = getOverflowInfo(dropdownLinksWrapper)
+        setAbsoluteLeft(dropdownLinksWrapper)
+        let { isOverflowingViewportToRight:willOverflowAtLeft } = getOverflowInfo(dropdownLinksWrapper)
+        setAbsoluteCenter(dropdownLinksWrapper)
+        let { isOverflowing:willOverflowAtCenter } = getOverflowInfo(dropdownLinksWrapper)
+
+        // Adjust position to keep in viewport
+        if (!doesWrapperFitInViewport){
+          if (contains_center){
+            setAbsoluteRight(dropdownLinksWrapper)
+          } else if (contains_right){
+            setAbsoluteLeft(dropdownLinksWrapper)
+          } else if (contains_left){
+            setAbsoluteCenter(dropdownLinksWrapper)
+          }
+        }
+        else{
+          if (!willOverflowAtCenter){
+            // setAbsoluteCenter(dropdownLinksWrapper)
+          } else if (!willOverflowAtRight){
+            setAbsoluteRight(dropdownLinksWrapper)
+          } else if (!willOverflowAtLeft){
+            setAbsoluteLeft(dropdownLinksWrapper)
+          } 
+        }
       }
       
       // Find all groups that are direct children of the same container (siblings)

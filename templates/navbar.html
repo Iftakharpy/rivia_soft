@@ -8,8 +8,8 @@
 
 <div class="w-full text-gray-700 bg-white dark:text-gray-200 dark:bg-gray-800 nav-container">
 
-  <div>
-    <div class="pt-2 flex flex-col md:items-center md:justify-between md:flex-row max-w-screen-xl px-4 md:px-6 lg:px-8 mx-auto">
+  <div class="px-4 pt-2">
+    <div class="flex flex-col md:items-center md:justify-between md:flex-row max-w-screen-xl mx-auto">
       <!-- Name of company -->
       <div class="flex flex-row items-center justify-between">
         <a href="{% url home %}" class="text-lg font-semibold tracking-widest text-gray-900 uppercase rounded-lg dark:text-white focus:outline-none focus:shadow-outline">Rivia Solutions</a>
@@ -201,7 +201,9 @@ window.NAV_LINKS = {
     
     {
       groupName: "👥{{ user.first_name }}",
-      extraClassList: ['flex', 'flex-col', 'gap-2', ],
+      extraClassList: ['flex', 'flex-col', 'gap-2', 'right-0'],
+      removeClassList: ['absolute-centerX'],
+      doNotAdjustPosition: true,
       urls: [
         {% if user.is_superuser %}
           {
