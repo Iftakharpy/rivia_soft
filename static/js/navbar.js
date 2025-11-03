@@ -65,7 +65,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const dropdownLinks = dropdownLinksWrapper.querySelector('[data-links-container]');
 
     if (item.extraClassList) {
-      dropdownLinksWrapper.classList.add(...item.removeClassList);
+      // experimental nav_bar_merged
+      // dropdownLinksWrapper.classList.add(...item.removeClassList);
       dropdownLinks.classList.add(...item.extraClassList);
     }
     if (item.removeClassList){
