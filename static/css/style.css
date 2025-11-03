@@ -1395,11 +1395,6 @@ video {
     padding: 1.25rem;
   }
 
-  .px-1{
-    padding-left: 0.25rem;
-    padding-right: 0.25rem;
-  }
-
   .px-2{
     padding-left: 0.5rem;
     padding-right: 0.5rem;
@@ -1455,10 +1450,6 @@ video {
     padding-bottom: 1rem;
   }
 
-  .pb-1{
-    padding-bottom: 0.25rem;
-  }
-
   .pb-4{
     padding-bottom: 1rem;
   }
@@ -1493,10 +1484,6 @@ video {
 
   .pt-1{
     padding-top: 0.25rem;
-  }
-
-  .pt-2{
-    padding-top: 0.5rem;
   }
 
   .text-left{
