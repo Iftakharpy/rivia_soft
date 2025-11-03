@@ -2,266 +2,28 @@
 {% load static %}
 
 {% if user.is_authenticated %}
-<script defer type="module" src="{% static 'js/alpine/alpine.v2.min.js' %}"></script>
 <link rel="stylesheet" href="{% static 'css/icon_styles.css' %}">
+<script defer type="module" src="{% static 'js/navbar.js' %}"></script>
+
+
 <div class="w-full text-gray-700 bg-white dark:text-gray-200 dark:bg-gray-800 nav-container">
-  
+
   <div>
-    <div x-data="{ open: false }" class="flex flex-col md:items-center md:justify-between md:flex-row max-w-screen-xl px-4 md:px-6 lg:px-8 mx-auto">
+    <div class="flex flex-col md:items-center md:justify-between md:flex-row max-w-screen-xl px-4 md:px-6 lg:px-8 mx-auto">
       <!-- Name of company -->
       <div class="p-4 flex flex-row items-center justify-between">
         <a href="{% url home %}" class="text-lg font-semibold tracking-widest text-gray-900 uppercase rounded-lg dark:text-white focus:outline-none focus:shadow-outline">Rivia Solutions</a>
-        <button class="md:hidden rounded-lg focus:outline-none focus:shadow-outline" @click="open = !open">
+        
+        <button id="mobile-menu-button" class="md:hidden rounded-lg focus:outline-none focus:shadow-outline">
           <svg fill="currentColor" viewBox="0 0 20 20" class="w-6 h-6">
-            <path x-show="!open" fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM9 15a1 1 0 011-1h6a1 1 0 110 2h-6a1 1 0 01-1-1z" clip-rule="evenodd"></path>
-            <path x-show="open" fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+            <path id="mobile-menu-open-icon" fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM9 15a1 1 0 011-1h6a1 1 0 110 2h-6a1 1 0 01-1-1z" clip-rule="evenodd"></path>
+            <path id="mobile-menu-close-icon" class="hidden" fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
           </svg>
         </button>
       </div>
 
-      <nav :class="{'flex': open, 'hidden': !open}" class="flex-col flex-grow pb-4 md:pb-0 hidden md:flex md:justify-end md:flex-row z-50" style="align-items:center">
-        <!-- Merged Tracker View -->
-        <a class="px-4 py-2 mt-2 text-sm font-semibold bg-transparent rounded-lg dark:bg-transparent dark:hover:bg-gray-600 dark:focus:bg-gray-600 dark:focus:text-white dark:hover:text-white dark:text-gray-200 md:mt-0 md:ml-4 hover:text-gray-900 focus:text-gray-900 hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:shadow-outline" href="{% url Merged_Tracker_home_name %}">Tracker</a>
-
-        {% comment %}
-        <!-- Merged Tracker View -->
-        <a class="px-4 py-2 mt-2 text-sm font-semibold bg-transparent rounded-lg dark:bg-transparent dark:hover:bg-gray-600 dark:focus:bg-gray-600 dark:focus:text-white dark:hover:text-white dark:text-gray-200 md:mt-0 md:ml-4 hover:text-gray-900 focus:text-gray-900 hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:shadow-outline" href="{% url Merged_Tracker_home_name %}"><img class="icon" src="{% static 'companies/tracker.png' %}" alt=""></a>
-        <!-- Selfassesment View -->
-        <a class="block px-4 py-2 mt-2 text-sm font-semibold bg-transparent rounded-lg dark:bg-transparent dark:hover:bg-gray-600 dark:focus:bg-gray-600 dark:focus:text-white dark:hover:text-white dark:text-gray-200 md:mt-0 hover:text-gray-900 focus:text-gray-900 hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:shadow-outline" href="{% url Selfassesment_home_name %}"><img class="icon" src="{% static 'companies/selfassesment.png' %}" alt=""></a>
-        <!-- Selfassesment Account Submission View -->
-        <a class="block px-4 py-2 mt-2 text-sm font-semibold bg-transparent rounded-lg dark:bg-transparent dark:hover:bg-gray-600 dark:focus:bg-gray-600 dark:focus:text-white dark:hover:text-white dark:text-gray-200 md:mt-0 hover:text-gray-900 focus:text-gray-900 hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:shadow-outline" href="{% url Selfassesment_Account_Submission_home_name %}"><img class="icon" src="{% static 'companies/selfassesmentSubmission.png' %}" alt=""></a>
-        <!-- Limited View -->
-        <a class="block px-4 py-2 mt-2 text-sm font-semibold bg-transparent rounded-lg dark:bg-transparent dark:hover:bg-gray-600 dark:focus:bg-gray-600 dark:focus:text-white dark:hover:text-white dark:text-gray-200 md:mt-0 hover:text-gray-900 focus:text-gray-900 hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:shadow-outline" href="{% url Limited_home_name %}"><img class="icon" src="{% static 'companies/limited.png' %}" alt=""></a>
-        <!-- Limited Submission View -->
-        <a class="block px-4 py-2 mt-2 text-sm font-semibold bg-transparent rounded-lg dark:bg-transparent dark:hover:bg-gray-600 dark:focus:bg-gray-600 dark:focus:text-white dark:hover:text-white dark:text-gray-200 md:mt-0 hover:text-gray-900 focus:text-gray-900 hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:shadow-outline" href="{% url Limited_Submission_Deadline_Tracker_home_name %}"><img class="icon" src="{% static 'companies/limitedSubmission.png' %}" alt=""></a>
-
-        
-        <!-- expandable nav Others  -->
-        <div @click.away="open = false" class="relative" x-data="{ open: false }">
-          <button @click="open = !open" class="flex flex-row items-center w-full px-4 py-2 mt-2 text-sm font-semibold text-left bg-transparent rounded-lg dark:bg-transparent dark:focus:text-white dark:hover:text-white dark:focus:bg-gray-600 dark:hover:bg-gray-600 md:w-auto md:inline md:mt-0 hover:text-gray-900 focus:text-gray-900 hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:shadow-outline">
-            <span>Others</span>
-          <svg fill="currentColor" viewBox="0 0 20 20" :class="{'rotate-180': open, 'rotate-0': !open}" class="inline w-4 h-4 mt-1 ml-1 transition-transform duration-200 transform md:-mt-1"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
-          </button>
-
-          <div x-show="open" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="transform opacity-100 scale-100" x-transition:leave-end="transform opacity-0 scale-95" class="absolute absolute-centerX right-0 w-full min-w-max mt-2 origin-top-right rounded-md shadow-lg md:w-48 z-50">
-            <div class="px-2 py-2 bg-white rounded-md shadow dark:bg-gray-800">
-              <!-- direct links -->
-              <a class="block px-4 py-2 mt-2 text-sm font-semibold bg-transparent rounded-lg dark:bg-transparent dark:hover:bg-gray-600 dark:focus:bg-gray-600 dark:focus:text-white dark:hover:text-white dark:text-gray-200 md:mt-0 hover:text-gray-900 focus:text-gray-900 hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:shadow-outline" href="{% url Selfassesment_create_name %}">Selfassesment Create</a>
-              <a class="block px-4 py-2 mt-2 text-sm font-semibold bg-transparent rounded-lg dark:bg-transparent dark:hover:bg-gray-600 dark:focus:bg-gray-600 dark:focus:text-white dark:hover:text-white dark:text-gray-200 md:mt-0 hover:text-gray-900 focus:text-gray-900 hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:shadow-outline" href="{% url Selfassesment_Account_Submission_create_name %}">Selfassesment Account Submission Create</a>
-              <a class="block px-4 py-2 mt-2 text-sm font-semibold bg-transparent rounded-lg dark:bg-transparent dark:hover:bg-gray-600 dark:focus:bg-gray-600 dark:focus:text-white dark:hover:text-white dark:text-gray-200 md:mt-0 hover:text-gray-900 focus:text-gray-900 hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:shadow-outline" href="{% url Limited_create_name %}">Limited Create</a>
-              <a class="block px-4 py-2 mt-2 text-sm font-semibold bg-transparent rounded-lg dark:bg-transparent dark:hover:bg-gray-600 dark:focus:bg-gray-600 dark:focus:text-white dark:hover:text-white dark:text-gray-200 md:mt-0 hover:text-gray-900 focus:text-gray-900 hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:shadow-outline" href="{% url Limited_Submission_Deadline_Tracker_create_name %}">Limited Submission Deadline Tracker Create</a>
-
-              <!-- expandable sub menu -->
-              <div @click.away="open = false" class="relative w-full" x-data="{ open: false }">
-                <button @click="open = !open" class="inline-block text-left px-4 py-2 mt-2 text-sm font-semibold bg-transparent rounded-lg dark:bg-transparent dark:hover:bg-gray-600 dark:focus:bg-gray-600 dark:focus:text-white dark:hover:text-white dark:text-gray-200 md:mt-0 hover:text-gray-900 focus:text-gray-900 hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:shadow-outline w-full">
-                  <span class="mr-auto">Limited VAT Tracker</span>
-                  <svg fill="currentColor" viewBox="0 0 20 20" :class="{'rotate-180': open, 'rotate-0': !open}" class="inline w-4 h-4 mt-1 ml-1 transition-transform duration-200 transform md:-mt-1"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
-                </button>
-                <div x-show="open" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="transform opacity-100 scale-100" x-transition:leave-end="transform opacity-0 scale-95" class="absolute absolute-centerX left-0 w-full rounded-md shadow-lg md:w-48 z-50">
-                  <div class="px-2 py-2 bg-white rounded-md shadow dark:bg-gray-800">
-                    <a class="block px-4 py-2 mt-2 text-sm font-semibold bg-transparent rounded-lg dark:bg-transparent dark:hover:bg-gray-600 dark:focus:bg-gray-600 dark:focus:text-white dark:hover:text-white dark:text-gray-200 md:mt-0 hover:text-gray-900 focus:text-gray-900 hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:shadow-outline" href="{% url Limited_VAT_Tracker_create_name %}">Create</a>
-                    <a class="block px-4 py-2 mt-2 text-sm font-semibold bg-transparent rounded-lg dark:bg-transparent dark:hover:bg-gray-600 dark:focus:bg-gray-600 dark:focus:text-white dark:hover:text-white dark:text-gray-200 md:mt-0 hover:text-gray-900 focus:text-gray-900 hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:shadow-outline" href="{% url Limited_VAT_Tracker_home_name %}">View</a>
-                  </div>
-                </div>
-              </div>
-              <!-- end sub menu -->
-            
-              <!-- expandable sub menu -->
-              <div @click.away="open = false" class="relative w-full" x-data="{ open: false }">
-                <button @click="open = !open" class="inline-block text-left px-4 py-2 mt-2 text-sm font-semibold bg-transparent rounded-lg dark:bg-transparent dark:hover:bg-gray-600 dark:focus:bg-gray-600 dark:focus:text-white dark:hover:text-white dark:text-gray-200 md:mt-0 hover:text-gray-900 focus:text-gray-900 hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:shadow-outline w-full">
-                  <span class="mr-auto">Limited Confirmation Statement Tracker</span>
-                  <svg fill="currentColor" viewBox="0 0 20 20" :class="{'rotate-180': open, 'rotate-0': !open}" class="inline w-4 h-4 mt-1 ml-1 transition-transform duration-200 transform md:-mt-1"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
-                </button>
-                <div x-show="open" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="transform opacity-100 scale-100" x-transition:leave-end="transform opacity-0 scale-95" class="absolute absolute-centerX left-0 w-full rounded-md shadow-lg md:w-48 z-50">
-                  <div class="px-2 py-2 bg-white rounded-md shadow dark:bg-gray-800">
-                    <a class="block px-4 py-2 mt-2 text-sm font-semibold bg-transparent rounded-lg dark:bg-transparent dark:hover:bg-gray-600 dark:focus:bg-gray-600 dark:focus:text-white dark:hover:text-white dark:text-gray-200 md:mt-0 hover:text-gray-900 focus:text-gray-900 hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:shadow-outline" href="{% url Limited_Confirmation_Statement_Tracker_create_name %}">Create</a>
-                    <a class="block px-4 py-2 mt-2 text-sm font-semibold bg-transparent rounded-lg dark:bg-transparent dark:hover:bg-gray-600 dark:focus:bg-gray-600 dark:focus:text-white dark:hover:text-white dark:text-gray-200 md:mt-0 hover:text-gray-900 focus:text-gray-900 hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:shadow-outline" href="{% url Limited_Confirmation_Statement_Tracker_home_name %}">View</a>
-                  </div>
-                </div>
-              </div>
-              <!-- end sub menu -->
-
-            </div>
-          </div>
-        </div>
-        <!-- end expandable nav Others  -->
-        {% endcomment %}
-
-        <!-- expandable nav Selfassesment  -->
-        <div @click.away="open = false" class="relative" x-data="{ open: false }">
-          <button @click="open = !open" class="flex flex-row items-center w-full px-4 py-2 mt-2 text-sm font-semibold text-left bg-transparent rounded-lg dark:bg-transparent dark:focus:text-white dark:hover:text-white dark:focus:bg-gray-600 dark:hover:bg-gray-600 md:w-auto md:inline md:mt-0 hover:text-gray-900 focus:text-gray-900 hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:shadow-outline">
-            <span>Selfassesment</span>
-          <svg fill="currentColor" viewBox="0 0 20 20" :class="{'rotate-180': open, 'rotate-0': !open}" class="inline w-4 h-4 mt-1 ml-1 transition-transform duration-200 transform md:-mt-1"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
-          </button>
-          
-          <div x-show="open" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="transform opacity-100 scale-100" x-transition:leave-end="transform opacity-0 scale-95" class="absolute absolute-centerX right-0 w-full min-w-max mt-2 origin-top-right rounded-md shadow-lg md:w-48 z-50">
-            <div class="px-2 py-2 bg-white rounded-md shadow dark:bg-gray-800">
-              <!-- direct links -->
-              <a class="block px-4 py-2 mt-2 text-sm font-semibold bg-transparent rounded-lg dark:bg-transparent dark:hover:bg-gray-600 dark:focus:bg-gray-600 dark:focus:text-white dark:hover:text-white dark:text-gray-200 md:mt-0 hover:text-gray-900 focus:text-gray-900 hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:shadow-outline" href="{% url Selfassesment_create_name %}">Create</a>
-              <a class="block px-4 py-2 mt-2 text-sm font-semibold bg-transparent rounded-lg dark:bg-transparent dark:hover:bg-gray-600 dark:focus:bg-gray-600 dark:focus:text-white dark:hover:text-white dark:text-gray-200 md:mt-0 hover:text-gray-900 focus:text-gray-900 hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:shadow-outline" href="{% url Selfassesment_home_name %}">View</a>
-
-              <!-- expandable sub menu -->
-              <div @click.away="open = false" class="relative w-full" x-data="{ open: false }">
-                <button @click="open = !open" class="inline-block text-left px-4 py-2 mt-2 text-sm font-semibold bg-transparent rounded-lg dark:bg-transparent dark:hover:bg-gray-600 dark:focus:bg-gray-600 dark:focus:text-white dark:hover:text-white dark:text-gray-200 md:mt-0 hover:text-gray-900 focus:text-gray-900 hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:shadow-outline w-full">
-                  <span class="mr-auto">Selfassesment Account Submission</span>
-                  <svg fill="currentColor" viewBox="0 0 20 20" :class="{'rotate-180': open, 'rotate-0': !open}" class="inline w-4 h-4 mt-1 ml-1 transition-transform duration-200 transform md:-mt-1"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
-                </button>
-                <div x-show="open" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="transform opacity-100 scale-100" x-transition:leave-end="transform opacity-0 scale-95" class="absolute absolute-centerX left-0 w-full rounded-md shadow-lg md:w-48 z-50">
-                  <div class="px-2 py-2 bg-white rounded-md shadow dark:bg-gray-800">
-                    <a class="block px-4 py-2 mt-2 text-sm font-semibold bg-transparent rounded-lg dark:bg-transparent dark:hover:bg-gray-600 dark:focus:bg-gray-600 dark:focus:text-white dark:hover:text-white dark:text-gray-200 md:mt-0 hover:text-gray-900 focus:text-gray-900 hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:shadow-outline" href="{% url Selfassesment_Account_Submission_create_name %}">Create</a>
-                    <a class="block px-4 py-2 mt-2 text-sm font-semibold bg-transparent rounded-lg dark:bg-transparent dark:hover:bg-gray-600 dark:focus:bg-gray-600 dark:focus:text-white dark:hover:text-white dark:text-gray-200 md:mt-0 hover:text-gray-900 focus:text-gray-900 hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:shadow-outline" href="{% url Selfassesment_Account_Submission_home_name %}">View</a>
-                  </div>
-                </div>
-              </div>
-              <!-- end sub menu -->
-
-              <a class="block px-4 py-2 mt-2 text-sm font-semibold bg-transparent rounded-lg dark:bg-transparent dark:hover:bg-gray-600 dark:focus:bg-gray-600 dark:focus:text-white dark:hover:text-white dark:text-gray-200 md:mt-0 hover:text-gray-900 focus:text-gray-900 hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:shadow-outline" href="{% url Selfassesment_Data_Collection_home_name %}">View Data Collection</a>
-            
-            </div>
-          </div>
-        </div>
-        <!-- end expandable nav Selfassesment  -->
-
-
-        <!-- expandable nav Limited  -->
-        <div @click.away="open = false" class="relative" x-data="{ open: false }">
-          <button @click="open = !open" class="flex flex-row items-center w-full px-4 py-2 mt-2 text-sm font-semibold text-left bg-transparent rounded-lg dark:bg-transparent dark:focus:text-white dark:hover:text-white dark:focus:bg-gray-600 dark:hover:bg-gray-600 md:w-auto md:inline md:mt-0 hover:text-gray-900 focus:text-gray-900 hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:shadow-outline">
-            <span>Limited</span>
-          <svg fill="currentColor" viewBox="0 0 20 20" :class="{'rotate-180': open, 'rotate-0': !open}" class="inline w-4 h-4 mt-1 ml-1 transition-transform duration-200 transform md:-mt-1"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
-          </button>
-
-          <div x-show="open" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="transform opacity-100 scale-100" x-transition:leave-end="transform opacity-0 scale-95" class="absolute absolute-centerX right-0 w-full min-w-max mt-2 origin-top-right rounded-md shadow-lg md:w-48 z-50">
-            <div class="px-2 py-2 bg-white rounded-md shadow dark:bg-gray-800">
-              <!-- direct links -->
-              <a class="block px-4 py-2 mt-2 text-sm font-semibold bg-transparent rounded-lg dark:bg-transparent dark:hover:bg-gray-600 dark:focus:bg-gray-600 dark:focus:text-white dark:hover:text-white dark:text-gray-200 md:mt-0 hover:text-gray-900 focus:text-gray-900 hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:shadow-outline" href="{% url Limited_create_name %}">Create</a>
-              <a class="block px-4 py-2 mt-2 text-sm font-semibold bg-transparent rounded-lg dark:bg-transparent dark:hover:bg-gray-600 dark:focus:bg-gray-600 dark:focus:text-white dark:hover:text-white dark:text-gray-200 md:mt-0 hover:text-gray-900 focus:text-gray-900 hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:shadow-outline" href="{% url Limited_home_name %}">View</a>
-
-              <!-- expandable sub menu -->
-              <div @click.away="open = false" class="relative w-full" x-data="{ open: false }">
-                <button @click="open = !open" class="inline-block text-left px-4 py-2 mt-2 text-sm font-semibold bg-transparent rounded-lg dark:bg-transparent dark:hover:bg-gray-600 dark:focus:bg-gray-600 dark:focus:text-white dark:hover:text-white dark:text-gray-200 md:mt-0 hover:text-gray-900 focus:text-gray-900 hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:shadow-outline w-full">
-                  <span class="mr-auto">Limited Submission Deadline Tracker</span>
-                  <svg fill="currentColor" viewBox="0 0 20 20" :class="{'rotate-180': open, 'rotate-0': !open}" class="inline w-4 h-4 mt-1 ml-1 transition-transform duration-200 transform md:-mt-1"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
-                </button>
-                <div x-show="open" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="transform opacity-100 scale-100" x-transition:leave-end="transform opacity-0 scale-95" class="absolute absolute-centerX left-0 w-full rounded-md shadow-lg md:w-48 z-50">
-                  <div class="px-2 py-2 bg-white rounded-md shadow dark:bg-gray-800">
-                    <a class="block px-4 py-2 mt-2 text-sm font-semibold bg-transparent rounded-lg dark:bg-transparent dark:hover:bg-gray-600 dark:focus:bg-gray-600 dark:focus:text-white dark:hover:text-white dark:text-gray-200 md:mt-0 hover:text-gray-900 focus:text-gray-900 hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:shadow-outline" href="{% url Limited_Submission_Deadline_Tracker_create_name %}">Create</a>
-                    <a class="block px-4 py-2 mt-2 text-sm font-semibold bg-transparent rounded-lg dark:bg-transparent dark:hover:bg-gray-600 dark:focus:bg-gray-600 dark:focus:text-white dark:hover:text-white dark:text-gray-200 md:mt-0 hover:text-gray-900 focus:text-gray-900 hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:shadow-outline" href="{% url Limited_Submission_Deadline_Tracker_home_name %}">View</a>
-                  </div>
-                </div>
-              </div>
-              <!-- end sub menu -->
-
-              <!-- expandable sub menu -->
-              <div @click.away="open = false" class="relative w-full" x-data="{ open: false }">
-                <button @click="open = !open" class="inline-block text-left px-4 py-2 mt-2 text-sm font-semibold bg-transparent rounded-lg dark:bg-transparent dark:hover:bg-gray-600 dark:focus:bg-gray-600 dark:focus:text-white dark:hover:text-white dark:text-gray-200 md:mt-0 hover:text-gray-900 focus:text-gray-900 hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:shadow-outline w-full">
-                  <span class="mr-auto">Limited VAT Tracker</span>
-                  <svg fill="currentColor" viewBox="0 0 20 20" :class="{'rotate-180': open, 'rotate-0': !open}" class="inline w-4 h-4 mt-1 ml-1 transition-transform duration-200 transform md:-mt-1"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
-                </button>
-                <div x-show="open" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="transform opacity-100 scale-100" x-transition:leave-end="transform opacity-0 scale-95" class="absolute absolute-centerX left-0 w-full rounded-md shadow-lg md:w-48 z-50">
-                  <div class="px-2 py-2 bg-white rounded-md shadow dark:bg-gray-800">
-                    <a class="block px-4 py-2 mt-2 text-sm font-semibold bg-transparent rounded-lg dark:bg-transparent dark:hover:bg-gray-600 dark:focus:bg-gray-600 dark:focus:text-white dark:hover:text-white dark:text-gray-200 md:mt-0 hover:text-gray-900 focus:text-gray-900 hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:shadow-outline" href="{% url Limited_VAT_Tracker_create_name %}">Create</a>
-                    <a class="block px-4 py-2 mt-2 text-sm font-semibold bg-transparent rounded-lg dark:bg-transparent dark:hover:bg-gray-600 dark:focus:bg-gray-600 dark:focus:text-white dark:hover:text-white dark:text-gray-200 md:mt-0 hover:text-gray-900 focus:text-gray-900 hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:shadow-outline" href="{% url Limited_VAT_Tracker_home_name %}">View</a>
-                  </div>
-                </div>
-              </div>
-              <!-- end sub menu -->
-            
-              <!-- expandable sub menu -->
-              <div @click.away="open = false" class="relative w-full" x-data="{ open: false }">
-                <button @click="open = !open" class="inline-block text-left px-4 py-2 mt-2 text-sm font-semibold bg-transparent rounded-lg dark:bg-transparent dark:hover:bg-gray-600 dark:focus:bg-gray-600 dark:focus:text-white dark:hover:text-white dark:text-gray-200 md:mt-0 hover:text-gray-900 focus:text-gray-900 hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:shadow-outline w-full">
-                  <span class="mr-auto">Limited Confirmation Statement Tracker</span>
-                  <svg fill="currentColor" viewBox="0 0 20 20" :class="{'rotate-180': open, 'rotate-0': !open}" class="inline w-4 h-4 mt-1 ml-1 transition-transform duration-200 transform md:-mt-1"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
-                </button>
-                <div x-show="open" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="transform opacity-100 scale-100" x-transition:leave-end="transform opacity-0 scale-95" class="absolute absolute-centerX left-0 w-full rounded-md shadow-lg md:w-48 z-50">
-                  <div class="px-2 py-2 bg-white rounded-md shadow dark:bg-gray-800">
-                    <a class="block px-4 py-2 mt-2 text-sm font-semibold bg-transparent rounded-lg dark:bg-transparent dark:hover:bg-gray-600 dark:focus:bg-gray-600 dark:focus:text-white dark:hover:text-white dark:text-gray-200 md:mt-0 hover:text-gray-900 focus:text-gray-900 hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:shadow-outline" href="{% url Limited_Confirmation_Statement_Tracker_create_name %}">Create</a>
-                    <a class="block px-4 py-2 mt-2 text-sm font-semibold bg-transparent rounded-lg dark:bg-transparent dark:hover:bg-gray-600 dark:focus:bg-gray-600 dark:focus:text-white dark:hover:text-white dark:text-gray-200 md:mt-0 hover:text-gray-900 focus:text-gray-900 hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:shadow-outline" href="{% url Limited_Confirmation_Statement_Tracker_home_name %}">View</a>
-                  </div>
-                </div>
-              </div>
-              <!-- end sub menu -->
-
-            </div>
-          </div>
-        </div>
-        <!-- end expandable nav Limited  -->
-        
-        {% comment %} 
-        <!-- expandable nav Invoice  -->
-        <div @click.away="open = false" class="relative" x-data="{ open: false }">
-          <button @click="open = !open" class="flex flex-row items-center w-full px-4 py-2 mt-2 text-sm font-semibold text-left bg-transparent rounded-lg dark:bg-transparent dark:focus:text-white dark:hover:text-white dark:focus:bg-gray-600 dark:hover:bg-gray-600 md:w-auto md:inline md:mt-0 hover:text-gray-900 focus:text-gray-900 hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:shadow-outline">
-            <span>Invoice</span>
-          <svg fill="currentColor" viewBox="0 0 20 20" :class="{'rotate-180': open, 'rotate-0': !open}" class="inline w-4 h-4 mt-1 ml-1 transition-transform duration-200 transform md:-mt-1"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
-          </button>
-
-          <div x-show="open" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="transform opacity-100 scale-100" x-transition:leave-end="transform opacity-0 scale-95" class="absolute absolute-centerX right-0 w-full min-w-max mt-2 origin-top-right rounded-md shadow-lg md:w-48 z-50">
-            <div class="px-2 py-2 bg-white rounded-md shadow dark:bg-gray-800">
-              <!-- direct links -->
-              <a class="block px-4 py-2 mt-2 text-sm font-semibold bg-transparent rounded-lg dark:bg-transparent dark:hover:bg-gray-600 dark:focus:bg-gray-600 dark:focus:text-white dark:hover:text-white dark:text-gray-200 md:mt-0 hover:text-gray-900 focus:text-gray-900 hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:shadow-outline" href="/invoice/invoices/create_form/">Create</a>
-              <a class="block px-4 py-2 mt-2 text-sm font-semibold bg-transparent rounded-lg dark:bg-transparent dark:hover:bg-gray-600 dark:focus:bg-gray-600 dark:focus:text-white dark:hover:text-white dark:text-gray-200 md:mt-0 hover:text-gray-900 focus:text-gray-900 hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:shadow-outline" href="/invoice/invoices/home/">View</a>
-
-              <!-- expandable sub menu -->
-              <div @click.away="open = false" class="relative w-full" x-data="{ open: false }">
-                <button @click="open = !open" class="inline-block text-left px-4 py-2 mt-2 text-sm font-semibold bg-transparent rounded-lg dark:bg-transparent dark:hover:bg-gray-600 dark:focus:bg-gray-600 dark:focus:text-white dark:hover:text-white dark:text-gray-200 md:mt-0 hover:text-gray-900 focus:text-gray-900 hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:shadow-outline w-full">
-                  <span class="mr-auto">Invoice Items</span>
-                  <svg fill="currentColor" viewBox="0 0 20 20" :class="{'rotate-180': open, 'rotate-0': !open}" class="inline w-4 h-4 mt-1 ml-1 transition-transform duration-200 transform md:-mt-1"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
-                </button>
-                <div x-show="open" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="transform opacity-100 scale-100" x-transition:leave-end="transform opacity-0 scale-95" class="absolute absolute-centerX left-0 w-full rounded-md shadow-lg md:w-48 z-50">
-                  <div class="px-2 py-2 bg-white rounded-md shadow dark:bg-gray-800">
-                    <a class="block px-4 py-2 mt-2 text-sm font-semibold bg-transparent rounded-lg dark:bg-transparent dark:hover:bg-gray-600 dark:focus:bg-gray-600 dark:focus:text-white dark:hover:text-white dark:text-gray-200 md:mt-0 hover:text-gray-900 focus:text-gray-900 hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:shadow-outline" href="/invoice/invoice_items/create_form/">Create</a>
-                    <a class="block px-4 py-2 mt-2 text-sm font-semibold bg-transparent rounded-lg dark:bg-transparent dark:hover:bg-gray-600 dark:focus:bg-gray-600 dark:focus:text-white dark:hover:text-white dark:text-gray-200 md:mt-0 hover:text-gray-900 focus:text-gray-900 hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:shadow-outline" href="/invoice/invoice_items/home/">View</a>
-                  </div>
-                </div>
-              </div>
-              <!-- end sub menu -->
-              
-              <!-- expandable sub menu -->
-              <div @click.away="open = false" class="relative w-full" x-data="{ open: false }">
-                <button @click="open = !open" class="inline-block text-left px-4 py-2 mt-2 text-sm font-semibold bg-transparent rounded-lg dark:bg-transparent dark:hover:bg-gray-600 dark:focus:bg-gray-600 dark:focus:text-white dark:hover:text-white dark:text-gray-200 md:mt-0 hover:text-gray-900 focus:text-gray-900 hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:shadow-outline w-full">
-                  <span class="mr-auto">Transaction</span>
-                  <svg fill="currentColor" viewBox="0 0 20 20" :class="{'rotate-180': open, 'rotate-0': !open}" class="inline w-4 h-4 mt-1 ml-1 transition-transform duration-200 transform md:-mt-1"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
-                </button>
-                <div x-show="open" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="transform opacity-100 scale-100" x-transition:leave-end="transform opacity-0 scale-95" class="absolute absolute-centerX left-0 w-full rounded-md shadow-lg md:w-48 z-50">
-                  <div class="px-2 py-2 bg-white rounded-md shadow dark:bg-gray-800">
-                    <a class="block px-4 py-2 mt-2 text-sm font-semibold bg-transparent rounded-lg dark:bg-transparent dark:hover:bg-gray-600 dark:focus:bg-gray-600 dark:focus:text-white dark:hover:text-white dark:text-gray-200 md:mt-0 hover:text-gray-900 focus:text-gray-900 hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:shadow-outline" href="/invoice/transactions/create_form/">Create</a>
-                    <a class="block px-4 py-2 mt-2 text-sm font-semibold bg-transparent rounded-lg dark:bg-transparent dark:hover:bg-gray-600 dark:focus:bg-gray-600 dark:focus:text-white dark:hover:text-white dark:text-gray-200 md:mt-0 hover:text-gray-900 focus:text-gray-900 hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:shadow-outline" href="/invoice/transactions/home/">View</a>
-                  </div>
-                </div>
-              </div>
-              <!-- end sub menu -->
-
-            </div>
-          </div>
-        </div>
-        <!-- end expandable nav Invoice  -->
-        {% endcomment %}
-
-        <!-- expandable nav User  -->
-        <div @click.away="open = false" class="relative" x-data="{ open: false }">
-          <button @click="open = !open" class="flex flex-row items-center w-full px-4 py-2 mt-2 text-sm font-semibold text-left bg-transparent rounded-lg dark:bg-transparent dark:focus:text-white dark:hover:text-white dark:focus:bg-gray-600 dark:hover:bg-gray-600 md:w-auto md:inline md:mt-0 hover:text-gray-900 focus:text-gray-900 hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:shadow-outline">
-            <span>👥{{ user.first_name }}</span>
-            <svg fill="currentColor" viewBox="0 0 20 20" :class="{'rotate-180': open, 'rotate-0': !open}" class="inline w-4 h-4 mt-1 ml-1 transition-transform duration-200 transform md:-mt-1"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
-          </button>
-          
-          <div x-show="open" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="transform opacity-100 scale-100" x-transition:leave-end="transform opacity-0 scale-95" class="absolute absolute-centerX right-0 w-full min-w-max mt-2 origin-top-right rounded-md shadow-lg md:w-48 z-50">
-            <div class="px-2 py-2 bg-white rounded-md shadow dark:bg-gray-800">
-              <!-- profile edit page -->
-            {% if user.is_superuser %}
-              <!-- admin -->
-              <a class="block px-4 py-2 mt-2 text-sm font-semibold rounded-lg md:mt-0 focus:outline-none focus:shadow-outline create" href="{% url 'admin:index' %}">Admin Pannel</a>
-              
-              <!-- logout -->
-              <a class="block px-4 py-2 mt-2 text-sm font-semibold rounded-lg md:mt-2 delete focus:outline-none focus:shadow-outline" href="{% url 'users_logout' %}">Logout</a>
-            {% elif user.is_staff %}
-              <!-- logout -->
-              <a class="block px-4 py-2 mt-2 text-sm font-semibold rounded-lg md:mt-0 delete focus:outline-none focus:shadow-outline" href="{% url 'users_logout' %}">Logout</a>
-            {% elif not user.is_authenticated %}
-              <a class="block px-4 py-2 mt-2 text-sm font-semibold rounded-lg md:mt-0 create bg-green-600 focus:outline-none focus:shadow-outline" href="{% url 'users_login' %}">Login</a>  
-            {% endif %}
-          </div>
-        </div>
-        <!-- end expandable nav User -->
-
+      <nav id="main-nav" class="flex-col flex-grow pb-4 md:pb-0 hidden md:flex md:justify-end md:flex-row z-50" style="align-items:center">
+        <!-- Primary navigation links will be inserted here -->
       </nav>
       <!-- end main navbar  -->
     </div>
@@ -269,44 +31,234 @@
 
 
   <!-- secondary navbar -->
-  <div class="nav-shortcuts">
-    <!-- Merged Tracker View -->
-    <span class="tooltip-container">
-      <a class="block px-4 py-2 mt-2 text-sm font-semibold bg-transparent rounded-lg dark:bg-transparent dark:hover:bg-gray-600 dark:focus:bg-gray-600 dark:focus:text-white dark:hover:text-white dark:text-gray-200 md:mt-0 hover:text-gray-900 focus:text-gray-900 hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:shadow-outline" href="{% url Merged_Tracker_home_name %}">
-        <img class="icon" src="{% static 'companies/tracker.png' %}" alt="">
-        <span class="tooltip-message">Tracker</span>
-      </a>
-    </span>
-    <!-- Selfassesment View -->
-    <span class="tooltip-container">
-      <a class="block px-4 py-2 mt-2 text-sm font-semibold bg-transparent rounded-lg dark:bg-transparent dark:hover:bg-gray-600 dark:focus:bg-gray-600 dark:focus:text-white dark:hover:text-white dark:text-gray-200 md:mt-0 hover:text-gray-900 focus:text-gray-900 hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:shadow-outline" href="{% url Selfassesment_home_name %}">
-        <img class="icon" src="{% static 'companies/selfassesment.png' %}" alt="">
-        <span class="tooltip-message">Selfassesment</span>
-      </a>
-    </span>
-    <!-- Selfassesment Account Submission View -->
-    <span class="tooltip-container">
-      <a class="block px-4 py-2 mt-2 text-sm font-semibold bg-transparent rounded-lg dark:bg-transparent dark:hover:bg-gray-600 dark:focus:bg-gray-600 dark:focus:text-white dark:hover:text-white dark:text-gray-200 md:mt-0 hover:text-gray-900 focus:text-gray-900 hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:shadow-outline" href="{% url Selfassesment_Account_Submission_home_name %}">
-        <img class="icon" src="{% static 'companies/selfassesmentSubmission.png' %}" alt="">
-        <span class="tooltip-message">Selfassesment Account Submission</span>
-      </a>
-    </span>
-    <!-- Limited View -->
-    <span class="tooltip-container">
-      <a class="block px-4 py-2 mt-2 text-sm font-semibold bg-transparent rounded-lg dark:bg-transparent dark:hover:bg-gray-600 dark:focus:bg-gray-600 dark:focus:text-white dark:hover:text-white dark:text-gray-200 md:mt-0 hover:text-gray-900 focus:text-gray-900 hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:shadow-outline" href="{% url Limited_home_name %}">
-        <img class="icon" src="{% static 'companies/limited.png' %}" alt="">
-        <span class="tooltip-message">Limited</span>
-      </a>
-    </span>
-    <!-- Limited Submission View -->
-    <span class="tooltip-container">
-      <a class="block px-4 py-2 mt-2 text-sm font-semibold bg-transparent rounded-lg dark:bg-transparent dark:hover:bg-gray-600 dark:focus:bg-gray-600 dark:focus:text-white dark:hover:text-white dark:text-gray-200 md:mt-0 hover:text-gray-900 focus:text-gray-900 hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:shadow-outline" href="{% url Limited_Submission_Deadline_Tracker_home_name %}">
-      <img class="icon" src="{% static 'companies/limitedSubmission.png' %}" alt="">
-      <span class="tooltip-message">Limited Submission</span>
-      </a>
-    </span>
+  <div id="secondary-nav" class="nav-shortcuts">
+    <!-- Secondary navigation links will be inserted here -->
   </div>
   <!-- end secondary navbar -->
 
 </div>
+
+<template id="nav-link-template">
+  <a data-link-item class="block px-4 py-2 text-sm font-semibold bg-transparent rounded-lg dark:bg-transparent dark:hover:bg-gray-600 dark:focus:bg-gray-600 dark:focus:text-white dark:hover:text-white dark:text-gray-200 hover:text-gray-900 focus:text-gray-900 hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:shadow-outline"></a>
+</template>
+
+<template id="nav-group-template">
+  <div class="relative" data-link-group>
+    <button data-link-group-btn class="flex flex-row items-center w-full px-4 py-2 text-sm font-semibold text-left bg-transparent rounded-lg dark:bg-transparent dark:focus:text-white dark:hover:text-white dark:focus:bg-gray-600 dark:hover:bg-gray-600 md:inline hover:text-gray-900 focus:text-gray-900 hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:shadow-outline">
+      <span data-group-name></span>
+      <svg fill="currentColor" viewBox="0 0 20 20" class="inline w-4 h-4 ml-1 transition-transform duration-200 transform">
+        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+      </svg>
+    </button>
+    <div data-links-wrapper class="absolute absolute-centerX right-0 min-w-max origin-top-right rounded-md shadow-lg md:w-28 z-50 hidden border-[1px] border-indigo-500">
+      <div data-links-container class="px-2 py-2 bg-white rounded-md shadow dark:bg-gray-800">
+      </div>
+    </div>
+  </div>
+</template>
+
+<template id="secondary-nav-item-template">
+    <span class="tooltip-container">
+      <a class="block px-4 py-2 text-sm font-semibold bg-transparent rounded-lg dark:bg-transparent dark:hover:bg-gray-600 dark:focus:bg-gray-600 dark:focus:text-white dark:hover:text-white dark:text-gray-200 hover:text-gray-900 focus:text-gray-900 hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:shadow-outline">
+        <img class="icon" src="" alt="">
+        <span class="tooltip-message" data-link-title></span>
+      </a>
+    </span>
+</template>
+
+
+
+<script>
+/* DON'T MODIFY/TOUCH THIS BLOCK */
+window.NAV_LINKS = {
+  "primary": [
+    {
+      name: "Tracker",
+      url: "{% url Merged_Tracker_home_name %}",
+    },
+    
+    {% comment %} 
+    {
+      groupName: "Test nest",
+      urls: [
+        {
+          name: "Create",
+          url: "{% url Selfassesment_create_name %}",
+        },
+        {
+          groupName: "Nest 2",
+          urls: [
+            {
+              name: "Create",
+              url: "{% url Selfassesment_create_name %}",
+            },
+            {
+              groupName: "Nest 3",
+              urls: [
+                {
+                  name: "Create",
+                  url: "{% url Selfassesment_Account_Submission_create_name %}",
+                },
+                {
+                  name: "View",
+                  url: "{% url Selfassesment_Account_Submission_home_name %}",
+                },
+              ]
+            },
+          ]
+        },
+      ]
+    },
+    {% endcomment %}
+
+    {
+      groupName: "Selfassesment",
+      urls: [
+        {
+          name: "Create",
+          url: "{% url Selfassesment_create_name %}",
+        },
+        {
+          name: "View",
+          url: "{% url Selfassesment_home_name %}",
+        },
+
+        {
+          groupName: "Account Submission",
+          urls: [
+            {
+              name: "Create",
+              url: "{% url Selfassesment_Account_Submission_create_name %}",
+            },
+            {
+              name: "View",
+              url: "{% url Selfassesment_Account_Submission_home_name %}",
+            },
+          ]
+        },
+
+        {
+          name: "Data Collection",
+          url: "{% url Selfassesment_Data_Collection_home_name %}",
+        },
+      ]
+    },
+
+    {
+      groupName: "Limited",
+      urls: [
+        {
+          name: "Create",
+          url: "{% url Limited_create_name %}",
+        },
+        {
+          name: "View",
+          url: "{% url Limited_home_name %}",
+        },
+        {
+          groupName: "Submission Deadline Tracker",
+          urls: [
+            {
+              name: "Create",
+              url: "{% url Limited_Submission_Deadline_Tracker_create_name %}",
+            },
+            {
+              name: "View",
+              url: "{% url Limited_Submission_Deadline_Tracker_home_name %}",
+            },
+          ]
+        },
+
+        {
+          groupName: "VAT Tracker",
+          urls: [
+            {
+              name: "Create",
+              url: "{% url Limited_VAT_Tracker_create_name %}",
+            },
+            {
+              name: "View",
+              url: "{% url Limited_VAT_Tracker_home_name %}",
+            },
+          ]
+        },
+
+        {
+          groupName: "Confirmation Statement Tracker",
+          urls: [
+            {
+              name: "Create",
+              url: "{% url Limited_Confirmation_Statement_Tracker_create_name %}",
+            },
+            {
+              name: "View",
+              url: "{% url Limited_Confirmation_Statement_Tracker_home_name %}",
+            },
+          ]
+        },
+      ]
+    },
+    
+    {
+      groupName: "👥{{ user.first_name }}",
+      extraClassList: ['flex', 'flex-col', 'gap-2', ],
+      urls: [
+        {% if user.is_superuser %}
+          {
+            name: "Admin Panel",
+            url: "{% url 'admin:index' %}",
+            extraClassList: ['create']
+          },
+          {
+            name: "Logout",
+            url: "{% url 'users_logout' %}",
+            extraClassList: ['delete'],
+          },
+        {% elif user.is_staff %}
+          {
+            name: "Logout",
+            url: "{% url 'users_logout' %}",
+            extraClassList: ['delete'],
+          },
+        {% elif not user.is_authenticated %}
+          {
+            name: "Login",
+            url: "{% url 'users_login' %}",
+            extraClassList: ['update'],
+          },
+        {% endif %}
+      ]
+    },
+  ],
+
+  "secondary": [
+    {
+      name: "Tracker",
+      url: "{% url Merged_Tracker_home_name %}",
+      iconImgSrc: "{% static 'companies/tracker.png' %}",
+    },
+    {
+      name: "Selfassesment",
+      url: "{% url Selfassesment_home_name %}",
+      iconImgSrc: "{% static 'companies/selfassesment.png' %}",
+    },
+    {
+      name: "Selfassesment Account Submission",
+      url: "{% url Selfassesment_Account_Submission_home_name %}",
+      iconImgSrc: "{% static 'companies/selfassesmentSubmission.png' %}",
+    },
+    {
+      name: "Limited",
+      url: "{% url Limited_home_name %}",
+      iconImgSrc: "{% static 'companies/limited.png' %}",
+    },
+    {
+      name: "Limited Submission",
+      url: "{% url Limited_Submission_Deadline_Tracker_home_name %}",
+      iconImgSrc: "{% static 'companies/limitedSubmission.png' %}",
+    },
+  ]
+}
+</script>
+
 {% endif %}
