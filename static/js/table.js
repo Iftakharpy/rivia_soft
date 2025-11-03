@@ -171,7 +171,7 @@ export async function get_tr_for_table(
 
 		// pretty-format text
 		td.classList.add("whitespace-normal");
-		td.style.textAlign = "justify";
+		// td.style.textAlign = "justify";
 		td.style.minWidth = `${field_data.length + 1}ch`;
 		if (field_data.length >= 37) {
 			td.classList.remove("whitespace-nowrap");
@@ -218,7 +218,7 @@ export async function populate_with_foreign_data(td, field, field_data, data) {
 	td.setAttribute("data-cmp", string);
 
 	td.classList.add("whitespace-normal");
-	td.style.textAlign = "justify";
+	// td.style.textAlign = "justify";
 	td.style.whiteSpace = "nowrap";
 	td.style.minWidth = `${field_data.length + 1}ch`;
 	if (string.length >= 37) {
