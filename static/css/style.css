@@ -1967,6 +1967,10 @@ video {
 }
 
 @layer r-base {
+  .h-screen{
+    height: 100dvh;
+  }
+
   #main-content{
     padding-left: 1rem;
     padding-right: 1rem;

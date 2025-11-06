@@ -7,6 +7,9 @@
 }
 
 @layer r-base {
+	.h-screen{
+		height: 100dvh;
+	}
   #main-content {
     @apply px-4 py-1;
   }
