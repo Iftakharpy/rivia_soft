@@ -250,7 +250,7 @@ export async function fetch_url({
 	if (response_content_type.includes("json")) {
 		let json_response = await response_cpy.json();
 		let errors = json_response?.errors || json_response?.error;
-		let success = json_response?.success
+		// let success = json_response?.success
 
 		if (errors) {
 			let errorList = Array.isArray(errors) ? errors : [errors];
@@ -264,19 +264,19 @@ export async function fetch_url({
 				showMessage(msg);
 			});
 		}
-		if (success){
-			let successList = Array.isArray(success) ? success : [success];
-			successList.forEach(async (successMsg) => {
-				let msg = await formatHTTPSuccessMessage({
-					request: request_cpy.clone(),
-					response: response.clone(),
-					successMsg: successMsg,
-					showRequest: true, // To show the request details
-					showResponse: false, // To hide the full response body
-				});
-				showMessage(msg, ['success']);
-			});
-		}
+		// if (success){
+		// 	let successList = Array.isArray(success) ? success : [success];
+		// 	successList.forEach(async (successMsg) => {
+		// 		let msg = await formatHTTPSuccessMessage({
+		// 			request: request_cpy.clone(),
+		// 			response: response.clone(),
+		// 			successMsg: successMsg,
+		// 			showRequest: true, // To show the request details
+		// 			showResponse: false, // To hide the full response body
+		// 		});
+		// 		showMessage(msg, ['success']);
+		// 	});
+		// }
 	} else if (response_cpy.status >= 400) {
 		let msg = null
 		let error_json = null
