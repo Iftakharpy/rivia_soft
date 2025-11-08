@@ -1,5 +1,5 @@
 import DATA from "./parse_data.js";
-import { fetch_url } from "./fetch_data.js";
+import { fetch_url, showMessage } from "./fetch_data.js";
 import { makeSafeHTML, URL_HasQueryParams, dateFormat } from "./utilities.js";
 
 const ObserverCallback = (entries, observer) => {
@@ -253,6 +253,7 @@ export async function populate_with_data(
 
 	let tbody = document.querySelector("tbody#data"); // find data container
 	if (clear_table_before_insertion) tbody.innerText = ""; // clear the container
+	if (!Array.isArray(data_array)) return; // data is not array so don't attempt to display it
 
 	// Populate the table using the provided data
 	for (let record of data_array) {

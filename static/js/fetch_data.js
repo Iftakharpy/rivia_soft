@@ -260,7 +260,6 @@ export async function fetch_url({
 					jsonResponse: json_response,
 					errorMsg,
 				});
-				msg = `${msg}\n\nQuery docs -> https://github.com/Iftakharpy/rivia_soft/blob/main/data_filter_query/README.md`
 				showMessage(msg);
 			});
 		}
@@ -299,7 +298,8 @@ function sleep(ms) {
 // =========================================================================================================
 // propagate http errors to users instead of dropping them silently
 export function showMessage(message, message_type_class = "error") {
-	let messagesContainer = document.querySelector("[data-messages]");
+	let messagesContainer = document.querySelector("[data-messages-container]");
+	let messagesList = messagesContainer.querySelector("[data-messages-list]")
 	let messageElement = document.createElement("pre");
 	messageElement.classList.add("message", message_type_class);
 	messageElement.innerText = message;
@@ -317,7 +317,7 @@ export function showMessage(message, message_type_class = "error") {
 	Object.entries(newStyles).forEach(([key, value]) => {
 		style[key] = value;
 	});
-	messagesContainer.appendChild(messageElement);
+	messagesList.prepend(messageElement);
 }
 
 export async function formatHTTPErrorMessage({

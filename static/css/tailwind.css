@@ -151,14 +151,17 @@
 	}
 
 	/* message styles */
-	[data-messages]:not(:has(>.message)){
+	[data-messages-container]:not(:has(>[data-messages-list]>.message)){
 		display: none;
 	}
-	[data-messages] {
-		@apply px-4 py-4;
+	[data-messages-container]{
+		&>[data-header]{
+			cursor: grab;
+			user-select: none;
+		}
 	}
 	.message {
-		@apply w-full px-4 py-1 rounded-md text-gray-50 max-w-screen-2xl text-base;
+		@apply rounded-md px-2.5 py-2 text-gray-50 text-base;
 	}
 
 	/* form headers */

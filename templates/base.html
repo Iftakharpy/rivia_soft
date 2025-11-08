@@ -32,20 +32,24 @@
     {% endif %}
 
     <!-- messages -->
-    <div class="z-[150] rounded-xl border-2 border-gray-400 max-w-[75dvw] max-h-[75dvh] overflow-y-auto flex flex-col gap-3 fixed left-4 top-4 bg-gray-900/80" data-messages>
-      <div class="sticky top-0 flex gap-2 rounded-xl border-2 border-gray-400 px-4 py-3 backdrop-blur-md bg-gray-800/75 dark:bg-gray-900/75 text-white">
+    <div data-messages-container data-modal class="p-2 z-[150] rounded-lg border-2 border-gray-400 max-w-[85ch] max-h-[75dvh] overflow-y-auto flex flex-col gap-2 fixed top-2 left-2 bg-gray-900/80">
+      <div data-header class="sticky top-0 flex gap-2 rounded-lg border-2 border-gray-400 p-2 backdrop-blur-md bg-gray-800/75 dark:bg-gray-900/75 text-white">
         <h2 class="flex-grow font-semibold text-lg">Messages</h2>
-        <button class="btn px-6 py-1 rounded-md bg-red-600 dark:bg-red-700" data-close-messages>X</button>
+        <button class="btn px-4 py-1 rounded-md bg-red-600 dark:bg-red-700" data-close-messages>X</button>
       </div>
-      {% if messages %}
-        {% for message in messages %}
-          <h3 class="message {{ message.tags }}">
-            {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}Important: {% endif %}
-            {{ message }}
-          </h3>
-        {% endfor %}
-      {% endif %}
+
+      <div data-messages-list class="flex flex-col gap-2" >
+        {% if messages %}
+          {% for message in messages %}
+            <h3 class="message {{ message.tags }}">
+              {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}Important: {% endif %}
+              {{ message }}
+            </h3>
+          {% endfor %}
+        {% endif %}
+      </div>
     </div>
+    <script defer type="module" src="{% static 'js/messages_container.js' %}"></script>
 
     <!-- content -->
     <div class="mx-auto" id="main-content">
@@ -62,7 +66,7 @@
     </style>
 
     <!-- js -->
-    <script defer type="module" src="{% static 'js/script.js' %}"></script>
+    <script defer type="module" src="{% static 'js/script.js' %}"></>
     <script>
       // Open descendent links of table in new tab
       const tbody = document.querySelector('tbody')
@@ -73,15 +77,6 @@
           let href = element.href
           window.open(href, '_blank')
         }
-      })
-      
-      let messagesContainer = document.querySelector('[data-messages]')
-      let messagesCloseBtn = document.querySelector('[data-close-messages]')
-      messagesCloseBtn.addEventListener('click', (e) => {
-        let messages = messagesContainer.querySelectorAll('.message')
-        messages.forEach((message) => {
-          message.remove()
-        })
       })
     </script>
   </body>

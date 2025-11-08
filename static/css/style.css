@@ -826,8 +826,8 @@ video {
     left: 0px;
   }
 
-  .left-4{
-    left: 1rem;
+  .left-2{
+    left: 0.5rem;
   }
 
   .right-0{
@@ -838,8 +838,8 @@ video {
     top: 0px;
   }
 
-  .top-4{
-    top: 1rem;
+  .top-2{
+    top: 0.5rem;
   }
 
   .-z-50{
@@ -1096,8 +1096,8 @@ video {
     max-width: 72rem;
   }
 
-  .max-w-\[75dvw\]{
-    max-width: 75dvw;
+  .max-w-\[85ch\]{
+    max-width: 85ch;
   }
 
   .max-w-\[90dvw\]{
@@ -1176,6 +1176,10 @@ video {
     resize: vertical !important;
   }
 
+  .resize{
+    resize: both;
+  }
+
   .appearance-none{
     -webkit-appearance: none;
        -moz-appearance: none;
@@ -1220,10 +1224,6 @@ video {
 
   .gap-2{
     gap: 0.5rem;
-  }
-
-  .gap-3{
-    gap: 0.75rem;
   }
 
   .gap-4{
@@ -1389,6 +1389,10 @@ video {
 
   .fill-current{
     fill: currentColor;
+  }
+
+  .p-2{
+    padding: 0.5rem;
   }
 
   .p-5{
@@ -2571,25 +2575,25 @@ video {
 
   /* message styles */
 
-  [data-messages]:not(:has(>.message)){
+  [data-messages-container]:not(:has(>[data-messages-list]>.message)){
     display: none;
   }
 
-  [data-messages]{
-    padding-left: 1rem;
-    padding-right: 1rem;
-    padding-top: 1rem;
-    padding-bottom: 1rem;
+  [data-messages-container]{
+    &>[data-header]{
+      cursor: grab;
+      -webkit-user-select: none;
+         -moz-user-select: none;
+              user-select: none;
+    }
   }
 
   .message{
-    width: 100%;
-    max-width: 1536px;
     border-radius: 0.375rem;
-    padding-left: 1rem;
-    padding-right: 1rem;
-    padding-top: 0.25rem;
-    padding-bottom: 0.25rem;
+    padding-left: 0.625rem;
+    padding-right: 0.625rem;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
     font-size: 1rem;
     line-height: 1.5rem;
     --tw-text-opacity: 1;
