@@ -1036,6 +1036,10 @@ video {
     max-height: min-content;
   }
 
+  .max-h-\[45dvh\]{
+    max-height: 45dvh;
+  }
+
   .\!min-h-10{
     min-height: 2.5rem !important;
   }
