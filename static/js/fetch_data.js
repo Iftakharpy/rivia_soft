@@ -250,6 +250,7 @@ export async function fetch_url({
 	if (response_content_type.includes("json")) {
 		let json_response = await response_cpy.json();
 		let errors = json_response?.errors || json_response?.error;
+		let success = json_response?.success
 
 		if (errors) {
 			let errorList = Array.isArray(errors) ? errors : [errors];
@@ -261,6 +262,13 @@ export async function fetch_url({
 					errorMsg,
 				});
 				showMessage(msg);
+			});
+		}
+		if (success){
+			let successList = Array.isArray(success) ? success : [success];
+			successList.forEach(async (successMsg) => {
+				let msg = `${req_method} ${url} -> ${successMsg}`
+				showMessage(msg, ['success']);
 			});
 		}
 	} else if (response_cpy.status >= 400) {
