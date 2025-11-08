@@ -824,7 +824,7 @@ def parse_and_build_q(model: type[Model] | None, data_filter_query: str) -> tupl
 
 		# Final validation
 		if len(operand_stack) != 1 or operator_stack:
-			msg = f"""operand_stack={operand_stack}\noperator_stack={operand_stack}\n\t-> The final expression is malformed and could not be resolved."""
+			msg = f"""The final expression is malformed and could not be resolved."""
 			return (len(data_filter_query), False, msg)
 
 	except ValueError as e:
