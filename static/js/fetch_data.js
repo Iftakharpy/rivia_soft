@@ -267,7 +267,13 @@ export async function fetch_url({
 		if (success){
 			let successList = Array.isArray(success) ? success : [success];
 			successList.forEach(async (successMsg) => {
-				let msg = `${req_method} ${url} -> ${successMsg}`
+				let msg = await formatHTTPSuccessMessage({
+					request: request_cpy.clone(),
+					response: response.clone(),
+					successMsg: successMsg,
+					showRequest: true, // To show the request details
+					showResponse: false, // To hide the full response body
+				});
 				showMessage(msg, ['success']);
 			});
 		}
@@ -429,7 +435,95 @@ BODY: ${ typeof reqBody === "object" ?
 			}`: ''}${showResponse? `${responsePrefix}RESPONSE: ${typeof resBody === "object" ? JSON.stringify(resBody, null, 2) : resBody}`: ''}`;
 }
 
+/**
+ * Formats a success message for an HTTP request, including details about the
+ * request and response.
+ *
+ * @param {object} options - The options for formatting.
+ * @param {Request} options.request - The original Request object.
+ * @param {Response} options.response - The original Response object.
+ * @param {string} [options.successMsg=""] - A specific success message to prepend.
+ * @param {boolean} [options.showRequest=true] - Whether to include request details.
+ * @param {boolean} [options.showResponse=false] - Whether to include response body.
+ * @param {string} [options.requestPrefix=""] - A prefix for the request section.
+ * @param {string} [options.responsePrefix="\n\n"] - A prefix for the response section.
+ * @returns {Promise<string>} A promise that resolves to the formatted success message.
+ */
+export async function formatHTTPSuccessMessage({
+	request,
+	response,
+	successMsg = "",
+	showRequest = true,
+	showResponse = false,
+	requestPrefix = "\n",
+	responsePrefix = "\n\n",
+}) {
+	if (!(request instanceof Request) || !(response instanceof Response)) {
+		return "[Invalid request or response object]";
+	}
 
+	// Clone request and response so we can safely read their bodies
+	const reqClone = request.clone();
+	const resClone = response.clone();
+
+	// Try reading request body
+	let reqBody = "[empty]";
+	try {
+		const text = await reqClone.text();
+		if (text) {
+			const contentType = reqClone.headers.get("content-type") || "";
+			if (contentType.includes("application/json")) {
+				reqBody = JSON.parse(text);
+			} else {
+				reqBody = text;
+			}
+		}
+	} catch (e) {
+		reqBody = `[unreadable: ${e.message}]`;
+	}
+
+	// Try reading response body
+	let resBody = "[empty]";
+	if (showResponse) {
+		try {
+			const text = await resClone.text();
+			if (text) {
+				const contentType = resClone.headers.get("content-type") || "";
+				if (contentType.includes("application/json")) {
+					resBody = JSON.parse(text);
+				} else {
+					resBody = text;
+				}
+			}
+		} catch (e) {
+			resBody = `[unreadable: ${e.message}]`;
+		}
+	}
+
+	// Prepend the specific success message if provided
+	const messagePrefix = successMsg ? `${successMsg}\n` : "";
+
+	// Build formatted output
+	return `${messagePrefix}${
+		showRequest
+			? `${requestPrefix}STATUS: ${reqClone.method} -> ${
+					resClone.status
+			  } ${resClone.statusText}
+URL: ${decodeURI(reqClone.url)}
+BODY: ${
+	typeof reqBody === "object" ? JSON.stringify(reqBody, null, 2) : reqBody
+}`
+			: ""
+	}${
+		showResponse
+			? `${responsePrefix}RESPONSE: ${
+					typeof resBody === "object"
+						? JSON.stringify(resBody, null, 2)
+						: resBody
+			  }`
+			: ""
+	}`;
+}
 
 // =========================================================================================================
 // Shows detailed info for debugging
