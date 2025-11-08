@@ -5,10 +5,11 @@ from weasyprint.text.fonts import FontConfiguration
 
 from django.http import Http404, HttpResponseNotFound
 from django.http.request import HttpRequest
+from django.http.response import JsonResponse, HttpResponse
 from django.template.loader import get_template
 
 from django.views.decorators.csrf import csrf_exempt
-from django.shortcuts import redirect, render, HttpResponse
+from django.shortcuts import redirect, render
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.db import transaction, connection
@@ -111,12 +112,12 @@ def index(request):
 @login_required
 def upsert_expese_for_submission(request:HttpRequest, submission_id, month_id, expense_id):
     if not request.method == "POST":
-        return HttpResponse(json.dumps({"error": "Invalid request"}), status=400)
+        return JsonResponse({"error": "Invalid request"}, status=400)
     
     try:
         loaded_data = json.loads(request.body.decode())
     except json.decoder.JSONDecodeError:
-        return HttpResponse(json.dumps({'error': f'only json data is allowed'}), status=400)
+        return JsonResponse({'error': f'only json data is allowed'}, status=400)
 
     amount = loaded_data.get("amount", None)
     personal_usage_percentage = loaded_data.get("personal_usage_percentage", None)
@@ -127,31 +128,31 @@ def upsert_expese_for_submission(request:HttpRequest, submission_id, month_id, e
 
     
     if amount is None and personal_usage_percentage is None and note is None and percentage_for_fuel_amount_value is None and percentage_for_office_and_admin_charge_amount_value is None:
-        return HttpResponse(json.dumps({'error': f'amount or personal_usage or note or office_and_admin_charge or fuel is required'}), status=400)
+        return JsonResponse({'error': f'amount or personal_usage or note or office_and_admin_charge or fuel is required'}, status=400)
     
     if personal_usage_percentage is not None and not 0<=personal_usage_percentage<=100:
-        return HttpResponse(json.dumps({'error': f'personal_usage value should be between 0 and 100!'}), status=400)
+        return JsonResponse({'error': f'personal_usage value should be between 0 and 100!'}, status=400)
     
     if percentage_for_office_and_admin_charge_amount_value is not None and not 0<=percentage_for_office_and_admin_charge_amount_value<=100:
-        return HttpResponse(json.dumps({'error': f'percentage_for_office_and_admin_charge_amount_value value should be between 0 and 100!'}), status=400)
+        return JsonResponse({'error': f'percentage_for_office_and_admin_charge_amount_value value should be between 0 and 100!'}, status=400)
     
     if percentage_for_fuel_amount_value is not None and not 0<=percentage_for_fuel_amount_value<=100:
-        return HttpResponse(json.dumps({'error': f'percentage_for_fuel_amount_value value should be between 0 and 100!'}), status=400)
+        return JsonResponse({'error': f'percentage_for_fuel_amount_value value should be between 0 and 100!'}, status=400)
 
     # retrive selfassemsent account submission record
     client = get_object_or_None(SelfassesmentAccountSubmission, pk=submission_id, delete_duplicate=True)
     if client is None:
-        return HttpResponse(json.dumps({'error': f'SelfassesmentAccountSubmission with pk={submission_id} does not exist'}), status=404)
+        return JsonResponse({'error': f'SelfassesmentAccountSubmission with pk={submission_id} does not exist'}, status=404)
     
     # retrive month 
     month = get_object_or_None(Months, pk=month_id, delete_duplicate=True)
     if month is None:
-        return HttpResponse(json.dumps({'error': f'Month with pk={month_id} does not exist'}), status=404)
+        return JsonResponse({'error': f'Month with pk={month_id} does not exist'}, status=404)
     
     # retrive expense source
     expense = get_object_or_None(SelfemploymentExpenseSources, pk=expense_id, delete_duplicate=True)
     if expense is None:
-        return HttpResponse(json.dumps({'error': f'Expense with pk={expense_id} does not exist'}), status=404)
+        return JsonResponse({'error': f'Expense with pk={expense_id} does not exist'}, status=404)
     
 
     is_created = False
@@ -175,41 +176,41 @@ def upsert_expese_for_submission(request:HttpRequest, submission_id, month_id, e
         expense_for_tax_year.save()
 
     if is_created:
-        return HttpResponse(json.dumps({'success': 'Created new record'}), status=201)
-    return HttpResponse(json.dumps({'success': 'Updated existing record'}))
+        return JsonResponse({'success': 'Created new record'}, status=201)
+    return JsonResponse({'success': 'Updated existing record'})
 
 @csrf_exempt
 @login_required
 def upsert_income_for_submission(request:HttpRequest, submission_id, month_id, income_id):
     if not request.method == "POST":
-        return HttpResponse(json.dumps({"error": "Invalid request"}), status=400)
+        return JsonResponse({"error": "Invalid request"}, status=400)
     
     try:
         loaded_data = json.loads(request.body.decode())
     except json.decoder.JSONDecodeError:
-        return HttpResponse(json.dumps({'error': f'only json data is allowed'}), status=400)
+        return JsonResponse({'error': f'only json data is allowed'}, status=400)
     
     amount = loaded_data.get("amount", None)
     comission = loaded_data.get("comission", None)
     note = loaded_data.get("note", None)
 
     if amount is None and comission is None and note is None:
-        return HttpResponse(json.dumps({'error': f'amount or comission or note must be specified'}), status=400)
+        return JsonResponse({'error': f'amount or comission or note must be specified'}, status=400)
 
     # retrive selfassemsent account submission record
     client = get_object_or_None(SelfassesmentAccountSubmission, pk=submission_id, delete_duplicate=True)
     if client is None:
-        return HttpResponse(json.dumps({'error': f'SelfassesmentAccountSubmission with pk={submission_id} does not exist'}), status=404)
+        return JsonResponse({'error': f'SelfassesmentAccountSubmission with pk={submission_id} does not exist'}, status=404)
     
     # retrive month 
     month = get_object_or_None(Months, pk=month_id, delete_duplicate=True)
     if month is None:
-        return HttpResponse(json.dumps({'error': f'Month with pk={month_id} does not exist'}), status=404)
+        return JsonResponse({'error': f'Month with pk={month_id} does not exist'}, status=404)
     
     # retrive income source
     income = get_object_or_None(SelfemploymentIncomeSources, pk=income_id, delete_duplicate=True)
     if income is None:
-        return HttpResponse(json.dumps({'error': f'IncomeSource with pk={income_id} does not exist'}), status=404)
+        return JsonResponse({'error': f'IncomeSource with pk={income_id} does not exist'}, status=404)
     
     is_created = False
     with transaction.atomic():
@@ -230,8 +231,8 @@ def upsert_income_for_submission(request:HttpRequest, submission_id, month_id, i
         income_for_tax_year.save()
     
     if is_created:
-        return HttpResponse(json.dumps({'success': 'Created new record'}), status=201)
-    return HttpResponse(json.dumps({'success': 'Updated existing record'}))
+        return JsonResponse({'success': 'Created new record'}, status=201)
+    return JsonResponse({'success': 'Updated existing record'})
     
 
 
@@ -239,12 +240,12 @@ def upsert_income_for_submission(request:HttpRequest, submission_id, month_id, i
 @login_required
 def upsert_deduction_for_submission(request:HttpRequest, submission_id, deduction_id):
     if not request.method == "POST":
-        return HttpResponse(json.dumps({"error": "Invalid request"}), status=400)
+        return JsonResponse({"error": "Invalid request"}, status=400)
     
     try:
         loaded_data = json.loads(request.body.decode())
     except json.decoder.JSONDecodeError:
-        return HttpResponse(json.dumps({'error': f'only json data is allowed'}), status=400)
+        return JsonResponse({'error': f'only json data is allowed'}, status=400)
     
     amount = loaded_data.get("amount", None)
     addition = loaded_data.get("addition", None)
@@ -254,22 +255,22 @@ def upsert_deduction_for_submission(request:HttpRequest, submission_id, deductio
     note = loaded_data.get("note", None)
 
     if amount is None and addition is None and disposal is None and allowance_percentage is None and personal_usage_percentage is None and note is None:
-        return HttpResponse(json.dumps({'error': f'amount or addition or disposal or allowance_percentage or personal_usage_percentage or note must be specified'}), status=400)
+        return JsonResponse({'error': f'amount or addition or disposal or allowance_percentage or personal_usage_percentage or note must be specified'}, status=400)
     
     if allowance_percentage and not 0<=allowance_percentage<=100:
-        return HttpResponse(json.dumps({'error': f'allowance_percentage must be between 0 and 100!'}), status=400)
+        return JsonResponse({'error': f'allowance_percentage must be between 0 and 100!'}, status=400)
     if personal_usage_percentage and not 0<=personal_usage_percentage<=100:
-        return HttpResponse(json.dumps({'error': f'personal_usage_percentage must be between 0 and 100!'}), status=400)
+        return JsonResponse({'error': f'personal_usage_percentage must be between 0 and 100!'}, status=400)
 
     # retrive selfassemsent account submission record
     client = get_object_or_None(SelfassesmentAccountSubmission, pk=submission_id, delete_duplicate=True)
     if client is None:
-        return HttpResponse(json.dumps({'error': f'SelfassesmentAccountSubmission with pk={submission_id} does not exist'}), status=404)
+        return JsonResponse({'error': f'SelfassesmentAccountSubmission with pk={submission_id} does not exist'}, status=404)
     
     # retrive deduction source
     deduction_source = get_object_or_None(SelfemploymentDeductionSources, pk=deduction_id, delete_duplicate=True)
     if deduction_source is None:
-        return HttpResponse(json.dumps({'error': f'DeductionSource with pk={deduction_id} does not exist'}), status=404)
+        return JsonResponse({'error': f'DeductionSource with pk={deduction_id} does not exist'}, status=404)
     
 
     is_created = False
@@ -296,8 +297,8 @@ def upsert_deduction_for_submission(request:HttpRequest, submission_id, deductio
         deduction_for_tax_year.save()
     
     if is_created:
-        return HttpResponse(json.dumps({'success': 'Created new record'}), status=201)
-    return HttpResponse(json.dumps({'success': 'Updated existing record'}))
+        return JsonResponse({'success': 'Created new record'}, status=201)
+    return JsonResponse({'success': 'Updated existing record'})
     
 
 
@@ -305,32 +306,32 @@ def upsert_deduction_for_submission(request:HttpRequest, submission_id, deductio
 @login_required
 def upsert_taxable_income_for_submission(request:HttpRequest, submission_id, taxable_income_id):
     if not request.method == "POST":
-        return HttpResponse(json.dumps({"error": "Invalid request"}), status=400)
+        return JsonResponse({"error": "Invalid request"}, status=400)
     
     try:
         loaded_data = json.loads(request.body.decode())
     except json.decoder.JSONDecodeError:
-        return HttpResponse(json.dumps({'error': f'only json data is allowed'}), status=400)
+        return JsonResponse({'error': f'only json data is allowed'}, status=400)
     
     amount = loaded_data.get("amount", None)
     paid_income_tax_amount = loaded_data.get("paid_income_tax_amount", None)
     note = loaded_data.get("note", None)
 
     if amount is None and paid_income_tax_amount is None and note is None:
-        return HttpResponse(json.dumps({'error': f'amount or paid_income_tax_amount or note must be specified'}), status=400)
+        return JsonResponse({'error': f'amount or paid_income_tax_amount or note must be specified'}, status=400)
     
     # if paid_income_tax_amount and not 0<=paid_income_tax_amount<=100:
-    #     return HttpResponse(json.dumps({'error': f'paid_income_tax_amount must be between 0 and 100!'}), status=400)
+    #     return JsonResponse({'error': f'paid_income_tax_amount must be between 0 and 100!'}, status=400)
 
     # retrive selfassemsent account submission record
     submission = get_object_or_None(SelfassesmentAccountSubmission, pk=submission_id, delete_duplicate=True)
     if submission is None:
-        return HttpResponse(json.dumps({'error': f'SelfassesmentAccountSubmission with pk={submission_id} does not exist'}), status=404)
+        return JsonResponse({'error': f'SelfassesmentAccountSubmission with pk={submission_id} does not exist'}, status=404)
     
     # retrive deduction source
     taxable_income_source = get_object_or_None(TaxableIncomeSources, pk=taxable_income_id, delete_duplicate=True)
     if taxable_income_source is None:
-        return HttpResponse(json.dumps({'error': f'DeductionSource with pk={taxable_income_id} does not exist'}), status=404)
+        return JsonResponse({'error': f'DeductionSource with pk={taxable_income_id} does not exist'}, status=404)
     
 
     is_created = False
@@ -351,8 +352,8 @@ def upsert_taxable_income_for_submission(request:HttpRequest, submission_id, tax
         taxable_income_for_tax_year.save()
     
     if is_created:
-        return HttpResponse(json.dumps({'success': 'Created new record'}), status=201)
-    return HttpResponse(json.dumps({'success': 'Updated existing record'}))
+        return JsonResponse({'success': 'Created new record'}, status=201)
+    return JsonResponse({'success': 'Updated existing record'})
     
 
 
@@ -363,29 +364,25 @@ def upsert_taxable_income_for_submission(request:HttpRequest, submission_id, tax
 def get_expenses_for_submission(request: HttpRequest, submission_id):
     submission_expenses = SelfemploymentExpensesPerTaxYear.objects.filter(client=submission_id)
     serialized_data = SelfemploymentExpensesPerTaxYearSerializer(submission_expenses, many=True)
-    json_response = dump_to_json.render(serialized_data.data)
-    return HttpResponse(json_response, content_type='application/json')
+    return JsonResponse(serialized_data.data, safe=False)
 
 @login_required
 def get_incomes_for_submission(request: HttpRequest, submission_id):
     submission_incomes = SelfemploymentIncomesPerTaxYear.objects.filter(client=submission_id)
     serialized_data = SelfemploymentIncomesPerTaxYearSerializer(submission_incomes, many=True)
-    json_response = dump_to_json.render(serialized_data.data)
-    return HttpResponse(json_response, content_type='application/json')
+    return JsonResponse(serialized_data.data, safe=False)
 
 @login_required
 def get_deductions_for_submission(request: HttpRequest, submission_id):
     submission_deductions = SelfemploymentDeductionsPerTaxYear.objects.filter(client=submission_id)
     serialized_data = SelfemploymentDeductionsPerTaxYearSerializer(submission_deductions, many=True)
-    json_response = dump_to_json.render(serialized_data.data)
-    return HttpResponse(json_response, content_type='application/json')
+    return JsonResponse(serialized_data.data, safe=False)
 
 @login_required
 def get_taxable_incomes_for_submission(request: HttpRequest, submission_id):
     taxable_incomes = TaxableIncomeSourceForSubmissionPerTaxYear.objects.filter(submission=submission_id)
     serialized_data = TaxableIncomeSourceForSubmissionPerTaxYearSerializer(taxable_incomes, many=True)
-    json_response = dump_to_json.render(serialized_data.data)
-    return HttpResponse(json_response, content_type='application/json')
+    return JsonResponse(serialized_data.data, safe=False)
 
 
 ##############################################################################
@@ -394,37 +391,32 @@ def get_taxable_incomes_for_submission(request: HttpRequest, submission_id):
 @login_required
 def get_all_expense_sources(request):
     expese_sources = SelfemploymentExpenseSources.objects.all()
-    serialized = SelfemploymentExpenseSourcesSerializer(expese_sources, many=True)
-    json_response = dump_to_json.render(serialized.data)
-    return HttpResponse(json_response, content_type='application/json')
+    serialized_data = SelfemploymentExpenseSourcesSerializer(expese_sources, many=True)
+    return JsonResponse(serialized_data.data, safe=False)
 
 @login_required
 def get_all_income_sources(request):
     income_sources = SelfemploymentIncomeSources.objects.all()
-    serialized = SelfemploymentIncomeSourcesSerializer(income_sources, many=True)
-    json_response = dump_to_json.render(serialized.data)
-    return HttpResponse(json_response, content_type='application/json')
+    serialized_data = SelfemploymentIncomeSourcesSerializer(income_sources, many=True)
+    return JsonResponse(serialized_data.data, safe=False)
 
 @login_required
 def get_all_months(request):
     income_sources = Months.objects.all()
-    serialized = MonthsSerializer(income_sources, many=True)
-    json_response = dump_to_json.render(serialized.data)
-    return HttpResponse(json_response, content_type='application/json')
+    serialized_data = MonthsSerializer(income_sources, many=True)
+    return JsonResponse(serialized_data.data, safe=False)
 
 @login_required
 def get_all_deduction_sources(request):
     deduction_sources = SelfemploymentDeductionSources.objects.all()
-    serialized = SelfemploymentDeductionSourcesSerializer(deduction_sources, many=True)
-    json_response = dump_to_json.render(serialized.data)
-    return HttpResponse(json_response, content_type='application/json')
+    serialized_data = SelfemploymentDeductionSourcesSerializer(deduction_sources, many=True)
+    return JsonResponse(serialized_data.data, safe=False)
 
 @login_required
 def get_all_taxable_income_sources(request):
     taxable_income_sources = TaxableIncomeSources.objects.all()
-    serialized = TaxableIncomeSourcesSerializer(taxable_income_sources, many=True)
-    json_response = dump_to_json.render(serialized.data)
-    return HttpResponse(json_response, content_type='application/json')
+    serialized_data = TaxableIncomeSourcesSerializer(taxable_income_sources, many=True)
+    return JsonResponse(serialized_data.data, safe=False)
 
 
 
@@ -678,9 +670,9 @@ def overview_section_data(request:HttpRequest, submission_id):
             'taxable_income': total_taxable_income,
             'tax': total_tax
         }
-        return HttpResponse(dump_to_json.render(data))
+        return JsonResponse(data)
     except RaiseErrorMessages as e:
-        return HttpResponseNotFound(content=dump_to_json.render(e.messages))
+        return JsonResponse({'errors': e.messages}, status=404)
 
 
 # Cache for weasyprint
