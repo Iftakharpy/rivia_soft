@@ -551,7 +551,7 @@ class Limited(models.Model):
     director_email = models.EmailField(verbose_name='Director Email', max_length=320, blank=True, null=True)
     director_address = models.TextField(verbose_name='Director Address', blank=True, null=True, db_index=True)
     director_post_code =models.CharField(verbose_name='Director Postal Code', max_length=10, blank=True, null=True)
-    gateway_id = models.CharField(verbose_name='Director Gateway ID', max_length=255, blank=True, null=True, unique=True)
+    gateway_id = models.CharField(verbose_name='Gateway ID', max_length=255, blank=True, null=True, unique=True)
     gateway_password = models.CharField(verbose_name='Gateway Password', max_length=255, blank=True, null=True)
     CH_personal_codes = models.TextField(verbose_name='CH Personal Codes', blank=True, null=True, db_index=True)
     
