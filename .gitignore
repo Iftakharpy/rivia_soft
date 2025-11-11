@@ -1,6 +1,9 @@
 # Custom rules
 
 config.json
+config.yaml
+secrets.json
+secrets.yaml
 **production/
 # **/migrations/**
 
