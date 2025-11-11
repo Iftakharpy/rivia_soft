@@ -91,7 +91,7 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'user_logs.middleware.UserLastSeenLoggerMiddleware',
-    'invoice.middleware.SimpleMiddleware',
+    'users.middleware.SimpleMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]

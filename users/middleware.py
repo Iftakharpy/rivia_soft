@@ -6,6 +6,7 @@ from companies.url_variables import Full_URL_PATHS_WITHOUT_ARGUMENTS
 
 
 public_urls = [
+    re.compile(r'^/favicon.(svg|ico)$'),
     re.compile(r'^/companies/SA/data_collection/(auth|create)_for_client/.*'),
     re.compile(r'^/accounts/public_tax_report/\d+/(?:[0-9a-fA-F]+\-?)+/$')
 ]

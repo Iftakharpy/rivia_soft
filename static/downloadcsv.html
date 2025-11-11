@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced CSV Download Example</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f7f6;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        p {
+            margin-top: 20px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+
+    <button id="downloadBtn">Download Employee Data as CSV</button>
+    <p>Click the button to download a 20-row CSV file.</p>
+
+    <script>
+        // 1. --- Sample Data: An array of 20 employee objects ---
+        const employeeData = [
+            { id: 101, firstName: "Aisha", lastName: "Khan", department: "Engineering", position: "Software Engineer", salary: 80000 },
+            { id: 102, firstName: "Ben", lastName: "Carter", department: "Marketing", position: "Marketing Manager", salary: 75000 },
+            { id: 103, firstName: "Chloe", lastName: "Davis", department: "Sales", position: "Sales Representative", salary: 65000 },
+            { id: 104, firstName: "David", lastName: "Miller", department: "Engineering", position: "Senior Engineer", salary: 95000 },
+            { id: 105, firstName: "Eva", lastName: "Garcia", department: "Human Resources", position: "HR Specialist", salary: 60000 },
+            { id: 106, firstName: "Frank", lastName: "Wilson", department: "Sales", position: "Account Executive", salary: 72000 },
+            { id: 107, firstName: "Grace", lastName: "Lee", department: "Engineering", position: "DevOps Engineer", salary: 88000 },
+            { id: 108, firstName: "Henry", lastName: "Taylor", department: "Marketing", position: "SEO Specialist", salary: 62000 },
+            { id: 109, firstName: "Isabella", lastName: "Brown", department: "Product", position: "Product Manager", salary: 105000 },
+            { id: 110, firstName: "Jack", lastName: "Martinez", department: "Engineering", position: "QA Tester", salary: 70000 },
+            { id: 111, firstName: "Kate", lastName: "Anderson", department: "Support", position: "Support Lead", salary: 58000 },
+            { id: 112, firstName: "Leo", lastName: "Thomas", department: "Sales", position: "Sales Manager", salary: 90000 },
+            { id: 113, firstName: "Mia", lastName: "Rodriguez", department: "Engineering", position: "Frontend Developer", salary: 82000 },
+            { id: 114, firstName: "Noah", lastName: "Harris", department: "Marketing", position: "Content Creator", salary: 55000 },
+            { id: 115, firstName: "Olivia", lastName: "Clark", department: "Product", position: "UX/UI Designer", salary: 85000 },
+            { id: 116, firstName: "Peter", lastName: "Lewis", department: "Engineering", position: "Backend Developer", salary: 92000 },
+            { id: 117, firstName: "Quinn", lastName: "Walker", department: "Human Resources", position: "Recruiter", salary: 63000 },
+            { id: 118, firstName: "Ryan", lastName: "Hall", department: "Support", position: "Customer Support Rep", salary: 51000 },
+            { id: 119, firstName: "Sophia", lastName: "Allen", department: "Sales", position: "Sales Representative", salary: 68000 },
+            { id: 120, firstName: "Tom", lastName: "Young", department: "Engineering", position: "Data Scientist", salary: 110000 }
+        ];
+
+        // 2. --- Helper Function to convert Array of Objects to CSV String ---
+        function convertToCSV(data) {
+            const headers = Object.keys(data[0]);
+            const rows = data.map(obj => 
+                headers.map(header => {
+                    const value = obj[header];
+                    // Handle values that might contain commas
+                    return typeof value === 'string' && value.includes(',') ? `"${value}"` : value;
+                }).join(',')
+            );
+            return [headers.join(','), ...rows].join('\n');
+        }
+
+        // 3. --- Download Methods ---
+
+        /**
+         * METHOD A: Direct Download using the File System Access API.
+         * Provides a native "Save As..." dialog.
+         */
+        async function downloadWithFilePicker(csvContent, fileName) {
+            try {
+                const handle = await window.showSaveFilePicker({
+                    suggestedName: fileName,
+                    types: [{
+                        description: 'CSV file',
+                        accept: { 'text/csv': ['.csv'] },
+                    }],
+                });
+                const writable = await handle.createWritable();
+                await writable.write(csvContent);
+                await writable.close();
+            } catch (err) {
+                // This error is often thrown if the user cancels the save dialog.
+                if (err.name !== 'AbortError') {
+                    console.error("File picker error:", err);
+                }
+            }
+        }
+
+        /**
+         * METHOD B: Fallback method using an invisible link click.
+         * Universally compatible.
+         */
+        function downloadWithLinkClick(csvContent, fileName) {
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+
+            link.setAttribute("href", url);
+            link.setAttribute("download", fileName);
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // 4. --- Main Handler to decide which method to use ---
+        async function handleDownload() {
+            console.log("Preparing download...");
+            const csvContent = convertToCSV(employeeData);
+            const fileName = `employee_data_${new Date().toISOString().slice(0,10)}.csv`;
+
+            // Use the modern API if available (and in a secure context like HTTPS)
+            if (typeof window.showSaveFilePicker === 'function') {
+                console.log("Using File System Access API.");
+                await downloadWithFilePicker(csvContent, fileName);
+            } else {
+                console.log("Fallback: Using link click method.");
+                downloadWithLinkClick(csvContent, fileName);
+            }
+        }
+
+        // 5. --- Attach the event listener to the button ---
+        document.getElementById('downloadBtn').addEventListener('click', handleDownload);
+
+    </script>
+</body>
+</html>

@@ -14,7 +14,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
 from django.shortcuts import redirect
 from django.conf import settings
 from django.conf.urls.static import static
@@ -23,6 +23,7 @@ from companies.url_variables import URL_NAMES_PREFIXED_WITH_APP_NAME
 
 
 urlpatterns = [
+    re_path(r"favicon?.(svg|ico)", lambda *args,**kwargs:redirect("/static/logos/bimi.svg", permanent=True)),
     path('', lambda *args, **kwargs:redirect(URL_NAMES_PREFIXED_WITH_APP_NAME.Merged_Tracker_home_name)),
     path('companies/', include('companies.urls'), name='companies'),
     path('accounts/', include('accounts.urls'), name='accounts'),
