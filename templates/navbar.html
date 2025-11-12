@@ -11,8 +11,9 @@
   <div class="px-4">
     <div class="py-1.5 flex flex-col md:items-center md:justify-between md:flex-row max-w-screen-xl mx-auto">
       <!-- Name of company -->
-      <div class="flex flex-row items-center justify-between">
-        <a href="{% url home %}" class="py-1.5 text-lg font-semibold tracking-widest text-gray-900 uppercase rounded-lg dark:text-white focus:outline-none focus:shadow-outline">Rivia Solutions</a>
+      <div class="inline-flex flex-row items-center justify-between">
+        <a href="{% url home %}" class="inline-flex items-center text-lg font-semibold tracking-widest text-gray-900 uppercase rounded-lg dark:text-white focus:outline-none focus:shadow-outline">
+          <img class="h-9 w-9 p-0.5" src="{% static 'logos/bg_transparent.svg' %}" alt="Rivia Solutions Logo"><span>Rivia Solutions</span></a>
         
         <button id="mobile-menu-button" class="md:hidden rounded-lg focus:outline-none focus:shadow-outline">
           <svg fill="currentColor" viewBox="0 0 20 20" class="w-6 h-6">
@@ -62,7 +63,7 @@
 
 <template id="secondary-nav-item-template">
     <span class="tooltip-container">
-      <a class="block px-3.5 py-2 text-sm font-semibold bg-transparent rounded-lg dark:bg-transparent dark:hover:bg-gray-600 dark:focus:bg-gray-600 dark:focus:text-white dark:hover:text-white dark:text-gray-200 hover:text-gray-900 focus:text-gray-900 hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:shadow-outline">
+      <a class="block px-3.5 py-1.5 text-sm font-semibold bg-transparent rounded-lg dark:bg-transparent dark:hover:bg-gray-600 dark:focus:bg-gray-600 dark:focus:text-white dark:hover:text-white dark:text-gray-200 hover:text-gray-900 focus:text-gray-900 hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:shadow-outline">
         <img class="icon" src="" alt="">
         <span class="tooltip-message" data-link-title></span>
       </a>

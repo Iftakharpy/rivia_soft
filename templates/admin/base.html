@@ -2,6 +2,8 @@
 {% load static %}
 
 {% block extrahead %}
+    <link rel="shortcut icon" href="/favicon.svg" type="image/svg+xml" sizes="any">
     {{ block.super }}
+    
     <script defer type="module" src="{% static 'js/auto_logout.js' %}"></script>
 {% endblock %}
