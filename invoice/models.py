@@ -10,7 +10,7 @@ class Company(models.Model):
     class Meta:
         verbose_name_plural = "Companies"
         constraints = [
-                models.CheckConstraint(check=models.Q(selfassesment__isnull=True) | models.Q(limited__isnull=True), name='limited_or_selfassesment_per_row'),
+                models.CheckConstraint(condition=models.Q(selfassesment__isnull=True) | models.Q(limited__isnull=True), name='limited_or_selfassesment_per_row'),
             ]
 
     selfassesment = models.ForeignKey(Selfassesment, on_delete=models.CASCADE, null=True, blank=True)
