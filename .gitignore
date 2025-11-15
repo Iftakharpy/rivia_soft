@@ -16,7 +16,8 @@ todo.txt
 
 .vscode/
 
-
+*logs*/
+logs/
 
 # Created by https://www.toptal.com/developers/gitignore/api/django,node,python,vscode,windows,git
 # Edit at https://www.toptal.com/developers/gitignore?templates=django,node,python,vscode,windows,git

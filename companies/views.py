@@ -86,7 +86,6 @@ from .repr_formats import HTML_Generator, Forms as FK_Formats
 
 # query parser
 from data_filter_query import query_model
-from error_handler.error_logger import log_server_error_to_file
 
 
 

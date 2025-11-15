@@ -1,4 +1,5 @@
 import json
+import logging
 from typing import Any
 
 from django.db.models import QuerySet
@@ -25,6 +26,9 @@ from .serializers import CustomUserSerializer
 from companies.url_variables import APPLICATION_NAME, URL_NAMES, URL_PATHS, Full_URL_PATHS_WITHOUT_ARGUMENTS, URL_NAMES_PREFIXED_WITH_APP_NAME
 from companies.url_variables import *
 from inspect import getmembers
+
+
+logger = logging.getLogger(__name__)
 
 
 application_name = APPLICATION_NAME
@@ -84,6 +88,8 @@ def login_user(request):
                 if next_url:
                     return redirect(next_url)
                 return redirect(URL_NAMES_PREFIXED_WITH_APP_NAME.Merged_Tracker_home_name)
+            public_ip = request.META.get("HTTP_X_FORWARDED_FOR", '0.0.0.0')
+            logger.warning(f"Failed login attempt: {public_ip}:{email}:{password}")
         context['message'] = 'Incorrect email or password.'
     return render(request, 'users/login.html', context=context)
 

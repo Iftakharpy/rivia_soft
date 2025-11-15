@@ -1,17 +1,21 @@
-from pathlib import Path
-from django.http.response import Http404, HttpResponseBadRequest
-from django.shortcuts import render
+import logging
+from django.conf import settings
+
+from .error_reporting import safe_render_error_page
+from ses_mailer.boto import SES_MAILER
 
 from companies.url_variables import *
-from error_handler.error_logger import log_server_error_to_file
-
-
 Navbar_links = {
   'home': f'{APPLICATION_NAME}:home',
 
   **Full_URL_PATHS_WITHOUT_ARGUMENTS.get_dict(),
   **URL_NAMES_PREFIXED_WITH_APP_NAME.get_dict()
 }
+
+
+# Get a logger for this module.
+logger = logging.getLogger(__name__)
+
 
 # Create your views here.
 def handle_400_error(request, exception):
@@ -22,11 +26,12 @@ def handle_400_error(request, exception):
     'hint': "Server can't/won't process the request due to client error. \
 Don't repeat this request without modification."
   }
-  return render(
+  return safe_render_error_page(
     request = request,
     template_name = 'error_handler/error.html',
+    status = 400,
     context = context,
-    status = 400)
+    )
 
 def handle_403_error(request, exception):
   context = {
@@ -35,11 +40,12 @@ def handle_403_error(request, exception):
     'message': 'Forbidden',
     'hint': "You are unauthorized to access this."
   }
-  return render(
+  return safe_render_error_page(
     request = request,
     template_name = 'error_handler/error.html',
+    status = 403,
     context = context,
-    status = 403)
+    )
 
 def handle_404_error(request, exception):
   context = {
@@ -48,11 +54,12 @@ def handle_404_error(request, exception):
     'message': 'Not Found',
     'hint': "Requested content can't be found in the server."
   }
-  return render(
+  return safe_render_error_page(
     request = request,
     template_name = 'error_handler/error.html',
+    status = 404,
     context = context,
-    status = 404)
+    )
 
 
 def handle_500_error(request):
@@ -63,11 +70,17 @@ def handle_500_error(request):
     'hint': "This is an edge case contact the developer."
   }
 
-  # Log 500 errors to file
-  log_server_error_to_file()
+  SES_MAILER.send_email(
+    sender=settings.DEFAULT_FROM_EMAIL,
+    to_addresses=['Admin <iftakharhusan7@gmail.com>'],
+    reply_to_addresses=[settings.DEFAULT_REPLY_TO_EMAIL],
+    subject=f"Server error",
+    body_text=f"check the server logs an unexpected error occurred"
+    )
 
-  return render(
+  return safe_render_error_page(
     request = request,
     template_name = 'error_handler/error.html',
+    status = 500,
     context = context,
-    status = 500)
+    )

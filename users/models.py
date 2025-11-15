@@ -30,6 +30,14 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return f"📨{self.email} 👥{self.first_name}"
     
+    @classmethod
+    def get_active_admins(cls):
+        return cls.objects.filter(is_admin=True, is_active=True)
+
+    @property
+    def name(self):
+        return self.get_full_name()
+    
     def get_username(self) -> str:
         return self.get_email()
     

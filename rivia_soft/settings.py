@@ -11,27 +11,29 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 
 import os
+import yaml
 from pathlib import Path
-from companies.url_variables import URL_NAMES_PREFIXED_WITH_APP_NAME
-from json import loads
 from .network_address import get_hostname, get_all_ipv4_addresses
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+LOGS_DIR = BASE_DIR/"__logs__"; LOGS_DIR.mkdir(parents=True, exist_ok=True)
+ERROR_REPORTS_DIR = LOGS_DIR/'_reports'; ERROR_REPORTS_DIR.mkdir(parents=True, exist_ok=True)
 
 # Weasyprint relies on some linux libraries which is required
 # those can be satisfied with mingw installation
 if os.name == 'nt':
-    os.add_dll_directory(r"C:\msys64\mingw64\bin")
+	os.add_dll_directory(r"C:\msys64\mingw64\bin")
 
-# config file for production
-CONFIG_FILE_NAME = 'config.json'
-CONFIG_FILE_PATH = BASE_DIR / CONFIG_FILE_NAME # Server settings
-# load configurations
-with open(CONFIG_FILE_PATH, 'r') as CONFIG_FILE:
-    CONFIG = loads(CONFIG_FILE.read())
-
-
+# ---------------------------------------------------------------------
+# LOAD CONFIGURATION FROM YAML 
+# ---------------------------------------------------------------------
+CONFIG_FILE_NAME = 'config.yaml'
+CONFIG_FILE_PATH = BASE_DIR / CONFIG_FILE_NAME # server config file path
+# load config
+with open(CONFIG_FILE_PATH, 'r', encoding='utf-8') as f:
+	CONFIG = yaml.safe_load(f)
 
 
 # Quick-start development settings - unsuitable for production
@@ -41,7 +43,6 @@ with open(CONFIG_FILE_PATH, 'r') as CONFIG_FILE:
 # ?: (security.W018) You should not have DEBUG set to True in deployment.
 DEBUG = CONFIG['DEBUG']
 WANT_TO_MIGRATE = False
-ERROR_LOG_FILE_PATH = BASE_DIR / "500_errors.log"
 ###############################################################################
 
 
@@ -50,70 +51,94 @@ ERROR_LOG_FILE_PATH = BASE_DIR / "500_errors.log"
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 if DEBUG:
-    SECRET_KEY = 'wh*lo-yh6geec40s91k0wb!enwn5ov6)3^k53c1hq)pq6png4@'
-    ALLOWED_HOSTS = ["riviagw.com", "*.riviagw.com", "localhost", "127.0.0.1", get_hostname()]
-    ALLOWED_HOSTS += get_all_ipv4_addresses()
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
-    }
+	SECRET_KEY = 'wh*lo-yh6geec40s91k0wb!enwn5ov6)3^k53c1hq)pq6png4@'
+	ALLOWED_HOSTS = ["riviagw.com", "*.riviagw.com", "localhost", "127.0.0.1", get_hostname()]
+	ALLOWED_HOSTS += get_all_ipv4_addresses()
+	DATABASES = {
+		'default': {
+			'ENGINE': 'django.db.backends.sqlite3',
+			'NAME': BASE_DIR / 'db.sqlite3',
+		}
+	}
+	AWS = { # Default AWS SES creeds 
+		'REGION': 'eu-west-2', # London, UK
+		'ACCESS_KEY_ID': 'AKI',
+		'SECRET_ACCESS_KEY': 'SAK'
+	}
+	ADMINS = [ # (default + CustomUser) admins receive 5xx errors in email
+		{'name': 'Jhon Doe', 'email': 'jhon@example.com'},
+		{'name': 'Jane Doe', 'email': 'jane@example.com'},
+	]
+	DEFAULT_FROM_EMAIL = 'Info RS <do-not-reply@riviagw.com>'
+	DEFAULT_REPLY_TO_EMAIL = 'Info RS <info@rivia-solutions.com>'
+	LOG_LEVEL = CONFIG.get("LOG_LEVEL", "NOTSET")
+	DISABLE_HSTS_HEADERS = False
 else:
-    SECRET_KEY = CONFIG['SECRET_KEY']
-    ALLOWED_HOSTS = CONFIG['ALLOWED_HOSTS']
-    DATABASES = CONFIG['DATABASES']
+	SECRET_KEY = CONFIG.get('SECRET_KEY')
+	ALLOWED_HOSTS = CONFIG.get('ALLOWED_HOSTS', [])
+	DATABASES = CONFIG.get('DATABASES', {})
+	AWS = CONFIG.get('AWS', {})
+	ADMINS = CONFIG.get('ADMINS', [])
+	DEFAULT_FROM_EMAIL = CONFIG.get('DEFAULT_FROM_EMAIL', 'Info RS <do-not-reply@riviagw.com>')
+	DEFAULT_REPLY_TO_EMAIL = CONFIG.get('DEFAULT_REPLY_TO_EMAIL', 'Info RS <info@rivia-solutions.com>')
+	LOG_LEVEL = CONFIG.get("LOG_LEVEL", "WARNING")
+	DISABLE_HSTS_HEADERS = CONFIG.get("DISABLE_HSTS_HEADERS", False)
 
 # Application definition
-
 INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'rest_framework',
+	'django.contrib.admin',
+	'django.contrib.auth',
+	'django.contrib.contenttypes',
+	'django.contrib.sessions',
+	'django.contrib.messages',
+	'django.contrib.staticfiles',
+	'rest_framework',
 
-    # Project apps
-    'error_handler',
-    'users',
-    'user_logs',
-    'companies',
-    'accounts',
-    'invoice',
+	# Project apps
+	'error_handler',
+	'users',
+	'user_logs',
+	'companies',
+	'accounts',
+	'invoice',
 ]
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'user_logs.middleware.UserLastSeenLoggerMiddleware',
-    'users.middleware.SimpleMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+	# reporting
+	'error_handler.middleware.CustomErrorLoggingMiddleware',
+
+	'django.middleware.security.SecurityMiddleware',
+	'django.contrib.sessions.middleware.SessionMiddleware',
+	'django.middleware.common.CommonMiddleware',
+	'django.middleware.csrf.CsrfViewMiddleware',
+	'django.contrib.auth.middleware.AuthenticationMiddleware',
+
+	# custom middlewares
+	'user_logs.middleware.UserLastSeenLoggerMiddleware',
+	'users.middleware.CustomAuthorizationMiddleware',
+
+	'django.contrib.messages.middleware.MessageMiddleware',
+	'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
 ROOT_URLCONF = 'rivia_soft.urls'
 
 TEMPLATES = [
-    {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [
-            BASE_DIR / 'templates'
-        ],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
-            ],
-        },
-    },
+	{
+		'BACKEND': 'django.template.backends.django.DjangoTemplates',
+		'DIRS': [
+			BASE_DIR / 'templates'
+		],
+		'APP_DIRS': True,
+		'OPTIONS': {
+			'context_processors': [
+				'django.template.context_processors.debug',
+				'django.template.context_processors.request',
+				'django.contrib.auth.context_processors.auth',
+				'django.contrib.messages.context_processors.messages',
+			],
+		},
+	},
 ]
 
 WSGI_APPLICATION = 'rivia_soft.wsgi.application'
@@ -123,18 +148,18 @@ WSGI_APPLICATION = 'rivia_soft.wsgi.application'
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+	{
+		'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+	},
+	{
+		'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+	},
+	{
+		'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+	},
+	{
+		'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+	},
 ]
 
 
@@ -170,7 +195,7 @@ STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'collected_staticfiles'
 # Additional locations the staticfiles app will traverse if the FileSystemFinder finder is enabled
 STATICFILES_DIRS = [
-    BASE_DIR / 'static',
+	BASE_DIR / 'static', # Serve them locally for testing when DEBUG=False but SHOULD_DJANGO_SERVE_STATIC_FILES=True
 ]
 
 
@@ -182,40 +207,128 @@ LOGOUT_REDIRECT_URL = 'users_login'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
+# ---------------------------------------------------------------------
+# REST FRAMEWORK
+# ---------------------------------------------------------------------
 REST_FRAMEWORK = {
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 1,
-    'DEFAULT_RENDERER_CLASSES': [
-        'rest_framework.renderers.JSONRenderer',
-        'rest_framework.renderers.BrowsableAPIRenderer',
-    ],
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.BasicAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
-    ]
+	'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+	'PAGE_SIZE': 1,
+	'DEFAULT_RENDERER_CLASSES': [
+		'rest_framework.renderers.JSONRenderer',
+		'rest_framework.renderers.BrowsableAPIRenderer',
+	],
+	'DEFAULT_AUTHENTICATION_CLASSES': [
+		'rest_framework.authentication.BasicAuthentication',
+		'rest_framework.authentication.SessionAuthentication',
+	]
+}
+
+# ---------------------------------------------------------------------
+# LOGGING
+# ---------------------------------------------------------------------
+ERROR_LOG_FILE_PATH = LOGS_DIR / "500_errors.log" # old server_log func
+LOGGING = {
+	'version': 1,
+	'disable_existing_loggers': False, # This is important to keep Django's own loggers running
+
+	"formatters": {
+		"verbose_file_fmt": {
+			"()": "django.utils.log.ServerFormatter",
+			"format": f"""\n
+{'='*85}
+[%(asctime)s] %(levelname)s - %(module)s.%(funcName)s
+Logger: %(name)s
+Error Message: %(message)s
+File: %(pathname)s:%(lineno)d
+{'='*85}
+""",
+			"style": "%",
+		}
+	},
+
+	"handlers": {
+		"console": {
+			"level": LOG_LEVEL,
+			"class": "logging.StreamHandler",
+		},
+		"file": {
+			"level": LOG_LEVEL,
+			"class": "logging.FileHandler",
+			'formatter': 'verbose_file_fmt',
+			"filename": LOGS_DIR/"_django_server.log",
+		},
+		'__root__':{
+			"level": LOG_LEVEL,
+			"class": "logging.FileHandler",
+			'formatter': 'verbose_file_fmt',
+			"filename": LOGS_DIR/"__root__.log",
+		},
+		"users_handler": {
+			"level": LOG_LEVEL,
+			'formatter': 'verbose_file_fmt',
+			"class": "logging.FileHandler",
+			"filename": LOGS_DIR/"users.log",
+		},
+		"ses_mailer_handler": {
+			"level": LOG_LEVEL,
+			'formatter': 'verbose_file_fmt',
+			"class": "logging.FileHandler",
+			"filename": LOGS_DIR/"ses_mailer.log",
+		},
+	},
+	'loggers': {
+		'':{
+			'level': LOG_LEVEL,
+			'handlers': ['console', "__root__"],
+		},
+		'django':{
+			"propagate": False,
+			'level': LOG_LEVEL,
+			'handlers': ['console', "file",],
+		},
+		'users':{
+			"propagate": False,
+			'level': LOG_LEVEL,
+			'handlers': ['console', 'users_handler'],
+		},
+		'ses_mailer':{
+			"propagate": False,
+			'level': LOG_LEVEL,
+			'handlers': ['console', 'ses_mailer_handler'],
+		},
+	}
 }
 
 
+# ---------------------------------------------------------------------
+# SECURITY HEADERS (PRODUCTION)
+# ---------------------------------------------------------------------
 if not DEBUG:
-    # python manage.py check --deploy
-    # ?: (security.W004) You have not set a value for the SECURE_HSTS_SECONDS setting. If your entire site is served only over SSL, you may want to consider setting a value and enabling HTTP Strict Transport Security. Be sure to read the documentation first; enabling HSTS carelessly can cause serious, irreversible problems.
-    SECURE_HSTS_SECONDS = 1800 # 1800 # nginx will handle this
-    
-    # ?: (security.W005) You have not set the SECURE_HSTS_INCLUDE_SUBDOMAINS setting to True. Without this, your site is potentially vulnerable to attack via an insecure connection to a subdomain. Only set this to True if you are certain that all subdomains of your domain should be served exclusively via SSL.
-    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+	# python manage.py check --deploy
+	# ?: (security.W004) You have not set a value for the SECURE_HSTS_SECONDS setting. If your entire site is served only over SSL, you may want to consider setting a value and enabling HTTP Strict Transport Security. Be sure to read the documentation first; enabling HSTS carelessly can cause serious, irreversible problems.
+	SECURE_HSTS_SECONDS = 1800 # 1800 # nginx will handle this
+	
+	# ?: (security.W005) You have not set the SECURE_HSTS_INCLUDE_SUBDOMAINS setting to True. Without this, your site is potentially vulnerable to attack via an insecure connection to a subdomain. Only set this to True if you are certain that all subdomains of your domain should be served exclusively via SSL.
+	SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 
-    # ?: (security.W008) Your SECURE_SSL_REDIRECT setting is not set to True. Unless your site should be available over both SSL and non-SSL connections, you may want to either set this setting True or configure a load balancer or reverse-proxy server to redirect all connections to HTTPS.       
-    SECURE_SSL_REDIRECT = True # behind nginx so no need for this
+	# ?: (security.W008) Your SECURE_SSL_REDIRECT setting is not set to True. Unless your site should be available over both SSL and non-SSL connections, you may want to either set this setting True or configure a load balancer or reverse-proxy server to redirect all connections to HTTPS.       
+	SECURE_SSL_REDIRECT = True # behind nginx so no need for this
 
-    # ?: (security.W012) SESSION_COOKIE_SECURE is not set to True. Using a secure-only session cookie makes it more difficult for network traffic sniffers to hijack user sessions.
-    SESSION_COOKIE_SECURE = True
+	# ?: (security.W012) SESSION_COOKIE_SECURE is not set to True. Using a secure-only session cookie makes it more difficult for network traffic sniffers to hijack user sessions.
+	SESSION_COOKIE_SECURE = True
 
-    # ?: (security.W016) You have 'django.middleware.csrf.CsrfViewMiddleware' in your MIDDLEWARE, but you have not set CSRF_COOKIE_SECURE to True. Using a secure-only CSRF cookie makes it more difficult for network traffic sniffers to steal the CSRF token.
-    CSRF_COOKIE_SECURE = True
+	# ?: (security.W016) You have 'django.middleware.csrf.CsrfViewMiddleware' in your MIDDLEWARE, but you have not set CSRF_COOKIE_SECURE to True. Using a secure-only CSRF cookie makes it more difficult for network traffic sniffers to steal the CSRF token.
+	CSRF_COOKIE_SECURE = True
 
-    # ?: (security.W021) You have not set the SECURE_HSTS_PRELOAD setting to True. Without this, your site cannot be submitted to the browser preload list.
-    SECURE_HSTS_PRELOAD = True
+	# ?: (security.W021) You have not set the SECURE_HSTS_PRELOAD setting to True. Without this, your site cannot be submitted to the browser preload list.
+	SECURE_HSTS_PRELOAD = True
 
-    # ?: (security.W019) You have 'django.middleware.clickjacking.XFrameOptionsMiddleware' in your MIDDLEWARE, but X_FRAME_OPTIONS is not set to 'DENY'. Unless there is a good reason for your site to serve other parts of itself in a frame, you should change it to 'DENY'.
-    X_FRAME_OPTIONS = "SAMEORIGIN" # this is necessary to embed the pdf reports
+	# ?: (security.W019) You have 'django.middleware.clickjacking.XFrameOptionsMiddleware' in your MIDDLEWARE, but X_FRAME_OPTIONS is not set to 'DENY'. Unless there is a good reason for your site to serve other parts of itself in a frame, you should change it to 'DENY'.
+	X_FRAME_OPTIONS = "SAMEORIGIN" # this is necessary to embed the pdf reports
+
+if DISABLE_HSTS_HEADERS:
+	SECURE_HSTS_INCLUDE_SUBDOMAINS = False       
+	SECURE_SSL_REDIRECT = False
+	SESSION_COOKIE_SECURE = False
+	CSRF_COOKIE_SECURE = False
+	SECURE_HSTS_PRELOAD = False
