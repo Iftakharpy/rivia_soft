@@ -31,8 +31,13 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         return f"📨{self.email} 👥{self.first_name}"
     
     @classmethod
-    def get_active_admins(cls):
-        return cls.objects.filter(is_admin=True, is_active=True)
+    def get_active_superusers(cls):
+        return cls.objects.filter(is_superuser=True, is_active=True)
+
+    @classmethod
+    def get_active_superusers_emails(cls):
+        for active_admin in cls.get_active_superusers():
+            yield f"{active_admin.get_full_name()} <{active_admin.get_email()}>"
 
     @property
     def name(self):

@@ -51,6 +51,11 @@ WANT_TO_MIGRATE = False
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 if DEBUG:
+	LOG_LEVEL = CONFIG.get("LOG_LEVEL", "NOTSET")
+	DISABLE_HSTS_HEADERS = True
+	ENABLE_ERROR_TRIGGERS = True
+	DISABLE_ADMIN_EMAIL_ALERTS = True
+
 	SECRET_KEY = 'wh*lo-yh6geec40s91k0wb!enwn5ov6)3^k53c1hq)pq6png4@'
 	ALLOWED_HOSTS = ["riviagw.com", "*.riviagw.com", "localhost", "127.0.0.1", get_hostname()]
 	ALLOWED_HOSTS += get_all_ipv4_addresses()
@@ -65,24 +70,31 @@ if DEBUG:
 		'ACCESS_KEY_ID': 'AKI',
 		'SECRET_ACCESS_KEY': 'SAK'
 	}
-	ADMINS = [ # (default + CustomUser) admins receive 5xx errors in email
-		{'name': 'Jhon Doe', 'email': 'jhon@example.com'},
-		{'name': 'Jane Doe', 'email': 'jane@example.com'},
+	ADMIN_EMAILS_EXTEND_WITH_SUPERUSER = False
+	ADMIN_EMAILS = [
+		# 'jhon@example.com',
+		# 'Jane Doe <jane@example.com>',
+		# CustomUser.get_active_admins admins receive alerts about 5xx errors via email
 	]
 	DEFAULT_FROM_EMAIL = 'Info RS <do-not-reply@riviagw.com>'
 	DEFAULT_REPLY_TO_EMAIL = 'Info RS <info@rivia-solutions.com>'
-	LOG_LEVEL = CONFIG.get("LOG_LEVEL", "NOTSET")
-	DISABLE_HSTS_HEADERS = False
 else:
+	LOG_LEVEL = CONFIG.get("LOG_LEVEL", "WARNING")
+	DISABLE_HSTS_HEADERS = CONFIG.get("DISABLE_HSTS_HEADERS", False)
+	ENABLE_ERROR_TRIGGERS = CONFIG.get("ENABLE_ERROR_TRIGGERS", False)
+	DISABLE_ADMIN_EMAIL_ALERTS = CONFIG.get("DISABLE_ADMIN_EMAIL_ALERTS", False)
+
 	SECRET_KEY = CONFIG.get('SECRET_KEY')
 	ALLOWED_HOSTS = CONFIG.get('ALLOWED_HOSTS', [])
 	DATABASES = CONFIG.get('DATABASES', {})
+	
 	AWS = CONFIG.get('AWS', {})
-	ADMINS = CONFIG.get('ADMINS', [])
 	DEFAULT_FROM_EMAIL = CONFIG.get('DEFAULT_FROM_EMAIL', 'Info RS <do-not-reply@riviagw.com>')
 	DEFAULT_REPLY_TO_EMAIL = CONFIG.get('DEFAULT_REPLY_TO_EMAIL', 'Info RS <info@rivia-solutions.com>')
-	LOG_LEVEL = CONFIG.get("LOG_LEVEL", "WARNING")
-	DISABLE_HSTS_HEADERS = CONFIG.get("DISABLE_HSTS_HEADERS", False)
+	
+	ADMIN_EMAILS_EXTEND_WITH_SUPERUSER = CONFIG.get('ADMIN_EMAILS_EXTEND_WITH_SUPERUSER', False)
+	ADMIN_EMAILS = CONFIG.get('ADMIN_EMAILS', [])
+
 
 # Application definition
 INSTALLED_APPS = [

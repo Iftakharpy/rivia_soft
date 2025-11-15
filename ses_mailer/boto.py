@@ -1,13 +1,15 @@
-import boto3
 import yaml
 import logging
 from pathlib import Path
-from botocore.exceptions import ClientError
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
-from email.mime.application import MIMEApplication
-from typing import List, Dict, Optional, Any
+from typing import Optional, Any, Iterable
+
 from django.conf import settings
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from email.mime.application import MIMEApplication
+import boto3
+from botocore.exceptions import ClientError
+
 
 
 # Get a logger for this module. Django will automatically configure this
@@ -15,7 +17,7 @@ from django.conf import settings
 logger = logging.getLogger(__name__)
 
 # For type hinting the in-memory attachment structure
-InMemoryAttachment = Dict[str, Any]
+InMemoryAttachment = dict[str, Any]
 
 
 class SESv2_boto3:
@@ -55,7 +57,7 @@ class SESv2_boto3:
 			logger.error("An unexpected error occurred during SES client creation.", exc_info=e)
 		return None
 
-	def send_email(self, *, sender: str, to_addresses: List[str], subject: str, body_html: Optional[str] = None, body_text: Optional[str] = None, reply_to_addresses: List[str] = [], cc_addresses: List[str] = [], bcc_addresses: List[str] = [], attachment_file_paths: List[str] = [], in_memory_attachments: List[InMemoryAttachment] = [], custom_headers: Dict[str, str] = {}) -> Optional[str]:
+	def send_email(self, *, sender: str, to_addresses: Iterable[str], subject: str, body_html: Optional[str] = None, body_text: Optional[str] = None, reply_to_addresses: Iterable[str] = [], cc_addresses: Iterable[str] = [], bcc_addresses: Iterable[str] = [], attachment_file_paths: Iterable[Path] = [], in_memory_attachments: Iterable[InMemoryAttachment] = [], custom_headers: dict[str, str] = {}) -> Optional[str]:
 		"""
 		Constructs and sends an email, returning the message ID on success.
 		- If any attachments are present, a raw MIME email is constructed.
