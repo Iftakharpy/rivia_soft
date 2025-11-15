@@ -58,7 +58,7 @@ def alert_admins(subject:str, body_text:str|None=None):
 	try:
 		SES_MAILER.send_email(
 			sender=settings.DEFAULT_FROM_EMAIL,
-			to_addresses=to_addresses,
+			to_addresses=list(to_addresses),
 			reply_to_addresses=[settings.DEFAULT_REPLY_TO_EMAIL],
 			subject=subject,
 			body_text=body_text or get_formatted_error()

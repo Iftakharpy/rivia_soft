@@ -57,7 +57,7 @@ class SESv2_boto3:
 			logger.error("An unexpected error occurred during SES client creation.", exc_info=e)
 		return None
 
-	def send_email(self, *, sender: str, to_addresses: Iterable[str], subject: str, body_html: Optional[str] = None, body_text: Optional[str] = None, reply_to_addresses: Iterable[str] = [], cc_addresses: Iterable[str] = [], bcc_addresses: Iterable[str] = [], attachment_file_paths: Iterable[Path] = [], in_memory_attachments: Iterable[InMemoryAttachment] = [], custom_headers: dict[str, str] = {}) -> Optional[str]:
+	def send_email(self, *, sender: str, to_addresses: list[str], subject: str, body_html: Optional[str] = None, body_text: Optional[str] = None, reply_to_addresses: list[str] = [], cc_addresses: list[str] = [], bcc_addresses: list[str] = [], attachment_file_paths: list[Path] = [], in_memory_attachments: list[InMemoryAttachment] = [], custom_headers: dict[str, str] = {}) -> Optional[str]:
 		"""
 		Constructs and sends an email, returning the message ID on success.
 		- If any attachments are present, a raw MIME email is constructed.
