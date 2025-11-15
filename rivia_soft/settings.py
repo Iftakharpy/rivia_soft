@@ -116,14 +116,14 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-	# reporting
-	'error_handler.middleware.CustomErrorLoggingMiddleware',
-
 	'django.middleware.security.SecurityMiddleware',
 	'django.contrib.sessions.middleware.SessionMiddleware',
 	'django.middleware.common.CommonMiddleware',
 	'django.middleware.csrf.CsrfViewMiddleware',
 	'django.contrib.auth.middleware.AuthenticationMiddleware',
+
+	# reporting
+	'error_handler.middleware.CustomErrorLoggingMiddleware',
 
 	# custom middlewares
 	'user_logs.middleware.UserLastSeenLoggerMiddleware',
