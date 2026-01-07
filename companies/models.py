@@ -341,8 +341,10 @@ class SelfassesmentAccountSubmission(models.Model):
     @classmethod
     def get_request_date(cls, client_id, tax_year):
         records = cls.objects.filter(client_id=client_id, tax_year=tax_year)
-        if records.count()>=1:
-            return records.first().request_date
+        if records.exists():
+            acc_submission = records.first()
+            if acc_submission:
+                return acc_submission.request_date
         return None
 
 
