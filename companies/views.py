@@ -2478,9 +2478,10 @@ def get_limited_submissions_where_assigned_to_me(user):
 def home_limited_submission_deadline_tracker(request):
   pk_field = 'submission_id'
   exclude_fields = []
-  field_ordering = ['client_id', 'file_#', 'reg_num', 'status', 'assigned_to', 'period_start_date', 'period', 'remarks', 'HMRC_deadline', 'is_submitted', 'submitted_by', 'submission_date', 'our_deadline', 'is_submitted_hmrc', 'submitted_by_hmrc', 'submission_date_hmrc', 'is_documents_uploaded', ]
+  field_ordering = ['client_id', 'file_#', 'reg_num', 'auth_code', 'status', 'assigned_to', 'period_start_date', 'period', 'remarks', 'HMRC_deadline', 'is_submitted', 'submitted_by', 'submission_date', 'our_deadline', 'is_submitted_hmrc', 'submitted_by_hmrc', 'submission_date_hmrc', 'is_documents_uploaded', ]
   model_fields = get_field_names_from_model(LimitedSubmissionDeadlineTracker)
   model_fields.append('reg_num')
+  model_fields.append('auth_code')
   model_fields.append('file_#')
   keep_include_fields = False
   fk_fields = {
@@ -2490,6 +2491,7 @@ def home_limited_submission_deadline_tracker(request):
       'submitted_by_hmrc': { 'details_url_without_argument': user_details_url_without_argument, 'repr-format': HTML_Generator.CustomUser_repr_format },
       'client_id': { 'details_url_without_argument': Full_URL_PATHS_WITHOUT_ARGUMENTS.Limited_details_url, 'repr-format': HTML_Generator.Limited_client_id_repr_format, 'href-url': Full_URL_PATHS_WITHOUT_ARGUMENTS.Limited_update_url,},
       'reg_num': { 'details_url_without_argument': '/companies/LTD/details/', 'repr-format': r'{company_reg_number}', 'data-field': 'fields.client_id'},
+      'auth_code': { 'details_url_without_argument': '/companies/LTD/details/', 'repr-format': r'{company_auth_code}', 'data-field': 'fields.client_id'},
       'file_#': { 'details_url_without_argument': '/companies/LTD/details/', 'repr-format': r'{client_file_number}', 'data-field': 'fields.client_id'},
       }
   context = {
@@ -3091,6 +3093,7 @@ def home_limited_confirmation_statement_tracker(request):
     "statement_id",
     "client_id",
     "reg_num",
+    "auth_code",
     "company_house_deadline",
     "is_submitted",
     "submitted_by",
@@ -3102,10 +3105,12 @@ def home_limited_confirmation_statement_tracker(request):
   ]
   model_fields = get_field_names_from_model(LimitedConfirmationStatementTracker)
   model_fields.append('reg_num')
+  model_fields.append('auth_code')
   fk_fields = {
       'updated_by': { 'details_url_without_argument': user_details_url_without_argument, 'repr-format': HTML_Generator.CustomUser_repr_format },
       'client_id': { 'details_url_without_argument': Full_URL_PATHS_WITHOUT_ARGUMENTS.Limited_details_url, 'repr-format': HTML_Generator.Limited_client_id_repr_format, 'href-url': Full_URL_PATHS_WITHOUT_ARGUMENTS.Limited_update_url,},
       'reg_num': { 'details_url_without_argument': '/companies/LTD/details/', 'repr-format': r'{company_reg_number}', 'data-field': 'fields.client_id'},
+      'auth_code': { 'details_url_without_argument': '/companies/LTD/details/', 'repr-format': r'{company_auth_code}', 'data-field': 'fields.client_id'},
       }
   context = {
     **URLS,
