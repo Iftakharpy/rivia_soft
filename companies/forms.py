@@ -560,6 +560,7 @@ class SelfassesmentAccountSubmissionCreationForm(forms.ModelForm):
         fk_field='id',
         empty_label=None
     )
+    payment_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date',}), required=False)
     appointment_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date',}), required=False)
     request_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date', "value": get_date_today()}), required=False)
 
@@ -577,6 +578,7 @@ class SelfassesmentAccountSubmissionCreationForm(forms.ModelForm):
             "payment_status",
             "payment_method",
             "paid_amount",
+            "payment_date",
             # "prepared_by",
             # "submitted_by",
             # "is_submitted",
@@ -667,6 +669,7 @@ class SelfassesmentAccountSubmissionChangeForm(forms.ModelForm):
         empty_label=None
     )
     appointment_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}), required=False)
+    payment_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}), required=False)
     # request_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}), required=False)
 
     read_only_fields = ["client_id", ]
@@ -689,6 +692,7 @@ class SelfassesmentAccountSubmissionChangeForm(forms.ModelForm):
             "payment_status",
             "payment_method",
             "paid_amount",
+            "payment_date",
             "prepared_by",
             "submitted_by",
             # "is_submitted",

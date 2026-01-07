@@ -306,6 +306,7 @@ class SelfassesmentAccountSubmission(models.Model):
     )
     payment_method = models.CharField("Payment Method", blank=True, null=True, max_length=55, choices=payment_method_choices, default=None)
     paid_amount = models.BigIntegerField(verbose_name='Amount Paid', blank=True, null=True)
+    payment_date = models.DateField(verbose_name='Payment Date', default=None, null=True)
     unique_public_view_key = models.UUIDField('Unique Public View Key', default=uuid.uuid4, editable=False)
 
     last_updated_by = models.ForeignKey(

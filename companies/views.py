@@ -1005,6 +1005,7 @@ def home_selfassesment_account_submission(request):
     "payment_status",
     "payment_method",
     "paid_amount",
+    "payment_date",
     "unique_public_view_key",
     "assigned_to",
     "last_updated_by",
