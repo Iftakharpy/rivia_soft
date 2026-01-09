@@ -1717,6 +1717,7 @@ def home_limited(request):
     'NINO',
     "vat",
     "created_by",
+    'assigned_to',
     "date_of_registration"
   ]
   keep_include_fields = True

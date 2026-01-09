@@ -887,6 +887,18 @@ class SelfassesmentTrackerDeleteForm(forms.ModelForm):
 
 ##################################################################################################
 class LimitedCreationForm(forms.ModelForm):
+    assigned_to = SearchableModelField(
+        queryset=CustomUser.objects.all(),
+        search_url = search_users_url_path,
+        all_url = all_users_url_path,
+        repr_format = Forms.CustomUser_repr_format,
+        model = CustomUser,
+        choices = CustomUser.objects.all().only('user_id', 'first_name'),
+        fk_field = 'user_id',
+        disabled = False,
+        required = False,
+        empty_label = None # remove default option '------' from select menu
+        )
     date_of_registration = forms.DateField(
         label='Registration date',
         widget=forms.DateInput(attrs={'type': 'date', 'value': get_date_today, 'placehoder': 'Registration date'})
@@ -902,6 +914,7 @@ class LimitedCreationForm(forms.ModelForm):
             # 'client_id',
             # 'created_by',
             # 'is_updated',
+            'assigned_to',
             'client_rating',
             'date_of_registration',
             'is_active',
@@ -947,7 +960,7 @@ class LimitedCreationForm(forms.ModelForm):
         fieldsets = (
             Fieldset(
                 title = 'Client Info',
-                fields = ('client_rating', 'client_file_number', 'date_of_registration', 'client_name', 'company_reg_number', 'company_auth_code', 'remarks', 'is_active', 'is_payroll', 'payment_method', 'direct_debit_amount', )
+                fields = ('assigned_to', 'client_rating', 'client_file_number', 'date_of_registration', 'client_name', 'company_reg_number', 'company_auth_code', 'remarks', 'is_active', 'is_payroll', 'payment_method', 'direct_debit_amount', )
                 ),
             Fieldset(
                 title = 'Director Info',
@@ -969,6 +982,18 @@ class LimitedCreationForm(forms.ModelForm):
 
 
 class LimitedChangeForm(forms.ModelForm):
+    assigned_to = SearchableModelField(
+        queryset=CustomUser.objects.all(),
+        search_url = search_users_url_path,
+        all_url = all_users_url_path,
+        repr_format = Forms.CustomUser_repr_format,
+        model = CustomUser,
+        choices = CustomUser.objects.all().only('user_id', 'first_name'),
+        fk_field = 'user_id',
+        disabled = False,
+        required = False,
+        empty_label = None # remove default option '------' from select menu
+        )
     date_of_registration = forms.DateField(
         label='Registration date',
         widget=forms.DateInput(attrs={'type': 'date', 'value': get_date_today, 'placehoder': 'Registration date'})
@@ -978,12 +1003,14 @@ class LimitedChangeForm(forms.ModelForm):
         widget=forms.DateInput(attrs={'type': 'date',})
     )
     
+    
     class Meta:
         model = Limited
         fields = (
             # 'client_id',
             # 'created_by',
             # 'is_updated',
+            'assigned_to',
             'client_rating',
             'date_of_registration',
             'is_active',
@@ -1029,7 +1056,7 @@ class LimitedChangeForm(forms.ModelForm):
         fieldsets = (
             Fieldset(
                 title = 'Client Info',
-                fields = ('client_rating', 'client_file_number', 'date_of_registration', 'client_name', 'company_reg_number', 'company_auth_code', 'remarks', 'is_active', 'is_payroll', 'payment_method', 'direct_debit_amount', )
+                fields = ('assigned_to', 'client_rating', 'client_file_number', 'date_of_registration', 'client_name', 'company_reg_number', 'company_auth_code', 'remarks', 'is_active', 'is_payroll', 'payment_method', 'direct_debit_amount', )
                 ),
             Fieldset(
                 title = 'Director Info',

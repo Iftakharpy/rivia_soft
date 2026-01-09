@@ -525,6 +525,14 @@ class Limited(models.Model):
         to_field='user_id',
         blank=True,
         null=True)
+    assigned_to = models.ForeignKey(
+        to='users.CustomUser',
+        on_delete=models.SET_NULL,
+        verbose_name='Assigned to',
+        related_name='limited_assigned_to',
+        to_field='user_id',
+        blank=True,
+        null=True)
 
 
     date_of_registration = models.DateField(verbose_name='Registration date', blank=False, null=True, default=timezone.now)
