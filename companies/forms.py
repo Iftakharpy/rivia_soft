@@ -1430,8 +1430,8 @@ class LimitedSubmissionDeadlineTrackerChangeForm(forms.ModelForm):
     period_start_date = forms.DateField(label="Period Start", widget=forms.DateInput(attrs={'type': 'date'}), required=False)
     period = forms.DateField(label="Period End", widget=forms.DateInput(attrs={'type': 'date'}), required=False)
 
-    planning_date = forms.DateField(label="Planning date", widget=forms.DateInput(attrs={'type': 'date'}))
     our_deadline = forms.DateField(label="HMRC Deadline", widget=forms.DateInput(attrs={'type': 'date'}), required=False)
+    planning_date = forms.DateField(label="Planning date", widget=forms.DateInput(attrs={'type': 'date'}), required=False)
     HMRC_deadline = forms.DateField(label="CompanyHouse Deadline", widget=forms.DateInput(attrs={'type': 'date'}))
     submission_date = forms.DateField(label="Submission Date(CH)", widget=forms.DateInput(attrs={'type': 'date'}), required=False)
     submission_date_hmrc = forms.DateField(label="Submission Date(HM)", widget=forms.DateInput(attrs={'type': 'date'}), required=False)
@@ -1445,6 +1445,7 @@ class LimitedSubmissionDeadlineTrackerChangeForm(forms.ModelForm):
     class Meta:
         model = LimitedSubmissionDeadlineTracker
         fields = (
+            "assigned_to",
             # "submission_id",
             "client_id",
             "status",
@@ -1473,8 +1474,6 @@ class LimitedSubmissionDeadlineTrackerChangeForm(forms.ModelForm):
 
             # "updated_by",
             # "last_updated_on",
-
-            "assigned_to",
             )
     def clean_submission_date(self):
         is_submitted = self.cleaned_data.get('is_submitted')

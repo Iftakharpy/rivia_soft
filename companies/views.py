@@ -2647,6 +2647,7 @@ def update_limited_submission_deadline_tracker(request, submission_id:int):
       if (assesment.is_submitted and assesment.is_submitted_hmrc) and not does_newer_record_already_exist:
         new_assesment = LimitedSubmissionDeadlineTracker()
         new_assesment.client_id = assesment.client_id
+        new_assesment.assigned_to = assesment.assigned_to
         new_assesment.updated_by = request.user
         new_assesment.HMRC_deadline = assesment.HMRC_deadline + relativedelta(years=1) # Company House deadline
         new_assesment.our_deadline = assesment.our_deadline + relativedelta(years=1) # HMRC Deadline
