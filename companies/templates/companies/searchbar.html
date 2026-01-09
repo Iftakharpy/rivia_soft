@@ -21,7 +21,29 @@
           </svg>
         </span>
       </div>
+  
     </div>
+
+    <div class="inline-block">
+      <button class="btn update px-3 rounded-lg" style="height: 40px;" id="open-docs-btn">?</button>
+    </div>
+    <!-- Load the component -->
+    <script type="module" src="/static/js/web_components/github-docs-window.js"></script>
+    <github-docs-window
+      id="docs"
+      src="https://raw.githubusercontent.com/Iftakharpy/rivia_soft/main/data_filter_query/README.md">
+    </github-docs-window>
+  
+    <!-- Page-specific wiring -->
+    <script type="module">
+      const docs = document.getElementById("docs");
+
+      document
+        .getElementById("open-docs-btn")
+        .addEventListener("click", () => {
+          docs.open();
+        });
+    </script>
     
     {% if tax_years %}
       <div class="inline-block">
