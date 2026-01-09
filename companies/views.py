@@ -1695,6 +1695,7 @@ def home_limited(request):
   pk_field = 'client_id'
   exclude_fields = []
   include_fields = [
+    'assigned_to',
     'client_rating',
     'client_name',
     'client_file_number',
@@ -1717,7 +1718,6 @@ def home_limited(request):
     'NINO',
     "vat",
     "created_by",
-    'assigned_to',
     "date_of_registration"
   ]
   keep_include_fields = True
