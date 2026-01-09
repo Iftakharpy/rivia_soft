@@ -2480,7 +2480,7 @@ def get_limited_submissions_where_assigned_to_me(user):
 def home_limited_submission_deadline_tracker(request):
   pk_field = 'submission_id'
   exclude_fields = []
-  field_ordering = ['client_id', 'file_#', 'reg_num', 'auth_code', 'status', 'assigned_to', 'period_start_date', 'period', 'remarks', 'HMRC_deadline', 'is_submitted', 'submitted_by', 'submission_date', 'our_deadline', 'is_submitted_hmrc', 'submitted_by_hmrc', 'submission_date_hmrc', 'is_documents_uploaded', ]
+  field_ordering = ['client_id', 'file_#', 'reg_num', 'auth_code', 'status', 'assigned_to', 'period_start_date', 'period', 'remarks', 'planning_date', 'HMRC_deadline', 'is_submitted', 'submitted_by', 'submission_date', 'our_deadline', 'is_submitted_hmrc', 'submitted_by_hmrc', 'submission_date_hmrc', 'is_documents_uploaded', ]
   model_fields = get_field_names_from_model(LimitedSubmissionDeadlineTracker)
   model_fields.append('reg_num')
   model_fields.append('auth_code')

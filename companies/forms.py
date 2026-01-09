@@ -1320,6 +1320,7 @@ class LimitedSubmissionDeadlineTrackerCreationForm(forms.ModelForm):
     #     required = False,
     #     empty_label = None # remove default option '------' from select menu
     #     )
+    planning_date = forms.DateField(label="Planning date", widget=forms.DateInput(attrs={'type': 'date'}), required=False)
     # our_deadline = forms.DateField(label="HMRC deadline", widget=forms.DateInput(attrs={'type': 'date'}), required=False)
     HMRC_deadline = forms.DateField(label="CompanyHouse Deadline", widget=forms.DateInput(attrs={'type': 'date'}))
     # submission_date_hmrc = forms.DateField(label="Submission Date(CH)", widget=forms.DateInput(attrs={'type': 'date'}), required=False)
@@ -1341,6 +1342,7 @@ class LimitedSubmissionDeadlineTrackerCreationForm(forms.ModelForm):
             # "submitted_by_hmrc",
             # "submission_date_hmrc",
 
+            "planning_date",
             "HMRC_deadline",
             # "is_submitted",
             # "submitted_by",
@@ -1366,6 +1368,13 @@ class LimitedSubmissionDeadlineTrackerCreationForm(forms.ModelForm):
             raise ValidationError('Is Submitted is True therefore Submission Date is required.')
         return submission_date
     
+    def clean_planning_date(self):
+        planning_date = self.cleaned_data.get('planning_date')
+        HMRC_deadline = self.cleaned_data.get('HMRC_deadline')
+        if planning_date and HMRC_deadline and planning_date >= HMRC_deadline:
+            raise ValidationError("Planning date can't be greater than or equals to Deadline(CH)")
+        return planning_date
+    
     def clean(self):
         date_type = type(date(1,1,1))
 
@@ -1384,6 +1393,13 @@ class LimitedSubmissionDeadlineTrackerCreationForm(forms.ModelForm):
                 message = "Difference between period start and period and should be 1 year or more."
                 self.add_error("period_start_date", message)
                 self.add_error("period", message)
+
+        planning_date = self.cleaned_data.get('planning_date')
+        HMRC_deadline = self.cleaned_data.get('HMRC_deadline')
+        if planning_date and HMRC_deadline and planning_date >= HMRC_deadline:
+            message = "Planning date can't be greater than or equals to Deadline(CH)"
+            self.add_error("planning_date", message)
+
 
 # Limited Submission Deadline Tracker
 class LimitedSubmissionDeadlineTrackerChangeForm(forms.ModelForm):
@@ -1414,6 +1430,7 @@ class LimitedSubmissionDeadlineTrackerChangeForm(forms.ModelForm):
     period_start_date = forms.DateField(label="Period Start", widget=forms.DateInput(attrs={'type': 'date'}), required=False)
     period = forms.DateField(label="Period End", widget=forms.DateInput(attrs={'type': 'date'}), required=False)
 
+    planning_date = forms.DateField(label="Planning date", widget=forms.DateInput(attrs={'type': 'date'}))
     our_deadline = forms.DateField(label="HMRC Deadline", widget=forms.DateInput(attrs={'type': 'date'}), required=False)
     HMRC_deadline = forms.DateField(label="CompanyHouse Deadline", widget=forms.DateInput(attrs={'type': 'date'}))
     submission_date = forms.DateField(label="Submission Date(CH)", widget=forms.DateInput(attrs={'type': 'date'}), required=False)
@@ -1434,6 +1451,7 @@ class LimitedSubmissionDeadlineTrackerChangeForm(forms.ModelForm):
             "period_start_date",
             "period",
 
+            "planning_date",
             "HMRC_deadline",
             "is_submitted",
             "submission_date",
@@ -1474,6 +1492,13 @@ class LimitedSubmissionDeadlineTrackerChangeForm(forms.ModelForm):
         if is_submitted == True and not type(submission_date)==type(date(2021, 6, 28)):
             raise ValidationError('Is Submitted is True therefore Submission Date is required.')
         return submission_date
+    
+    def clean_planning_date(self):
+        planning_date = self.cleaned_data.get('planning_date')
+        HMRC_deadline = self.cleaned_data.get('HMRC_deadline')
+        if planning_date and HMRC_deadline and planning_date >= HMRC_deadline:
+            raise ValidationError("Planning date can't be greater than or equals to Deadline(CH)")
+        return planning_date
 
 
     def clean(self):
@@ -1494,6 +1519,13 @@ class LimitedSubmissionDeadlineTrackerChangeForm(forms.ModelForm):
                 message = "Difference between period start and period and should be 1 year or more."
                 self.add_error("period_start_date", message)
                 self.add_error("period", message)
+        
+        planning_date = self.cleaned_data.get('planning_date')
+        HMRC_deadline = self.cleaned_data.get('HMRC_deadline')
+        if planning_date and HMRC_deadline and planning_date >= HMRC_deadline:
+            message = "Planning date can't be greater than or equals to Deadline(CH)"
+            self.add_error("planning_date", message)
+        
 
 class LimitedSubmissionDeadlineTrackerDeleteForm(forms.ModelForm):
     agree = forms.BooleanField(label='I want to proceed.', required=True)
