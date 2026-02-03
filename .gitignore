@@ -5,6 +5,7 @@ config.yaml
 secrets.json
 secrets.yaml
 **production/
+**temp_scripts/
 # **/migrations/**
 
 collected_staticfiles/
