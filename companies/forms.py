@@ -562,7 +562,7 @@ class SelfassesmentAccountSubmissionCreationForm(forms.ModelForm):
     )
     payment_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date',}), required=False)
     appointment_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date',}), required=False)
-    request_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date', "value": get_date_today()}), required=False)
+    request_date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date', "value": get_date_today}), required=False)
 
     class Meta:
         model = SelfassesmentAccountSubmission
