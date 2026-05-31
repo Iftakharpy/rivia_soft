@@ -747,7 +747,8 @@ class LimitedSubmissionDeadlineTracker(models.Model):
     class Meta:
         verbose_name = _("Limited Submission")
         verbose_name_plural = _("Limited Submissions")
-        ordering = ['-HMRC_deadline', '-our_deadline',]
+        # ordering = ['planning_date', '-HMRC_deadline', '-our_deadline',]
+        ordering = ['-planning_date', '-HMRC_deadline', '-our_deadline',]
 
     objects = models.Manager()
     ordered_manager = LimitedSubmissionDeadlineTrackerManager()
