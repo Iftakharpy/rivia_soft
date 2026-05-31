@@ -8,12 +8,16 @@ secrets.yaml
 **temp_scripts/
 # **/migrations/**
 
+
 collected_staticfiles/
 staticfiles/
 
 *.sqlite3
 *env*/
+
+001_tasks/
 todo.txt
+done.txt
 
 .vscode/
 
